@@ -149,17 +149,44 @@ Now we can install some packages for our actually API. We're going to use `expre
 npm install express body-parser compression @types/express @type/body-parser @types/compression
 ```
 
-Our `package.json` will look similar to this:
+Now that we have the project tooling setup, we can begin scaffolding the server application. Create a folder called `app` and create a file called `app/index.ts`
 
 ```bash
-$ cat package.json
+$ mkdir app
+$ touch app/index.ts
+```
+
+This will be application entrypoint and will be used to launch our application.
+
+Next let's scaffold our server.  We create a new `express` application. Then using that application we listn on port 8000. When the server successfully starts we write to the console that the service has started.
+
+```typescript
+import express from "express";
+
+const app: express.Express = express();
+
+app.listen(8000, () => {
+    console.log("listening port 8000");
+});
+```
+
+Next we need to start the application, we will use `ts-node` to do this. In our `package.json` file we add the `start` script with the following command:
+
+```
+ts-node app
+```
+
+Our `package.json` should look similar to:
+
+```json
 {
   "name": "server",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node app"
   },
   "keywords": [],
   "author": "",
@@ -185,9 +212,20 @@ $ cat package.json
 }
 ```
 
+We can then start the server using `npm start` and we should see the server start:
+
+```bash
+$ npm start
+
+> server@1.0.0 start
+> ts-node app
+
+listening port 8000
+```
+
 With this we have scaffolded our server project! You can also take this scaffold and create a template project on GitHub. This will help you create applications using the baseline tooling without requiring you to start from scratch every time.
 
-We're now set up and ready to being writing some code!
+We're now set up and ready to being writing some code for this project or others!
 
 ## Server Application
 
