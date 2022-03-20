@@ -167,30 +167,54 @@ Next create a folder called `app`. This is where our source code will live.
 $ mkdir app
 ```
 
-We'll create `app/Options.ts` that will read information from the environment variables and can be used by the application.
+First let's create an `app/Options.ts` that will read information from the environment variables and construct an options object that contains our applications configuration options. We start by creating the `Options` type and assigning a single property `port` that we mark as `readonly`. Doing so will automatically create the `port` property on the object and disallow it from being modified.
 
 ```typescript
 import "dotenv/config";
 
-export const options = {
-  PORT: process.env.PORT,
-};
+export class Options {
+  constructor(readonly port: number) {}
+}
+```
 
-export type Options = typeof options;
+Next we'll add the the `dotenv` package to inject values from the `.env` file into `process.env` environment variables. We'll also define a static property on the class called `env` that maps values from `process.env`. We do this so we have an inventory of configurations that we should have obtained from the environment.
 
-for (const [key, value] of Object.entries(options)) {
-  if (!value) {
-    console.error(`Required config ${key} not found`);
-    process.exit(1);
+```typescript
+import "dotenv/config";
+
+export class Options {
+  public static env = {
+    PORT: process.env.PORT,
+  };
+
+  constructor(readonly port: number) {}
+}
+```
+
+The last step is creating a `fromEnv` factory function that will return our `Option` instance. In this method, we can that all required keys were provided, whether the supplied values are correct, or other checks we may have. After we have performed these checks, we return an instance of `Options` with the values we obtained from our configuration file.
+
+```typescript
+import "dotenv/config";
+
+export class Options {
+  public static env = {
+    PORT: process.env.PORT,
+  };
+
+  constructor(readonly port: number) {}
+
+  public static async fromEnv(): Promise<Options> {
+    for (const [key, value] of Object.entries(Options.env)) {
+      if (!value) {
+        throw new Error(`Required option ENV.${key} is not defined`);
+      }
+    }
+    return new Options(Number(Options.env.PORT));
   }
 }
 ```
 
-This file uses the `dotenv` package to inject values from the `.env` file into `process.env` environment variables. These values are applied to the `options` object which is exported and can be used throughout our application. This file also exports the `Options` type so we can enable typing throughout the application.
-
-Lastly, this file performs a check on options values to ensure that they are provided. If a value is not provided we alert the user and terminate the process with a non-zero code to signal that there was a problem.
-
-As we build out our application, we can add additional configuration values to the `.env` file and add properties to the `options` object so that our application can consume that values.
+As we build out our application, we can add additional configuration values to the `.env` file and add properties to our `Options` class so that our application can consume these values
 
 ### Scaffold the Server
 
@@ -205,9 +229,9 @@ import bodyParser from "body-parser";
 import { Options } from "./Options";
 
 export class Server {
-  constructor(readonly options: Options) {}
-
   public app: express.Express;
+
+  constructor(readonly options: Options) {}
 
   public async setup() {
     this.app = express();
@@ -223,8 +247,8 @@ export class Server {
 
   public async listen(): Promise<void> {
     return new Promise((resolve) => {
-      this.app.listen(Number(this.options.PORT), () => {
-        console.log(`server listening on ${this.options.PORT}`);
+      this.app.listen(Number(this.options.port), () => {
+        console.log(`server listening on ${this.options.port}`);
         resolve();
       });
     });
@@ -241,11 +265,12 @@ The `listen` method starts the express server and converts the callback passing 
 The last piece is creating the entrypoint of the application `app/index.ts`. In this file we create a single `async` function `run`. This function will create our server, call `setup` and `listen`. If we need to do any additional configuration, we can perform it here and pass it into our server.
 
 ```typescript
-import { options } from "./Options";
+import { Options } from "./Options";
 import { Server } from "./Server";
 
 async function run() {
   // additional configurations here
+  const options = Options.fromEnv();
   const server = new Server(options);
   await server.setup();
   await server.listen();
