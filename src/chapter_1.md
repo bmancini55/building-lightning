@@ -1,10 +1,10 @@
-# Visualzing the Lightning Graph
+# Visualizing the Lightning Graph
 
 This application will use Node.js with Typescript, Express, and D3.js to create a visualization of the Lightning Network graph.
 
 ## Development Environment
 
-A development environment for the Lightning network typeically consists of a Bitcoin node running in simnet mode and one or more Lightning Network nodes. Getting all this running can be time consuming. Fortunately, there is the tool [Polar](https://lightningpolar.com) that allows us to spin up Lightning network testing environments easily!
+A development environment for the Lightning network typically consists of a Bitcoin node running in regtest mode and one or more Lightning Network nodes. Getting all this running can be time consuming. Fortunately, there is the tool [Polar](https://lightningpolar.com) that allows us to spin up Lightning network testing environments easily!
 
 Our first step is to download and install Polar for your operating system from the [website](https://lightningpolar.com).
 
@@ -20,7 +20,7 @@ Polar also provides a few tools to allow us to easily perform common tasks.
 
 We will start by depositing some funds into Alice's node. To do this, click on Alice's node, then click on the `Actions` tab.
 
-We will then deposit 1,000,000 satoshis into Alice's node. When you click the `Deposit` button, the Bitcoin Core node running in simnet will create new blocks to an address and 0.01000000 bitcoin (1,000,000 satoshis) will deposited into an address controlled by Alice's Lightning Network node.
+We will then deposit 1,000,000 satoshis into Alice's node. When you click the `Deposit` button, the Bitcoin Core node running in regtest will create new blocks to an address and 0.01000000 bitcoin (1,000,000 satoshis) will deposited into an address controlled by Alice's Lightning Network node.
 
 ![Alice with 1mil Sats](images/ch1_polar_deposit.png)
 
@@ -38,11 +38,7 @@ At this point, we are ready to connect to Alice's node via the API.
 
 ### Connecting to Alice's node
 
-## Understanding the Lightning Graph
-
-## LND Connectivity
-
-For this project, since we'll only be retreiving data we're going to use the LND REST API. The LND REST API provides swagger files, so we could use these to generate TypeScript references and a client. Because we're using a small subset of API's we'll create a simple client on our our own to retrieve the results
+For this project, since we'll only be retrieving data we're going to use the LND REST API. The LND REST API provides swagger files, so we could use these to generate TypeScript references and a client. Because we're using a small subset of API's we'll create a simple client on our our own to retrieve the results
 
 LND also has a gRPC API that can be used for streaming information about your node
 
