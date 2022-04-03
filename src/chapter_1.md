@@ -6,9 +6,9 @@ This project uses [TypeScript](https://www.typescriptlang.org/) in the [Node.js]
 
 This project also uses [Express](https://expressjs.com) as the web framework. It is a fast, easy to use, and popular web framework. Lastly this project uses [React](https://reactjs.org/) and [D3](https://d3js.org/) for creating the visualization of the Lightning Network graph.
 
-## Development Environment
+## Environment Setup
 
-We'll get started by setting up your infrastructure and development environment. Since we're going to build a Lightning Network application it should not be surprising that our infrastructure consists of a Bitcoin node and one or more Lightning Network nodes that we can control.
+We'll get started by setting up your environment. Since we're going to build a Lightning Network application it should not be surprising that our infrastructure consists of a Bitcoin node and one or more Lightning Network nodes that we can control.
 
 As a user of Bitcoin and the Lightning Network you are most likely familiar with the main Bitcoin network. Bitcoin software actually has multiple networks that it can run on:
 
@@ -49,6 +49,17 @@ We should now see a channel link between Alice and Bob in our channel graph.
 ![Alice to Bob Channel](images/ch1_polar_alice_bob.png)
 
 At this point, we are ready to connect to Alice's node via the API.
+
+## Development Setup
+
+- ide ??
+- install nodejs
+
+- fork the repo
+- run npm install
+
+- repo walk through
+- link to appendix on thorough discourse on building a template
 
 ### Connecting to Alice's node
 
@@ -394,3 +405,232 @@ export class Server {
 Dev Note: Express does not natively understanding `async` code but we can easily retrofit it. To do this we define the handler with a lambda function that has arguments for the `Request`, `Response`, and `next` arguments (has the type `(req, res, next) => void`). Inside that lambda, we then call our async code and attach the `catch(next)` to that function call. This way if our `async` function has an error, it will get passed to Express' error handler!
 
 Once you have written this code, test our the server by running the `npm start` command and accessing `http://localhost:8001/api/graph. You should see information about the LND network. In this case, you should get a JSON result with two nodes (one for Alice and one for Bob) and a single edge for the channel between Alice and Bob.
+
+## User Interface
+
+Let's jump into the user interface! This application uses the React.js framework and D3.js. If you're not familiar with React, I suggest finding a tutorial to get familiar with the concepts and basic mechanics. We'll again be using TypeScript for our React code to help us add compile-time type-checking. There is an in-depth overview of building a project template in Appendix 2, so we'll just cover the basics in this section.
+
+The user interface sub-project lives inside the `client` folder of our repository. Inside `client/src` is our application code.
+
+The entry point of the application is `App.tsx`. This code uses `react-router` to allow us to link URLs to various scenes of our application. Once we've built-up our entry point we embed the application into DOM.
+
+```typescript
+// client/src/App.tsx
+import React from "react";
+import ReactDom from "react-dom";
+import { BrowserRouter } from "react-router-dom";
+import { LayoutScene } from "./scenes/layout/LayoutScene";
+
+ReactDom.render(
+  <BrowserRouter>
+    <LayoutScene />
+  </BrowserRouter>,
+  document.getElementById("app")
+);
+```
+
+From this you will see that we render a single component, `<LayoutScene>`. It lives inside the `client/src/scenes/layout` folder where we define things related to our application layout. Inside `LayoutScene` is also where we use `react-router` to define how our various scenes render based on the URL path.
+
+```typescript
+import React from "react";
+import { Route, Routes } from "react-router-dom";
+import { AppNav } from "./components/AppNav";
+import { GraphScene } from "../graph/GraphScene";
+
+export const LayoutScene = () => {
+  return (
+    <div className="layout">
+      <div className="container-fluid mb-3">
+        <AppNav />
+      </div>
+      <Routes>
+        <Route path="/" element={<GraphScene />} />
+      </Routes>
+    </div>
+  );
+};
+```
+
+Here you can see that inside the `<Routes>` component we define a single `<Route>` that is bound to the root path `/` and it renders the `GraphScene` component which will be responsible for rendering our graph!
+
+So our folder structure looks like this:
+
+```
+client\
+  src\
+    App.tsx
+    scenes\
+      layout\
+        LayoutScene.tsx
+      graph\
+        GraphScene.tsx
+```
+
+And our code component hierarchy looks like this:
+
+```
+App
+  LayoutScene
+    GraphScene
+```
+
+Each of the scenes can also have components that are specific to the the scene. These are stored inside the `components` folder inside each scene.
+
+```
+client\
+  src\
+    App.tsx
+    scenes\
+      layout\
+        LayoutScene.tsx
+        components\
+          NavBar.tsx
+      graph\
+        GraphScene.tsx
+        components\
+          Graph.tsx
+```
+
+Now that we've laid out how our application works let's build our application and see what happens. In the command line, navigate to the `client` folder and run the following command:
+
+```
+npm run watch
+```
+
+This command should build the React application and place it into the `dist` folder.
+
+You can now use your browser to navigate to `http://localhost:8001` and view the application!
+
+![Blank Slate](/images/ch1_app_01.png)
+
+### Loading the Graph
+
+Now that we're setup need to wire up the API code we created in the first section with our application. To make our life easier we will use an `ApiService` to abstract the calls to our API endpoint.
+
+In your IDE, navigate to `/client/src/services/ApiService.ts` and create a method that uses the get helper `get` to retrieve
+
+```typescript
+// client/src/services/ApiService.ts
+import { LightningGraph } from "./ApiTypes";
+
+export class ApiService {
+  constructor(readonly host: string = "http://127.0.0.1:8001") {}
+
+  protected async get<T>(path: string): Promise<T> {
+    const res = await fetch(path, { credentials: "include" });
+    return await res.json();
+  }
+
+  // Exercise: Create a public fetchGraph method that returns Promise<LightningGraph>.
+  // You can use the get helper method above by supplying it with an API path.
+}
+```
+
+This API service is conveniently available inside the `useApi` hook located in the `hooks` folder. By adding our `fetchGraph` method to the `ApiService`, we can gain access to it by using the `useApi` hook inside any component!
+
+So let's point our IDE at the `GraphScene` component and see if we can wire up the API call for the graph to the scene.
+
+For this exercise, inside the `useEffect` hook, call the api's `fetchGraph` method. Be mindful that this method returns a promise, which you will need to retrieve the results from. To test your code, simply log the results to the console.
+
+```typescript
+import React, { useEffect, useRef } from "react";
+import { useApi } from "../../hooks/UseApi";
+import { Graph } from "./components/Graph";
+
+export const GraphScene = () => {
+  const api = useApi();
+  const graphRef = useRef<Graph>();
+
+  useEffect(() => {
+    // Exercise: Using the api, call the fetchGraph method. Since this returns a promise,
+    // we need to use the `then` method to retrieve the results. With the results, call
+    // `graphRef.current.createGraph` and add a console.log statement so you see the graph.
+  }, []);
+
+  return (
+    <div className="container-fluid h-100">
+      <div className="row h-100">
+        <div className="col h-100">{<Graph ref={graphRef} />}</div>
+      </div>
+    </div>
+  );
+};
+```
+
+Dev Note: The `useEffect` hook has two arguments: a callback function and an array of variables that when changed will trigger the callback function. Providing an empty array means our callback function will only be called when the component mounts, which is the functionality we are looking for.
+
+Dev Note: [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) are a mechanism for working with asynchronous operations. When a promise completes, the results are available in the `then` method.
+
+When you refresh your browser, the background will now be gray but you won't yet see the graph yet. If you open your developer tools, you will see the graph output that you wrote with console.log!
+
+![Console with Graph](/images/ch1_app_02.png)
+
+We don't yet see the graph because haven't fully implemented the `createGraph` method in the `<Graph>` component. This method is responsible for converting our `LightningGraph` object into objects that can be used by D3.
+
+Our `LightningGraph` object has two arrays: `nodes` and `channels`.
+
+Each `LightningNode` object has three properties that we will use:
+
+- `pubkey` - a string that is the unique identifier for the node
+- `color` - the color of the node that is specified by the node operator
+- `alias` - the friendly name of the node that is specified by the node operator
+
+Each `LightningChannel` object has three properties that we will use:
+
+- `id` - the unique identifier for the channel
+- `node1PubKey` - the identifier for the first node, when sorted, of the channel
+- `node2PubKey` - the identifier for the second node, when sorted, of the channel
+
+Using this information we need to construct new objects that can be controlled by D3. We need to do
+this because D3 will store rendering state on the objects. We don't want D3 to mutate the original
+objects so we'll construct new ones that D3 can control.
+
+This gets us to our next exercise. We need to modify the `Graph` component's `createGraph` method
+to convert our Lightning graph objects into D3 controlled objects. To do this we create two arrays:
+
+- one array for the graph's nodes created from our `LightningNode` where our `pubkey` is the `id`,
+  and the `alias` is the D3 node's title.
+  ```typescript
+  interface D3Node {
+    id: string;
+    color: string;
+    title: string;
+  }
+  ```
+- one array for the graph's links created from our `LightningChannel` objects where the `id` is the
+  `channelId` and the `source` and `target` are the node pubkeys.
+  ```typescript
+  interface D3Link {
+    id: string;
+    source: string;
+    target: string;
+  }
+  ```
+
+```typescript
+// client/src/scenes/graph/components/Graph.tsx
+
+    createGraph(graph: LightningGraph) {
+        // map the graph's nodes into d3 nodes
+        this.nodes = [];
+
+        // map the graph's channels into d3 links
+        this.links = [];
+```
+
+Once we have created these maps we can refresh our browser and we should
+see the current graph!
+
+![Graph](/images/ch1_app_03.png)
+
+## Real Time Server Updates
+
+## Real Time User Interface
+
+## Further Exploration
+
+- add additional information to the graph, this will require add additional information to the
+  `LightningGraph` and modifying the plumbing
+- connect to c-lightning or eclair, this will require code to connect with each API and an adapter
+  our `LightningGraph` type used by our application.
+- connect to testnet mainnet, this will require restricting the results of the graph size!
