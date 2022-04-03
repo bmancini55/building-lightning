@@ -625,6 +625,105 @@ see the current graph!
 
 ## Real Time Server Updates
 
+At this point we've successfully connected our user interface to a REST server! However what happens
+if a new channel is created or a new node creates a channel? Our Lightning Network nodes will have
+new graph information but we would need to manually refresh the page.
+
+Go ahead and give it a try by creating a channel between Bob and Carol. When we refresh the browser
+we should see a new link between Bob and Carol.
+
+This is ok, but we can do better by passing updates to our user interface using WebSockets.
+
+The WebSocket code on our server uses the [ws]() library and lives inside
+the `SocketServer` class. This class maintains a set of connected sockets.
+It also includes a `broadcast` method that allows us to send data for some
+channel to all connected sockets.
+
+```
+{
+  channel: string,
+  data: T
+}
+```
+
+This class is covered in more depth in [Appendix 1](appendix_1).
+
+The last bit of code for WebSockets lives inside `server/src/index.ts`.
+At the end of the `run` method, we create the `SocketServer` instance and
+have it listen to the HTTP server for connections.
+
+```typescript
+// server/src/Server.ts
+async function run() {
+    // OTHER CODE IS HERE...
+
+  // start the server on the port
+    const server = app.listen(Number(options.port), () => {
+        console.log(`server listening on ${options.port}`);
+    });
+
+    // start the socket server
+    const socketServer = new SocketServer();
+
+    // start listening for http connections
+    socketServer.listen(server);
+```
+
+Back in our server code's `LndGraphService` is a method `subscribeGraph` that we need to modify. This
+method subscribes to LND API's `subscribeGraph` method. We need to impl.ement this method to convert LND's
+graph updates into our `LightningGraphUpdate` type and fire an event
+
+```typescript
+  public async subscribeGraph(): Promise<void> {
+        // Exercise:
+        // 1. Using the LND Client, subscribe to graph updates using the
+        //    `subscribeGraph` method
+        // 2. Handle each update by converting the LND `GraphUpdate` into
+        //    a `LightningGraphUpdate` used by our application
+        // 3. Emit the `LightningGraphUpdate` with this.emit("update", update);
+  }
+```
+
+Dev Note: This class is an [EventEmitter](). EventEmitters can use the
+`emit` method to tell other classes that something has happened. These
+other classes are "observers" and can listen using the `on` method.
+Using EventEmitters allows us to keep code decoupled and avoid messy
+callback nesting.
+
+Once you have implemented `subscribeGraph` we need to do two things:
+
+1. have the server subscribe to updates
+2. send those updates to any connected WebSockets
+
+To add these features we'll add them to the bottom out `Server.ts`.
+
+```typescript
+// server/src/Server.ts
+
+async function run() {
+  // other code is here...
+
+  // start the socket server
+  const socketServer = new SocketServer();
+
+  // start listening on the socket
+  socketServer.listen(server);
+
+  // Exercise: On the `lndGraphService`, attach an event handler for
+  // graph updates and broadcast them to all WebSockets using
+  // socketServer.broadcast. You can pick a channel name, such as "graph".
+
+  // subscribe to graph updates
+  lndGraphAdapter.subscribeGraph();
+}
+```
+
+That's all there is to it! You should now be able to connect a WebSocket
+to the server and receive updates.
+
+To test this code, you can generate graph updates by closing or
+opening a channel.
+
 ## Real Time User Interface
 
 ## Further Exploration
@@ -634,3 +733,7 @@ see the current graph!
 - connect to c-lightning or eclair, this will require code to connect with each API and an adapter
   our `LightningGraph` type used by our application.
 - connect to testnet mainnet, this will require restricting the results of the graph size!
+
+```
+
+```
