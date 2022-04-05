@@ -726,14 +726,133 @@ opening a channel.
 
 ## Real Time User Interface
 
+Now that our WebSocket server is sending update, we need to wire these
+updates into our user interface.
+
+The application already has some code to help us. We use React's context
+to establish a long-lived WebSocket that can be used by any component.
+This code lives in `client/src/context/SocketContext.tsx` and is covered
+in more depth in [Appendix 2]().
+
+We also have a hook, `useSocket` that lives in `client/src/hooks/UseSocket.ts`.
+This hook allows us to retrieve the websocket and subscribe to events for
+a particular channel, for example:
+
+```typescript
+export const SomeComponent = () => {
+  const socket = useSocket("some_channel", (data) => {
+    // do something with data
+    console.log(data);
+  });
+};
+```
+
+The last thing we should know is that in order for this to work, we need
+to establish the React Context higher in the component hierarchy. This is
+necessary so that our hook can acesss the socket context.
+
+To make this magic happen, we add the context via the `<SocketProvider>`
+component to our application's root, `App.txs`.
+
+```typescript
+// client/src/App.tsx
+import React from "react";
+import ReactDom from "react-dom";
+import { BrowserRouter } from "react-router-dom";
+import { SocketProvider } from "./context/SocketContext";
+import { LayoutScene } from "./scenes/layout/LayoutScene";
+
+ReactDom.render(
+  <SocketProvider>
+    <BrowserRouter>
+      <LayoutScene />
+    </BrowserRouter>
+  </SocketProvider>,
+  document.getElementById("app")
+);
+```
+
+With the lay of the land defined, we can now embark on our journey to
+wire up real time updates.
+
+The logical place to add this connection is the `GraphScene` component.
+As previously established, this scene is responsible for wiring up data
+connections for graph related components.
+
+Pointing our IDE at the `GraphScene` component our next exercise is
+implementing the socket handler. Using the `useSocket` hook, subscribe
+to the same channel that you established on the server. The handler
+function should call the `graphRef.current.createGraph` method on the
+graph component.
+
+```typescript
+// client/src/scenes/graph/GraphScene.tsx
+import React, { useEffect, useRef } from "react";
+import { useSocket } from "../../hooks/UseSocket";
+import { useApi } from "../../hooks/UseApi";
+import { Graph } from "./components/Graph";
+
+export const GraphScene = () => {
+  const api = useApi();
+  const graphRef = useRef<Graph>();
+
+  useEffect(() => {
+    api.fetchGraph().then((graph) => {
+      console.log("received graph", graph);
+      graphRef.current.createGraph(graph);
+    });
+  }, []);
+
+  // Exercise: with the useSocket hook, subscribe to the channel that
+  // the server is sending graph updates on. The handler function for
+  // this channel should call `graphRef.current.updateGraph` with the
+  // information.
+
+  return (
+    <div className="container-fluid h-100">
+      <div className="row h-100">
+        <div className="col h-100">{<Graph ref={graphRef} />}</div>
+      </div>
+    </div>
+  );
+};
+```
+
+We are almost done! The final step is implementing the `updateGraph`
+method to translate the `LightningGraphUpdate` into `D3Node` and `D3Link`
+types used by the graph.
+
+The update we receive from the server consists of three pieces of data:
+
+1. node updates - we need to change the color or title of the node in
+   the graph.
+2. channel updates - we need to add new links to our graph if the link
+   does not already exist.
+3. channel closes - we need to remove links from our graph.
+
+```typescript
+// client/src/scenes/graph/components/Graph.tsx
+updateGraph(update: LightningGraphUpdate) {
+    // Exercise:
+    // 1. For each Lightning node update, update the corresponding node's
+    // title and color.
+    // 2. For each channel update, add a link to the D3 graph if it does
+    // not already exist.
+    // 3. For each channel close, remove the link from the D3 graph
+
+    this.draw();
+}
+```
+
+After completing this exercise we will have everything needed for our
+graph to be functional. Try adding or removing a channel, you should
+see our graph application automatically update with the changes!
+
 ## Further Exploration
 
-- add additional information to the graph, this will require add additional information to the
-  `LightningGraph` and modifying the plumbing
-- connect to c-lightning or eclair, this will require code to connect with each API and an adapter
-  our `LightningGraph` type used by our application.
-- connect to testnet mainnet, this will require restricting the results of the graph size!
+This is just the beginning of interesting things we can do to help us visualize the Lightning Network. Spend some time working on further exploration of this application.
 
-```
-
-```
+- How would you add other information to our user interface?
+- How would you connect to c-lightning or eclair? What would need to change about the architecture?
+- How would you connect to testnet or mainnet? How would you address scaling given that the main network has 10's of thousands of nodes and channels?
+- How would you make our application production ready? How would you add testing? What happens if LND restarts? What happens if the REST/WebSocket server restarts?
