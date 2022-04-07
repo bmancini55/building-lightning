@@ -355,14 +355,17 @@ You can also access `http://localhost:8001/api/graph` in your browser. You shoul
 
 ## User Interface
 
-Let's jump into the user interface! This application uses the React.js framework and D3.js. If you're not familiar with React, I suggest finding a tutorial to get familiar with the concepts and basic mechanics. We'll again be using TypeScript for our React code to help us add compile-time type-checking. There is an in-depth overview of building a project template in Appendix 2, so we'll just cover the basics in this section.
+Now that we have a functioning server, let's jump into the user interface! This application uses the React.js framework and D3.js. If you're not familiar with React, I suggest finding a tutorial to get familiar with the concepts and basic mechanics. We'll again be using TypeScript for our React code to help us add compile-time type-checking.
+
+### Exploring the User Interface
 
 The user interface sub-project lives inside the `client` folder of our repository. Inside `client/src` is our application code.
 
 The entry point of the application is `App.tsx`. This code uses `react-router` to allow us to link URLs to various scenes of our application. Once we've built-up our entry point we embed the application into DOM.
 
 ```typescript
-// client/src/App.tsx
+// client/src/App
+
 import React from "react";
 import ReactDom from "react-dom";
 import { BrowserRouter } from "react-router-dom";
@@ -376,9 +379,13 @@ ReactDom.render(
 );
 ```
 
-From this you will see that we render a single component, `<LayoutScene>`. It lives inside the `client/src/scenes/layout` folder where we define things related to our application layout. Inside `LayoutScene` is also where we use `react-router` to define how our various scenes render based on the URL path.
+From this you will see that we render a single component, `<LayoutScene>`. It lives inside the `client/src/scenes/layout`. Inside this folder is where we define things related to our application layout.
+
+The `LayoutScene` component is also where we use `react-router` to define our various scenes based on the URL path.
 
 ```typescript
+// client/src/scenes/layout/LayoutScene
+
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import { AppNav } from "./components/AppNav";
@@ -450,15 +457,16 @@ You can now use your browser to navigate to `http://localhost:8001` and view the
 
 ![Blank Slate](/images/ch1_app_01.png)
 
-### Loading the Graph
+### Exercise: Loading the Graph
 
-Now that we're setup need to wire up the API code we created in the first section with our application. To make our life easier we will use an `ApiService` to abstract the calls to our API endpoint.
+Now that we're setup need to wire up the graph API we previously created. To make our life easier we will use an `ApiService` to abstract the calls to our API endpoint.
 
 In your IDE, navigate to `/client/src/services/ApiService.ts` and create a method that uses the get helper `get` to retrieve
 
 ```typescript
-// client/src/services/ApiService.ts
-import { LightningGraph } from "./ApiTypes";
+// client/src/services/ApiService
+
+import { Lnd } from "./ApiTypes";
 
 export class ApiService {
   constructor(readonly host: string = "http://127.0.0.1:8001") {}
@@ -468,18 +476,25 @@ export class ApiService {
     return await res.json();
   }
 
-  // Exercise: Create a public fetchGraph method that returns Promise<LightningGraph>.
+  // Exercise: Create a public fetchGraph method that returns Promise<Lnd.Graph>.
   // You can use the get helper method above by supplying it with an API path.
+  public async fetchGraph(): Promise<Lnd.Graph> {
+    return undefined;
+  }
 }
 ```
 
-This API service is conveniently available inside the `useApi` hook located in the `hooks` folder. By adding our `fetchGraph` method to the `ApiService`, we can gain access to it by using the `useApi` hook inside any component!
+This class is conveniently accessible by using the `useApi` hook located in the `hooks` folder. By adding our `fetchGraph` method to the `ApiService`, we can gain access to it with the `useApi` hook inside any component! Feel free to take a look at the `useApi` hook code and if you're confused read up on React hooks.
 
-So let's point our IDE at the `GraphScene` component and see if we can wire up the API call for the graph to the scene.
+### Exercise: Wire up the API Call
+
+Next let's point our IDE at the `GraphScene` component in `client/src/scenes/graph` and see if we can wire up the API call for the graph to this scene.
 
 For this exercise, inside the `useEffect` hook, call the api's `fetchGraph` method. Be mindful that this method returns a promise, which you will need to retrieve the results from. To test your code, simply log the results to the console.
 
 ```typescript
+// client/src/scenes/graph/GraphScene
+
 import React, { useEffect, useRef } from "react";
 import { useApi } from "../../hooks/UseApi";
 import { Graph } from "./components/Graph";
@@ -512,21 +527,31 @@ When you refresh your browser, the background will now be gray but you won't yet
 
 ![Console with Graph](/images/ch1_app_02.png)
 
-We don't yet see the graph because haven't fully implemented the `createGraph` method in the `<Graph>` component. This method is responsible for converting our `LightningGraph` object into objects that can be used by D3.
+### Graph Component Overview
 
-Our `LightningGraph` object has two arrays: `nodes` and `channels`.
+The `Graph` component is a bit different from a normal React component because it is encapsulating D3. Typically React controls rendering to the DOM, but for this component React will only control the SVG element where the D3 Graph will be rendered.
 
-Each `LightningNode` object has three properties that we will use:
+We control D3 with two methods on the component: `createGraph` and `updateGraph`. Each method takes information from our domain and converts it into objects that D3 can control and render.
 
-- `pubkey` - a string that is the unique identifier for the node
+As a result, we transition from the declarative style of programming used by React and use imperative code to call these functions. If that's a little confusing, take a gander at `GraphScene` and `Graph`. Notice that `GraphScene` renders `Graph` as a child, but we use the `createGraph` method to push information into D3.
+
+### Exercise: Creating the Graph
+
+After loading the page, we don't yet see the graph because we haven't fully implemented the `createGraph` method in the `Graph` component. This method is responsible for converting our `Lnd.Graph` object into objects that can be used by D3.
+
+As defined in `server/src/domain/lnd/LndRestTypes`, our `Lnd.Graph` object has two arrays: `nodes` and `edges`.
+
+Each `Lnd.LightningNode` object has three properties that we will use:
+
+- `pub_key` - a string that is the unique identifier for the node
 - `color` - the color of the node that is specified by the node operator
 - `alias` - the friendly name of the node that is specified by the node operator
 
-Each `LightningChannel` object has three properties that we will use:
+Each `Lnd.ChannelEdge` object has three properties that we will use:
 
-- `id` - the unique identifier for the channel
-- `node1PubKey` - the identifier for the first node, when sorted, of the channel
-- `node2PubKey` - the identifier for the second node, when sorted, of the channel
+- `channel_id` - the unique identifier for the channel
+- `node1_pub` - the identifier for the first node, when sorted, of the channel
+- `node2_pub` - the identifier for the second node, when sorted, of the channel
 
 Using this information we need to construct new objects that can be controlled by D3. We need to do
 this because D3 will store rendering state on the objects. We don't want D3 to mutate the original
@@ -535,8 +560,8 @@ objects so we'll construct new ones that D3 can control.
 This gets us to our next exercise. We need to modify the `Graph` component's `createGraph` method
 to convert our Lightning graph objects into D3 controlled objects. To do this we create two arrays:
 
-- one array for the graph's nodes created from our `LightningNode` where our `pubkey` is the `id`,
-  and the `alias` is the D3 node's title.
+- one array for the graph's nodes created from our `Lnd.LightningNode` where our `pub_key` maps to `id`,
+  and the `alias` maps to the D3 node's title.
   ```typescript
   interface D3Node {
     id: string;
@@ -544,8 +569,7 @@ to convert our Lightning graph objects into D3 controlled objects. To do this we
     title: string;
   }
   ```
-- one array for the graph's links created from our `LightningChannel` objects where the `id` is the
-  `channelId` and the `source` and `target` are the node pubkeys.
+- one array for the graph's links created from our `Lnd.ChannelEdge` objects where the `channel_id` maps to the the `id` and `node1_pub` maps to `source` and `node2_pub` maps to target.
   ```typescript
   interface D3Link {
     id: string;
@@ -555,7 +579,7 @@ to convert our Lightning graph objects into D3 controlled objects. To do this we
   ```
 
 ```typescript
-// client/src/scenes/graph/components/Graph.tsx
+// client/src/scenes/graph/components/Graph
 
     createGraph(graph: LightningGraph) {
         // map the graph's nodes into d3 nodes
