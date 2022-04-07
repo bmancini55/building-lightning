@@ -122,11 +122,15 @@ The repository is split three parts, each of which has a `package.json` with the
 
 We will discuss the `client` and `server` sections in more detail as we go through the various parts of the application. If you would like to learn how to build these from scratch, you can refer to the Appendices.
 
-## Connecting to Alice's node
+## Creating an API
 
-The first programming task we're going to undertake is connecting to Alice's LND node. We've chosen LND for this application but we could just as easily use c-lightning or Eclair.
+The first task is going to be creating a REST API of our own to provide graph information to our application. We'll start by getting our server connected to Alice's LND node.
 
-LND has a content with frequently performed tasks available on their [Builders Guide](https://docs.lightning.engineering/) that you may want to explore.
+### Connecting to Alice's node
+
+We've chosen to connect to LND for this application but we could just as easily use c-lightning or Eclair.
+
+LND also a [Builder's Guide](https://docs.lightning.engineering/) that you may want to explore to learn more about commonly performed tasks.
 
 LND has two ways we can interact with it from code: a [REST API](https://api.lightning.community/#lnd-rest-api-reference) and a [gRPC API](https://api.lightning.community/#lnd-grpc-api-reference). gRPC is a high performance RPC framework. With gRPC, the wire protocol is defined in a protocol definition file. This file is used by a code generators to construct a client in the programming language of your choice. gRPC is a fantastic mechanism for efficient network communication, but it comes with a bit of setup cost. The REST API requires less effort to get started but is less efficient over the wire. For applications with a large amount of interactivity, you would want to use gRPC connectivity. For this application we'll be using the REST API because it is highly relatable for web developers.
 
@@ -186,9 +190,7 @@ Your next exercise is to implement the `getGraph` method in `server/src/domain/l
 
 After this is complete, we should have a functional API client. In order to test this we will need to provide the macaroon and certificate.
 
-### Configuring `.env` to Connect to LND
-
-Our next task is going to be modifying few application options to help us connect to our LND node.
+### Exercise: Configuring `.env` to Connect to LND
 
 In this application we use the `dotenv` package to simplify environment variables. We can populate a `.env` file with key value pairs and the application will treat these as environment variables.
 
@@ -205,315 +207,151 @@ This environment variable can be read with:
 const port = process.env.PORT;
 ```
 
-So lets start by adding some values to `.env`. We'll add four new environment variables:
+Our next exercise is adding some values to `.env` inside the `server` sub-project. We'll add three new environment variables:
 
 - `LND_HOST` is the host where our LND node resides
 - `LND_READONLY_MACAROON_PATH` is the file path to the readonly Macaroon
 - `LND_CERT_PATH` is the certificate we use to securely connect with LND
 
-Fortunately, Polar provides us with a nice interface with all of this information. Polar also conveniently puts files in our local file system to make our dev lives a bit easier.
+Fortunately, Polar provides us with a nice interface with all of this information. Polar also conveniently puts files in our local file system to make our lives as developers a bit easier.
 
-In Polar, to access Alice's node click on Alice and then click on the `Connect` tab. You will be shown the information on how to connect to the GRPC and REST interfaces. Additionally you will be given paths to the network certificates and macaroon files that we will need in `.env`.
+In Polar, to access Alice's node by click on Alice and then click on the `Connect` tab. You will be shown the information on how to connect to the GRPC and REST interfaces. Additionally you will be given paths to the network certificates and macaroon files that we will need in `.env`.
 
 ![Connect to Alice](images/ch1_polar_connect_to_alice.png)
 
-Go ahead and add the three environment variables defined above to `.env`. When you are done, your file should look something like:
+Go ahead and add the three environment variables defined above to `.env`.
 
 ```
 # Express configuration
 PORT=8001
 
 # LND configuration
-LND_HOST=https://127.0.0.1/8081
-LND_READONLY_MACAROON_PATH=/home/lnuser/.polar/networks/1/volumes/lnd/alice/data/chain/bitcoin/regtest/readonly.macaroon
-LND_CERT_PATH=/home/lnuser/.polar/networks/1/volumes/lnd/alice/tls.cert
+# Exercise: Provide values for Alice's node
+LND_HOST=
+LND_READONLY_MACAROON_PATH=
+LND_CERT_PATH=
 ```
 
-#### Modify `Options.ts`
+### Exercise: Reading the Options
 
-Now that our environment variables are in our configuration file, we need to get them into our application. The project comes with `app/Options.ts`. This class is where we will put properties that are needed to set up and control our application.
+Now that our environment variables are in our configuration file, we need to get them into the application. The server project uses `server/src/Options` to read and store application options.
 
-The class contains a factory method `fromEnv` that allows us to construct an `Options` instance from environment variables. We're going to modify the `Options` class to read our newly defined environment variables.
+The class contains a factory method `fromEnv` that allows us to construct our options from environment variables. We're going to modify the `Options` class to read our newly defined environment variables.
 
-To do this, `Options` has a static property `Options.env` that maps the value of environment variables from `process.env` into known keys.
-
-Start by modifying `app/Options.ts` by adding new properties on the `Options.env` mapping and reading the value from the corresponding environment variable.
-
-The new properties to add to `env` are:
-
-- LND_HOST
-- LND_READONLY_MACAROON_PATH
-- LND_CERT_PATH
-
-After you add these value, your Options should look like:
+This method is partially implemented, but your next exercise is to finish the method by
 
 ```typescript
-import "dotenv/config";
-
-export class Options {
-  public static env = {
-    PORT: process.env.PORT,
-    LND_HOST: process.env.LND_HOST,
-    LND_READONLY_MACAROON_PATH: process.env.LND_READONLY_MACAROON_PATH,
-    LND_CERT_PATH: process.env.LND_CERT_PATH,
-  };
+// server/src/Options
 
   public static async fromEnv(): Promise<Options> {
-    for (const [key, value] of Object.entries(Options.env)) {
-      if (!value) {
-        throw new Error(`Required option ENV.${key} is not defined`);
-      }
-    }
+    const port: number = Number(process.env.PORT),
+    const host: string = process.env.LND_HOST,
+    const macaroon: Buffer = await fs.readFile(process.env.LND_READONLY_MACAROON_PATH),
 
-    const port = Number(Options.env.PORT);
+    // Exercise: Using fs.readFile read the file in the LND_CERT_PATH
+    // environment variable
+    const cert: Buffer = undefined;
 
-    return new Options(port);
+    return new Options(port, host, macaroon, cert);
   }
-
-  constructor(readonly port: number) {}
-}
 ```
-
-Next we will need to create the properties on our `Options` object that will be read by our application. To do this, we modify the constructor and add some additional readonly arguments, similar to the existing `port` argument. In this case want to create:
-
-- `lndHost` as a `string`
-- `lndPort` as a `number`
-- `lndReadonlyMacaroon` as a `Buffer`
-- `lndCert` as a `Buffer`
-
-Once you are done it will look like this:
-
-```typescript
-import "dotenv/config";
-import fs from "fs/promises";
-
-export class Options {
-  public static env = {
-    PORT: process.env.PORT,
-    LND_HOST: process.env.LND_HOST,
-    LND_PORT: process.env.LND_PORT,
-    LND_READONLY_MACAROON_PATH: process.env.LND_READONLY_MACAROON_PATH,
-    LND_CERT_PATH: process.env.LND_CERT_PATH,
-  };
-
-  public static async fromEnv(): Promise<Options> {
-    for (const [key, value] of Object.entries(Options.env)) {
-      if (!value) {
-        throw new Error(`Required option ENV.${key} is not defined`);
-      }
-    }
-
-    const port = Number(Options.env.PORT);
-
-    return new Options(port);
-  }
-
-  constructor(
-    readonly port: number,
-    readonly lndHost: string,
-    readonly lndPort: number,
-    readonly lndReadonlyMacaroon: Buffer,
-    readonly lndCert: Buffer
-  ) {}
-}
-```
-
-Most likely your IDE will be yelling at you right now as this code won't yet compile since our constructor is asking for five arguments and we're only supplying one in the `fromEnv` method. Don't worry, we'll get there next.
 
 Note: In this example we use TypeScript's [Parameter Properties](https://www.typescriptlang.org/docs/handbook/2/classes.html#parameter-properties) feature. This feature creates class properties from `readonly` parameters. I like it because it saves a few keystrokes by removing the boilerplate of defining the property in the class, then assigning its value in the constructor. There are pros and cons to this approach, so feel free to construct your objects how think is best and in a way that is likely to reduce errors.
 
-The last step we need is fix our compile error and supply our five arguments. You will note that I asked you to create the class properties as `Buffer` values. In the `fromEnv` method, we'll read the file's that are in the paths and use the resulting `Buffer` as the parameters to the constructor.
+### Exercise: Create the LND client
 
-To do that we'll use `fs/promises` `readFile` method to perform an `async` read of the file contents.
+The last step before we can see if our application can connect to LND is that we need to create the LND client! We will do this in the entrypoint of our server code `server/src/Server`.
 
-Start by importing `fs/promises` at the top `Options.ts`:
+In this exercise, construct an instance of the `LndRestClient` type and supply it with the options found in the `options` variable.
 
 ```typescript
-import fs from "fs/promises";
+// server/src/Server
+
+  async function run() {
+    // construct the options
+    const options = await Options.fromEnv();
+
+    // Exercise: using the Options defined above, construct an instance
+    // of the LndRestClient using the options.
+    const lnd: LndRestClient = undefined;
+
+    // construct an IGraphService for use by the application
+    const graphAdapter: IGraphService = new LndGraphService(lnd);
 ```
 
-Then we create some variables by reading the files contents and assigning variables. Don't forget to cast `LND_PORT` into a number! You can use the `fs.readFile` method to read the contents of a file, such as:
+At this point, our server code is ready. We'll take a look at a few other things before give it a test.
+
+### Looking at LndGraphService
+
+The `LndRestClient` instance that we just created will be used by `LndGraphService`. This class follows the adapter design pattern: which is a way to make code that operates in one way, adapt to another use. The `LndGraphService` is the place were we make the `LndRestClient` do things that our application needs.
 
 ```typescript
-const contents: Buffer = await fs.readFile("path_to_some_file");
-```
-
-When all is done, `Options.ts` should be similal to:
-
-```typescript
-import "dotenv/config";
-import fs from "fs/promises";
-
-export class Options {
-  public static env = {
-    PORT: process.env.PORT,
-    LND_HOST: process.env.LND_HOST,
-    LND_PORT: process.env.LND_PORT,
-    LND_READONLY_MACAROON_PATH: process.env.LND_READONLY_MACAROON_PATH,
-    LND_CERT_PATH: process.env.LND_CERT_PATH,
-  };
-
-  public static async fromEnv(): Promise<Options> {
-    for (const [key, value] of Object.entries(Options.env)) {
-      if (!value) {
-        throw new Error(`Required option ENV.${key} is not defined`);
-      }
+export class LndGraphService extends EventEmitter implements IGraphService {
+    constructor(readonly lnd: LndRestClient) {
+        super();
     }
 
-    const port = Number(Options.env.PORT);
-    const lndHost = Options.env.LND_HOST;
-    const lndPort = Number(Options.env.LND_PORT);
-    const lndReadonlyMacaroon = await fs.readFile(
-      Options.env.LND_READONLY_MACAROON_PATH
-    );
-    const lndCert = await fs.readFile(Options.env.LND_CERT_PATH);
-
-    return new Options(port, lndHost, lndPort, lndReadonlyMacaroon, lndCert);
-  }
-
-  constructor(
-    readonly port: number,
-    readonly lndHost: string,
-    readonly lndPort: number,
-    readonly lndReadonlyMacaroon: Buffer,
-    readonly lndCert: Buffer
-  ) {}
-}
+    /**
+     * Loads a graph from LND and returns the type. If we were mapping
+     * the returned value into a generic Graph type, this would be the
+     * place to do it.
+     * @returns
+     */
+    public async getGraph(): Promise<Lnd.Graph> {
+        return await this.lnd.getGraph();
+    }
 ```
 
-And with that, our application is has options to configure a connection to LND.
+For the purposes of fetching the graph, we simply call `getGraph` on the `LndRestClient` and return the results. But if we modified our application to use a generic graph instead of the one returned by LND, we could do that translation between the `Lnd.Graph` type and our application's graph.
 
-#### Creating an LND client
+### Looking at the Graph API
 
-To connect to the LND REST API our project defines the `LndRestClient` class. Our first task is to modify our application startup to create an instance of this class. You will need to use the
+Now that you've correctly connected your application to LND! Since we're building a REST web service to power our front end application, we need to define an endpoint in our Express application.
+
+Take a look at `server/src/Server`. We're doing a lot of things in this file for simplicity sake. About half-way down you'll see a line:
 
 ```typescript
-import { LndRestClient } from "./LndRestClient";
-import { Options } from "./Options";
-import { Server } from "./Server";
+// server/src/Server
 
-async function run() {
-  const options = await Options.fromEnv();
-
-  // Task: Create a LndRestClient
-  const lnd: LndRestClient = undefined;
-
-  const server = new Server(options);
-  await server.setup();
-  await server.listen();
-}
-
-run().catch((ex) => {
-  console.error(ex);
-  process.exit(1);
-});
+app.use(graphApi(graphAdapter));
 ```
 
-We will inject this client into our instance of the `Server` and will use it later to respond to make requests to the LND server.
+This code attaches a router to the Express application.
 
-To make this happen, define a property of the `LndRestClient` type in the `Server` class inside the `Server.ts` file.
-
-```typescript
-import express from "express";
-import compression from "compression";
-import bodyParser from "body-parser";
-import { Options } from "./Options";
-import { LndRestClient } from "./LndRestClient";
-
-export class Server {
-  public app: express.Express;
-
-  constructor(readonly options: Options /* add parameter property */) {}
-
-  public async setup() {
-    this.app = express();
-    this.app.use(bodyParser.json());
-    this.app.use(compression());
-  }
-
-  public async listen(): Promise<void> {
-    return new Promise((resolve) => {
-      this.app.listen(Number(this.options.port), () => {
-        console.log(`server listening on ${this.options.port}`);
-        resolve();
-      });
-    });
-  }
-}
-```
-
-At this point, you application wont' compile. To get things working again, pass the `LndRestClient` instance you created in the previous exercise into the `Server` constructor in `index.ts`.
+The router is defined in `server/src/api/GraphApi`. This file returns a function that accepts our `IGraphService` that we were just taking a look at. You can then see that we use the `IGraphService` inside an Express request handler where we return the results as JSON.
 
 ```typescript
-import { LndRestClient } from "./LndRestClient";
-import { Options } from "./Options";
-import { Server } from "./Server";
+// server/src/api/GraphApi
 
-async function run() {
-  const options = await Options.fromEnv();
-  const lnd = new LndRestClient(
-    options.lndHost,
-    options.lndReadonlyMacaroon,
-    options.lndCert
-  );
-  const server = new Server(options); // FIX ME
-  await server.setup();
-  await server.listen();
-}
+export function graphApi(graphService: IGraphService): express.Router {
+  // construct a router object
+  const router = express();
 
-run().catch((ex) => {
-  console.error(ex);
-  process.exit(1);
-});
-```
+  // adds a handler for returning the graph. By default express doe not
+  // understand async code, but we can easily adapt Express by calling
+  // a promise based handler and if it fails catching the error and
+  // supplying it with `next` to allow Express to handle the error.
+  router.get("/api/graph", (req, res, next) => getGraph(req, res).catch(next));
 
-#### Create the Graph API
-
-Since we're building a REST web service to power our front end application, we need to define an endpoint in our Express application.
-
-In `Server.ts`, in the `setup` method we can add a request handler. We have a `getGraph` async method that is defined and have already created the mapping for the endpoint as `GET /api/graph` that will call this function.
-
-In this exercise, use the `LndRestClient` that is part of the server to call the `graph` method. Return the results in a JSON response.
-
-```typescript
-import express from "express";
-import compression from "compression";
-import bodyParser from "body-parser";
-import { Options } from "./Options";
-import { LndRestClient } from "./LndRestClient";
-
-export class Server {
-  public app: express.Express;
-
-  constructor(readonly options: Options, readonly lnd: LndRestClient) {}
-
-  public async setup() {
-    this.app = express();
-    this.app.use(bodyParser.json());
-    this.app.use(compression());
-    this.app.get("/api/graph", (req, res, next) =>
-      this.getGraph(req, res).catch(next)
-    );
+  /**
+   * Handler that obtains the graph and returns it via JSON
+   */
+  async function getGraph(req: express.Request, res: express.Response) {
+    const graph = await graphService.getGraph();
+    res.json(graph);
   }
 
-  public async listen(): Promise<void> {
-    return new Promise((resolve) => {
-      this.app.listen(Number(this.options.port), () => {
-        console.log(`server listening on ${this.options.port}`);
-        resolve();
-      });
-    });
-  }
-
-  protected async getGraph(req: express.Request, res: express.Response) {
-    // Obtain graph from LND Client and return it in a JSON response
-  }
+  return router;
 }
 ```
 
 Dev Note: Express does not natively understanding `async` code but we can easily retrofit it. To do this we define the handler with a lambda function that has arguments for the `Request`, `Response`, and `next` arguments (has the type `(req, res, next) => void`). Inside that lambda, we then call our async code and attach the `catch(next)` to that function call. This way if our `async` function has an error, it will get passed to Express' error handler!
 
-Once you have written this code, test our the server by running the `npm start` command and accessing `http://localhost:8001/api/graph. You should see information about the LND network. In this case, you should get a JSON result with two nodes (one for Alice and one for Bob) and a single edge for the channel between Alice and Bob.
+We can now run `npm start` in the command line and our server should start up and connect to LND without issue.
+
+If you're getting errors, check your work by making sure Polar is running, the environment variables are correct, and you've correctly wired the code together.
+
+You can also access `http://localhost:8001/api/graph` in your browser. You should see information about the network as understood by Alice!
 
 ## User Interface
 
