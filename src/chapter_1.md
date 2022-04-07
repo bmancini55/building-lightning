@@ -124,23 +124,71 @@ We will discuss the `client` and `server` sections in more detail as we go throu
 
 ## Connecting to Alice's node
 
-vvvvvvvvvvvvvvvvvvvvvvvvvvv
+The first programming task we're going to undertake is connecting to Alice's LND node. We've chosen LND for this application but we could just as easily use c-lightning or Eclair.
 
-To get started, we're going to clone
+LND has a content with frequently performed tasks available on their [Builders Guide](https://docs.lightning.engineering/) that you may want to explore.
 
-For this project, since we'll only be retrieving data we're going to use the LND REST API. The LND REST API provides swagger files, so we could use these to generate TypeScript references and a client. Because we're using a small subset of API's we'll create a simple client on our our own to retrieve the results
+LND has two ways we can interact with it from code: a [REST API](https://api.lightning.community/#lnd-rest-api-reference) and a [gRPC API](https://api.lightning.community/#lnd-grpc-api-reference). gRPC is a high performance RPC framework. With gRPC, the wire protocol is defined in a protocol definition file. This file is used by a code generators to construct a client in the programming language of your choice. gRPC is a fantastic mechanism for efficient network communication, but it comes with a bit of setup cost. The REST API requires less effort to get started but is less efficient over the wire. For applications with a large amount of interactivity, you would want to use gRPC connectivity. For this application we'll be using the REST API because it is highly relatable for web developers.
 
-LND also has a gRPC API that can be used for streaming information about your node
+### API Client
 
-https://api.lightning.community/#lnd-rest-api-reference
+Inside our `server` sub-project, exists the start of an LND REST API client that we'll use for this application.
 
-https://api.lightning.community/?#v1-graph
+Why are we not leveraging an existing library from NPM? The first reason is that it is a nice exercise to help demonstrate how we can build connectivity. Lightning Network is still a nascent technology and developers need to be comfortable building tools to help them interact with Bitcoin and Lightning Network nodes. The second and arguably more important reason is that as developers in the Bitcoin ecosystem, we need to be extremely wary of outside packages that we pull into our projects, especially if they are cryptocurrency related. Outside dependencies pose a security risk that could compromise our application. As such, my general rule is that runtime dependencies should generally be built unless it is burdensome to do so and maintain.
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+With that said, point your IDE at the `server/src/domain/lnd/LndRestTypes.ts` file. This file contains a subset of TypeScript type definitions from the [REST API](https://api.lightning.community/#lnd-rest-api-reference) documentation. We are only building a subset of the API that we'll need for understanding the graph.
 
-#### Configuring `.env` to Connect to LND
+### Exercise : Defining the `Graph` Type
 
-We're going to add few application options to help us connect to our LND node.
+Here you'll see exercise 1. This exercise requires us to define the resulting object obtained by calling the [`/v1/graph`](https://api.lightning.community/#v1-graph) API. You will need to add two properties to the `Graph` interface. As a note, the `LightningNode` and `ChannelEdge` types are already defined!
+
+```typescript
+// server/src/domain/lnd/LndRestTypes
+
+export interface Graph {
+  // Exercise: implement this interface by adding the properties
+  // returned in the result of the https://api.lightning.community/#v1-graph.
+  // Note that the LightningNode and ChannelEdge types are already
+  // defined below
+}
+```
+
+### Exercise: Making the Call
+
+Now that we've defined the results from a call to [`/v1/graph`](https://api.lightning.community/#v1-graph), we need to point our IDE at `server/src/domain/lnd/LndRestClient.ts` so we can write the code that makes this API call.
+
+`LndRestClient` implements a basic LND REST client. We can add methods to it that are needed by our application. It also takes care of the heavy lifting for establishing a connection to LND. You'll notice that the constructor takes three parameters: `host`, `macaroon`, and `cert`. The `macaroon` is similar to a security token. The macaroon that you provide will dictate the security role you use when calling the API. The `cert` is a TLS certificate that enables a secure and authenticated connection to LND.
+
+```typescript
+// server/src/domain/lnd/LndRestClient
+
+export class LndRestClient {
+  constructor(
+    readonly host: string,
+    readonly macaroon: Buffer,
+    readonly cert: Buffer
+  ) {}
+}
+```
+
+This class also has a `get` method that is a helper for making HTTP GET requests to LND. This helper method applies the macaroon and ensures the connection is made using the TLS certificate.
+
+Your next exercise is to implement the `getGraph` method in `server/src/domain/lnd/LndRestClient.ts`. Use the `get` helper method to call the [`/v1/graph`](https://api.lightning.community/#v1-graph) API and return the results.
+
+```typescript
+// server/src/domain/lnd/LndRestClient
+
+  public async getGraph(): Promise<Lnd.Graph> {
+      // Exercise: use the `get` method below to call `/v1/graph` API
+      // and return the results
+  }
+```
+
+After this is complete, we should have a functional API client. In order to test this we will need to provide the macaroon and certificate.
+
+### Configuring `.env` to Connect to LND
+
+Our next task is going to be modifying few application options to help us connect to our LND node.
 
 In this application we use the `dotenv` package to simplify environment variables. We can populate a `.env` file with key value pairs and the application will treat these as environment variables.
 
