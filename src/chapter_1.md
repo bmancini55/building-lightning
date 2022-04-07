@@ -70,20 +70,59 @@ We should now see a channel link between Alice and Bob in our channel graph.
 
 ![Alice to Bob Channel](images/ch1_polar_alice_bob.png)
 
-At this point, we are ready to connect to Alice's node via the API.
+At this point, we are ready to write some code!
 
 ## Development Setup
 
-- ide ??
-- install nodejs
+### IDE Setup
 
-- fork the repo
-- run npm install
+For web applications, I like to use [Visual Studio Code](https://code.visualstudio.com/) as my IDE. It has excellent tooling for TypeScript and web development. I install the ESLint and Prettier plugins. These combine with the tooling in the project to improve your development experience.
 
-- repo walk through
-- link to appendix on thorough discourse on building a template
+### Runtime Setup
 
-### Connecting to Alice's node
+You will need to install [Node.js 16](https://nodejs.org/en/) by following the instructions for your operating system.
+
+### Repository Setup
+
+With general prerequisites setup, we can now clone the repository and check out the exercises branch:
+
+Clone the repository:
+
+```
+git clone https://github.com/bmancini55/building-lightning-graph.git
+```
+
+Navigate to the repository:
+
+```
+cd building-lightning-graph
+```
+
+Checkout the exercises branch
+
+```
+git checkout exercises
+```
+
+The repository uses `npm` scripts to perform common tasks. To install the dependencies, run:
+
+```
+npm install
+```
+
+This will install all of the dependencies for the three sub-modules in the project: `client`, `server`, and `style`. If you encounter any errors, you can try browsing to the individual sub-project and running the `npm install` command inside that directory.
+
+### Repository Walk-Through
+
+The repository is split three parts, each of which has a `package.json` with the dependencies for the the sub-application part and a unique set of `npm` scripts that can be run. The three parts are:
+
+1. `client` - Our React application lives in this directory.
+1. `server` - Our Express server code lives in this directory.
+1. `style` - Our code to create CSS lives here.
+
+We will discuss the `client` and `server` sections in more detail as we go through the various parts of the application. If you would like to learn how to build these from scratch, you can refer to the Appendices.
+
+## Connecting to Alice's node
 
 vvvvvvvvvvvvvvvvvvvvvvvvvvv
 
