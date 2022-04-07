@@ -553,15 +553,11 @@ Each `Lnd.ChannelEdge` object has three properties that we will use:
 - `node1_pub` - the identifier for the first node, when sorted, of the channel
 - `node2_pub` - the identifier for the second node, when sorted, of the channel
 
-Using this information we need to construct new objects that can be controlled by D3. We need to do
-this because D3 will store rendering state on the objects. We don't want D3 to mutate the original
-objects so we'll construct new ones that D3 can control.
+Using this information we need to construct new objects that can be controlled by D3. We need to do this because D3 will store rendering state on the objects. We don't want D3 to mutate the original objects so we'll construct new ones that D3 can control.
 
-This gets us to our next exercise. We need to modify the `Graph` component's `createGraph` method
-to convert our Lightning graph objects into D3 controlled objects. To do this we create two arrays:
+This gets us to our next exercise. We need to modify the `Graph` component's `createGraph` method to convert our Lightning graph objects into D3 controlled objects. To do this we create two arrays:
 
-- one array for the graph's nodes created from our `Lnd.LightningNode` where our `pub_key` maps to `id`,
-  and the `alias` maps to the D3 node's title.
+- one array for the graph's nodes created from our `Lnd.LightningNode` where our `pub_key` maps to `id`, and the `alias` maps to the D3 node's title.
   ```typescript
   interface D3Node {
     id: string;
@@ -589,26 +585,21 @@ to convert our Lightning graph objects into D3 controlled objects. To do this we
         this.links = [];
 ```
 
-Once we have created these maps we can refresh our browser and we should
-see the current graph!
+Once we have created these maps we can refresh our browser and we should see the current graph!
 
 ![Graph](/images/ch1_app_03.png)
 
 ## Real Time Server Updates
 
-At this point we've successfully connected our user interface to a REST server! However what happens
-if a new channel is created or a new node creates a channel? Our Lightning Network nodes will have
-new graph information but we would need to manually refresh the page.
+At this point we've successfully connected our user interface to a REST server! However what happens if a new channel is created or a new node creates a channel? Our Lightning Network nodes will have new graph information but we would need to manually refresh the page.
 
-Go ahead and give it a try by creating a channel between Bob and Carol. When we refresh the browser
-we should see a new link between Bob and Carol.
+Go ahead and give it a try by creating a channel between Bob and Carol. When we refresh the browser we should see a new link between Bob and Carol.
 
 This is ok, but we can do better by passing updates to our user interface using WebSockets.
 
-The WebSocket code on our server uses the [ws]() library and lives inside
-the `SocketServer` class. This class maintains a set of connected sockets.
-It also includes a `broadcast` method that allows us to send data for some
-channel to all connected sockets.
+### Exploring WebSocket Code
+
+The WebSocket code on our server uses the [ws](https://www.npmjs.com/package/ws) library and lives inside the `SocketServer` class. This class maintains a set of connected sockets. It also includes a `broadcast` method that allows us to send data for some channel to all connected sockets. These messages are sent in the form:
 
 ```
 {
@@ -617,14 +608,11 @@ channel to all connected sockets.
 }
 ```
 
-This class is covered in more depth in [Appendix 1](appendix_1).
-
-The last bit of code for WebSockets lives inside `server/src/index.ts`.
-At the end of the `run` method, we create the `SocketServer` instance and
-have it listen to the HTTP server for connections.
+The last bit of code for WebSockets lives inside `server/src/Server`. At the end of the `run` method, we create the `SocketServer` instance and have it listen to the HTTP server for connections.
 
 ```typescript
-// server/src/Server.ts
+// server/src/Server
+
 async function run() {
     // OTHER CODE IS HERE...
 
@@ -640,74 +628,61 @@ async function run() {
     socketServer.listen(server);
 ```
 
-Back in our server code's `LndGraphService` is a method `subscribeGraph` that we need to modify. This
-method subscribes to LND API's `subscribeGraph` method. We need to impl.ement this method to convert LND's
-graph updates into our `LightningGraphUpdate` type and fire an event
+### Exercise: Implement
+
+Back in our server code's `LndGraphService` is a method `subscribeGraph` that we need to modify. This method subscribes to LND API's `subscribeGraph` method and emit them as an event.
 
 ```typescript
   public async subscribeGraph(): Promise<void> {
-        // Exercise:
-        // 1. Using the LND Client, subscribe to graph updates using the
-        //    `subscribeGraph` method
-        // 2. Handle each update by converting the LND `GraphUpdate` into
-        //    a `LightningGraphUpdate` used by our application
-        // 3. Emit the `LightningGraphUpdate` with this.emit("update", update);
+        // Exercise: subscribe to the Lnd graph updates using `this.lnd.subscribeGraph`
+        // and emit a "update" event each time the handler is called.
   }
 ```
 
-Dev Note: This class is an [EventEmitter](). EventEmitters can use the
-`emit` method to tell other classes that something has happened. These
-other classes are "observers" and can listen using the `on` method.
-Using EventEmitters allows us to keep code decoupled and avoid messy
-callback nesting.
+Dev Note: This class is an [EventEmitter](https://nodejs.dev/learn/the-nodejs-event-emitter). EventEmitters can use the `emit` method to tell other classes that something has happened. These other classes are "observers" and can listen using the `on` method. Using EventEmitters allows us to keep code decoupled and avoid messy callback nesting.
 
-Once you have implemented `subscribeGraph` we need to do two things:
+### Exploring WebSocket Broadcasting
 
-1. have the server subscribe to updates
-2. send those updates to any connected WebSockets
-
-To add these features we'll add them to the bottom out `Server.ts`.
+The next logical step is consuming the `update` event and sending the update to the client over a WebSocket. If you navigate back to the trusty `Server` you will find some interesting code.
 
 ```typescript
-// server/src/Server.ts
+// server/src/Server
 
 async function run() {
   // other code is here...
 
-  // start the socket server
+  // construct the socket server
   const socketServer = new SocketServer();
 
-  // start listening on the socket
+  // start listening for http connections using the http server
   socketServer.listen(server);
 
-  // Exercise: On the `lndGraphService`, attach an event handler for
-  // graph updates and broadcast them to all WebSockets using
-  // socketServer.broadcast. You can pick a channel name, such as "graph".
+  // attach an event handler for graph updates and broadcast them
+  // to WebSocket using the socketServer.
+  graphAdapter.on("update", (update: Lnd.GraphUpdate) => {
+    socketServer.broadcast("graph", update);
+  });
 
   // subscribe to graph updates
-  lndGraphAdapter.subscribeGraph();
+  graphAdapter.subscribeGraph();
 }
 ```
 
-That's all there is to it! You should now be able to connect a WebSocket
-to the server and receive updates.
+From this code, you can see that we subscribe to the `update` event, and add an arrow function as the handler. This arrow function broadcasts the graph update to all connected WebsSockets over the `graph` channel.
 
-To test this code, you can generate graph updates by closing or
-opening a channel.
+After the event handler is defined, all of the plumbing is in place to for updates to go from `LND -> LndRestClient -> LndGraphAdapter -> WebSocket`.
+
+You should now be able to connect a WebSocket to the server and receive updates by generating channel opens or closes in Polar.
 
 ## Real Time User Interface
 
-Now that our WebSocket server is sending update, we need to wire these
-updates into our user interface.
+Now that our WebSocket server is sending updates, we need to wire these updates into our user interface.
 
-The application already has some code to help us. We use React's context
-to establish a long-lived WebSocket that can be used by any component.
-This code lives in `client/src/context/SocketContext.tsx` and is covered
-in more depth in [Appendix 2]().
+### Exploring Socket Connectivity
 
-We also have a hook, `useSocket` that lives in `client/src/hooks/UseSocket.ts`.
-This hook allows us to retrieve the websocket and subscribe to events for
-a particular channel, for example:
+The application already has some code to help us. We use React's context to establish a long-lived WebSocket that can be used by any component in the component hierarchy. This code lives in `client/src/context/SocketContext`.
+
+To integrate this context into our components we can use a custom hook: `useSocket` that lives in `client/src/hooks/UseSocket`. This hook allows us to retrieve the websocket and subscribe to events for a any channel.
 
 ```typescript
 export const SomeComponent = () => {
@@ -718,15 +693,11 @@ export const SomeComponent = () => {
 };
 ```
 
-The last thing we should know is that in order for this to work, we need
-to establish the React Context higher in the component hierarchy. This is
-necessary so that our hook can acesss the socket context.
-
-To make this magic happen, we add the context via the `<SocketProvider>`
-component to our application's root, `App.txs`.
+The last thing we should know is that in order for this to work, we need to establish the React Context higher in the component hierarchy. A great place is at the root!. We add the context via the `SocketProvider` component in our application's root component: `App`.
 
 ```typescript
-// client/src/App.tsx
+// client/src/App
+
 import React from "react";
 import ReactDom from "react-dom";
 import { BrowserRouter } from "react-router-dom";
@@ -743,11 +714,11 @@ ReactDom.render(
 );
 ```
 
-With the lay of the land defined, we can now embark on our journey to
-wire up real time updates.
+With the lay of the land defined, we can now embark on our journey to finish the real time updates.
 
-The logical place to add this connection is the `GraphScene` component.
-As previously established, this scene is responsible for wiring up data
+### Exercise: Subscribe to Updates
+
+The logical place to add this connection is the `GraphScene` component. As previously established, this scene is responsible for wiring up data
 connections for graph related components.
 
 Pointing our IDE at the `GraphScene` component our next exercise is
@@ -757,7 +728,8 @@ function should call the `graphRef.current.createGraph` method on the
 graph component.
 
 ```typescript
-// client/src/scenes/graph/GraphScene.tsx
+// client/src/scenes/graph/GraphScene
+
 import React, { useEffect, useRef } from "react";
 import { useSocket } from "../../hooks/UseSocket";
 import { useApi } from "../../hooks/UseApi";
@@ -789,41 +761,69 @@ export const GraphScene = () => {
 };
 ```
 
-We are almost done! The final step is implementing the `updateGraph`
-method to translate the `LightningGraphUpdate` into `D3Node` and `D3Link`
-types used by the graph.
+### Exercise: Update the Graph
 
-The update we receive from the server consists of three pieces of data:
+We are almost done! The final step is completing the `updateGraph` method. This method converts our `Lnd.GraphUpdate` object into `D3Node` and `D3Link` objects.
 
-1. node updates - we need to change the color or title of the node in
-   the graph.
-2. channel updates - we need to add new links to our graph if the link
-   does not already exist.
-3. channel closes - we need to remove links from our graph.
+The `Lnd.GraphUpdate` object we receive from the server is defined in `server/src/domain/lnd/LndRestTypes`. It consists of four pieces of data that we care about:
+
+1. new nodes that are don't yet have in the graph
+1. existing nodes that need to have their title and alias updated
+1. new channels that we need to add to the graph
+1. closed channels that we need to remove from the graph
+
+The `updateGraph` method is partially implemented for the first three conditions. Your last task is to remove a channel from the links if it has been closed.
 
 ```typescript
-// client/src/scenes/graph/components/Graph.tsx
-updateGraph(update: LightningGraphUpdate) {
-    // Exercise:
-    // 1. For each Lightning node update, update the corresponding node's
-    // title and color.
-    // 2. For each channel update, add a link to the D3 graph if it does
-    // not already exist.
-    // 3. For each channel close, remove the link from the D3 graph
+// client/src/scenes/graph/components/Graph
 
-    this.draw();
-}
+  updateGraph(update: Lnd.GraphUpdate) {
+      // Updates existing nodes or adds new ones if they don't already
+      // exist in the graph
+      for (const nodeUpdate of update.result.node_updates) {
+          const node = this.nodes.find(p => p.id === nodeUpdate.identity_key);
+          if (node) {
+              node.title = nodeUpdate.alias;
+              node.color = nodeUpdate.color;
+          } else {
+              this.nodes.push({
+                  id: nodeUpdate.identity_key,
+                  color: nodeUpdate.color,
+                  title: nodeUpdate.alias,
+              });
+          }
+      }
+
+      // Adds new channels to the graph. Note that for the purposes of
+      // our visualization we only care that a link exists. We will end
+      // up receiving two updates, one from each node and we just add
+      // the first one.
+      for (const channelUpdate of update.result.channel_updates) {
+          const channel = this.links.find(p => p.id === channelUpdate.chan_id);
+          if (!channel) {
+              this.links.push({
+                  source: channelUpdate.advertising_node,
+                  target: channelUpdate.connecting_node,
+                  id: channelUpdate.chan_id,
+              });
+          }
+      }
+
+      // Exercise: Remove closed channels from `this.links`.
+
+      this.draw();
+  }
 ```
 
-After completing this exercise we will have everything needed for our
-graph to be functional. Try adding or removing a channel, you should
-see our graph application automatically update with the changes!
+After completing this exercise we will have everything needed for our graph to be functional. Try adding or removing a channel, you should see our graph application automatically update with the changes!
 
 ## Further Exploration
 
-This is just the beginning of interesting things we can do to help us visualize the Lightning Network. Spend some time working on further exploration of this application.
+This is just the beginning of interesting things we can do to help us visualize the Lightning Network. Hopefully this tutorial provided you with an overview of how we can interface with a Lightning Network node to retrieve information and receive real time updates.
 
-- How would you add other information to our user interface?
-- How would you connect to c-lightning or eclair? What would need to change about the architecture?
+A few ideas for how you can continue your exploration:
+
+- How would you add other information to our user interface? What part of the application need to be changed?
+- How would you connect to c-lightning or Eclair? What would need to change about the architecture?
 - How would you connect to testnet or mainnet? How would you address scaling given that the main network has 10's of thousands of nodes and channels?
 - How would you make our application production ready? How would you add testing? What happens if LND restarts? What happens if the REST/WebSocket server restarts?
