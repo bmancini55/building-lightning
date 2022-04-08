@@ -1,36 +1,36 @@
 # Visualizing the Lightning Network Graph
 
-Welcome to Building on Lightning! This series will acquaint you with tools and techniques you will need to build Lightning Network applications. The first application we will build is a visualizer of Lightning Network nodes and channels. The end result is that our application will have an interface that queries a Lightning Network node and receives real-time updates from that node.
+Welcome to Building on Lightning! This series will acquaint you with tools and techniques you will need to build Lightning Network applications. The first application we will build is a visualizer of the nodes and channels from the perspective of one node in Lightning Network. You will learn how to connect a web application to a Lightning Network node and receive real-time updates from that node.
 
-This project uses [TypeScript](https://www.typescriptlang.org/) in the [Node.js](https://nodejs.org/en/) runtime. If you're not familiar with TypeScript, I suggest you do a tutorial to help you understand the code in this tutorial. Node.js is a popular runtime for web development. When combined with TypeScript it allows us to build large applications with compile-time type checking. This helps us reduce mistakes and properly structure our applications for future changes and developers.
-
-This project also uses [Express](https://expressjs.com) as the web framework. It is a fast, easy to use, and popular web framework. Lastly this project uses [React](https://reactjs.org/) and [D3](https://d3js.org/) for creating the visualization of the Lightning Network graph.
+This project uses [TypeScript](https://www.typescriptlang.org/) in the [Node.js](https://nodejs.org/en/) runtime. If you're not familiar with TypeScript, you may want to do a tutorial to help you understand the code. Node.js is a popular runtime for web development. When combined with TypeScript it allows us to build large applications with compile-time type checking. This helps us reduce mistakes and properly structure our applications for future changes. This project also uses [Express](https://expressjs.com) as the web framework. It is a fast, easy to use, and popular web framework. Lastly this project uses [React](https://reactjs.org/) and [D3](https://d3js.org/) for creating the visualization of the Lightning Network graph.
 
 ## The Lightning Network as a Graph
 
-We'll start with a brief discussion of why we can conceptualize the Lightning Network as a graph. As you may be aware the Lightning Network consists of many computers running software that understands the Lightning Network protocols as defined in the [BOLT specifications](https://github.com/lightning/bolts/blob/master/00-introduction.md). The goal is to allow trustless, bidirectional, off-chain payments between nodes. So why is a picture of the network important?
+We'll start with a brief discussion of why we can conceptualize the Lightning Network as a graph. The Lightning Network consists of many computers running software that understands the Lightning Network protocols as defined in the [BOLT specifications](https://github.com/lightning/bolts/blob/master/00-introduction.md). The goal is to allow trustless, bidirectional, off-chain payments between nodes. So why is a picture of the network important?
 
 Let's first consider payments between just two nodes: Alice and Carol. If Alice wants to pay Carol, she needs to know how to connect to Carol (the IP and port on which Carol's Lightning Network software is accessible). We refer to directly establishing a communication channel as becoming a peer. Once Alice and Carol are peers, Alice can establish a payment channel with Carol and finally pay her.
 
-This sounds good, but if this was all the Lightning Network was, it has a major shortcoming. Every payment requires two nodes to become peers and establish channels. This means there are delays in first payments, on-chain cost to establish channels, and ongoing burden to manage the growing set of channels.
+This sounds good, but if this was all the Lightning Network was, it has a major shortcoming. Every payment requires two nodes to become peers and establish channels. This means there are delays in sending a first payment, on-chain cost to establish channels, and ongoing burden to manage the growing set of channels.
 
-Instead the Lightning Network allows us to trustlessly route payments through other nodes in the network. If Alice wants to pay Carol, Alice doesn't need to be directly connected to Carol. Alice can pay Bob and Bob can pay Carol. However, Alice must know that she can pay through Bob.
+Instead, the Lightning Network allows us to trustlessly route payments through other nodes in the network. If Alice wants to pay Carol, Alice doesn't need to be directly connected to Carol. Alice can pay Bob and Bob can pay Carol. However, Alice must _know_ that she can pay through Bob.
 
-The prerequisite for routed payments is that nodes need a view of what channels exist between other nodes. This is why an understanding of the network topology is important.
+> The prerequisite for routed payments is that you need an understanding of the paths that a payment can take.
 
-Conceptually we can think of the nodes and channels topology as a graph data structure. Each computer running Lightning Network software is a node in the graph. Each node is uniquely identified by a public key. The edges of the graph the public channels that exist between nodes. The channels are uniquely identified by the UTXO of the channel's funding transaction.
+Without this understanding we cannot construct a route to make our payment.
 
-One consideration is that there is no such thing as a complete picture of the Lightning Network. The Lightning Network allows for private channels between nodes. Only nodes participating in a private channel will see these edges in their view of the network. As a result the Lightning Network is much larger than the topology created by public channels alone.
+Conceptually we can think of the nodes and channels topology as a graph data structure. Each computer running Lightning Network software is a node in the graph. Each node is uniquely identified by a public key. The edges of the graph are the _public_ channels that exist between nodes. The channels are uniquely identified by the UTXO of the channel's funding transaction.
+
+One consideration is that there is no such thing as a complete picture of the Lightning Network. The Lightning Network allows for private channels between nodes. Only nodes participating in a private channel will see these edges in their view of the network. As a result, the Lightning Network is much larger than the topology created by public channels alone.
 
 Another observation is that we often see visuals of the Lightning Network as an undirected graph. This makes sense when we are trying to get a picture of what channels exist. However there are complications when routing payments. Some balance of funds can exist on either side of the channel. This means that our ability to route through a channel is actually directional. For practical and privacy purposes, the balance on each side of the channel is opaque.
 
-This is a lot to unpack, but if you're curious and want to dig deeper into how node's gossip about the topology and how they perform route path finding, refer to Chapters 11 and 12 in Mastering the Lightning Network.
+This is a lot to unpack, but if you're curious and want to dig deeper into how node's gossip about the topology and how they perform route path finding, refer to Chapters 11 and 12 in _Mastering the Lightning Network_ by Antonopoulos et al.
 
-With some understanding of why the network can be viewed as a Graph, let's get started with our application!
+For this visualization we'll be treating the graph as undirected. So without further ado, let's get started building!
 
 ## Environment Setup
 
-We'll get started by setting up your environment. Since we're going to build a Lightning Network application it should not be surprising that our infrastructure consists of a Bitcoin node and one or more Lightning Network nodes that we can control.
+We'll start by setting up your environment. Since we're going to build a Lightning Network application it should not be surprising that our infrastructure consists of a Bitcoin node and one or more Lightning Network nodes that we can control.
 
 As a user of Bitcoin and the Lightning Network you are most likely familiar with the main Bitcoin network. Bitcoin software actually has multiple networks that it can run on:
 
@@ -46,11 +46,15 @@ Our first step is to download and install Polar for your operating system from t
 
 For a Linux system, it will be as an AppImage. You will need to grant executable rights to the file, then you can run the application.
 
-Once Polar is running, you can create a new network. Polar allows us to run many different networks with varying configurations. For this application we will start the network with 1 LND node, 1 c-lightning node, 1 Eclair, and 1 Bitcoin Core node. Provide a name for this network.
+For Mac it will be a .dmg file that you will need to install.
+
+For Windows, it will be an .exe file that you can run.
+
+Once Polar is running, you can create a new network. Polar allows us to run many different networks with varying configurations. For this application we will start the network with 1 LND node, 1 c-lightning node, 1 Eclair, and 1 Bitcoin Core node. Provide a name for this network and create it!
 
 ![Polar Network](images/ch1_polar_create.png)
 
-Start the network once it has been created. Polar will launch Docker containers for each of the nodes in your network.
+Next, start the network. Polar will launch Docker containers for each of the nodes in your network. This may take a few minutes for the nodes to come online.
 
 Polar also provides a few tools to allow us to easily perform common tasks.
 
@@ -76,7 +80,7 @@ At this point, we are ready to write some code!
 
 ### IDE Setup
 
-For web applications, I like to use [Visual Studio Code](https://code.visualstudio.com/) as my IDE. It has excellent tooling for TypeScript and web development. I install the ESLint and Prettier plugins. These combine with the tooling in the project to improve your development experience.
+For web applications, I like to use [Visual Studio Code](https://code.visualstudio.com/) as my IDE. It has excellent tooling for TypeScript and web development. I install the ESLint and Prettier plugins to give me real time feedback of any problems that my application may have.
 
 ### Runtime Setup
 
@@ -98,33 +102,27 @@ Navigate to the repository:
 cd building-lightning-graph
 ```
 
-Checkout the exercises branch
-
-```
-git checkout exercises
-```
-
 The repository uses `npm` scripts to perform common tasks. To install the dependencies, run:
 
 ```
 npm install
 ```
 
-This will install all of the dependencies for the three sub-modules in the project: `client`, `server`, and `style`. If you encounter any errors, you can try browsing to the individual sub-project and running the `npm install` command inside that directory.
+This will install all of the dependencies for the three sub-modules in the project: `client`, `server`, and `style`. You may get some warnings, but as long as the install command has exit code 0 for all three sub-projects you should be good. If you do encounter any errors, you can try browsing to the individual sub-project and running the `npm install` command inside each directory.
 
 ### Repository Walk-Through
 
-The repository is split three parts, each of which has a `package.json` with the dependencies for the the sub-application part and a unique set of `npm` scripts that can be run. The three parts are:
+The repository is split into three parts, each of which has a `package.json` to install Node.js dependencies for that sub-application. Each also has unique set of `npm` scripts that can be run. The three parts are:
 
 1. `client` - Our React application lives in this directory.
 1. `server` - Our Express server code lives in this directory.
 1. `style` - Our code to create CSS lives here.
 
-We will discuss the `client` and `server` sections in more detail as we go through the various parts of the application. If you would like to learn how to build these from scratch, you can refer to the Appendices.
+We will discuss the `client` and `server` sections in more detail as we go through the various parts of the application.
 
 ## Creating an API
 
-The first task is going to be creating a REST API of our own to provide graph information to our application. We'll start by getting our server connected to Alice's LND node.
+Our first coding task is going to be creating a REST API of our own to provide graph information to our application. We'll start by getting our server connected to Alice's LND node.
 
 ### Connecting to Alice's node
 
@@ -134,9 +132,9 @@ LND also a [Builder's Guide](https://docs.lightning.engineering/) that you may w
 
 LND has two ways we can interact with it from code: a [REST API](https://api.lightning.community/#lnd-rest-api-reference) and a [gRPC API](https://api.lightning.community/#lnd-grpc-api-reference). gRPC is a high performance RPC framework. With gRPC, the wire protocol is defined in a protocol definition file. This file is used by a code generators to construct a client in the programming language of your choice. gRPC is a fantastic mechanism for efficient network communication, but it comes with a bit of setup cost. The REST API requires less effort to get started but is less efficient over the wire. For applications with a large amount of interactivity, you would want to use gRPC connectivity. For this application we'll be using the REST API because it is highly relatable for web developers.
 
-### API Client
+### LND API Client
 
-Inside our `server` sub-project, exists the start of an LND REST API client that we'll use for this application.
+Inside our `server` sub-project is the start of code to connect to LND's REST API. We'll add to this for our application.
 
 Why are we not leveraging an existing library from NPM? The first reason is that it is a nice exercise to help demonstrate how we can build connectivity. Lightning Network is still a nascent technology and developers need to be comfortable building tools to help them interact with Bitcoin and Lightning Network nodes. The second and arguably more important reason is that as developers in the Bitcoin ecosystem, we need to be extremely wary of outside packages that we pull into our projects, especially if they are cryptocurrency related. Outside dependencies pose a security risk that could compromise our application. As such, my general rule is that runtime dependencies should generally be built unless it is burdensome to do so and maintain.
 
@@ -144,16 +142,14 @@ With that said, point your IDE at the `server/src/domain/lnd/LndRestTypes.ts` fi
 
 ### Exercise : Defining the `Graph` Type
 
-Here you'll see exercise 1. This exercise requires us to define the resulting object obtained by calling the [`/v1/graph`](https://api.lightning.community/#v1-graph) API. You will need to add two properties to the `Graph` interface. As a note, the `LightningNode` and `ChannelEdge` types are already defined!
+In `LndRestTypes` you'll see our first exercise. It requires us to define the resulting object obtained by calling LND's [`/v1/graph`](https://api.lightning.community/#v1-graph) API. You will need to add two properties to the `Graph` interface. To help you, the `LightningNode` and `ChannelEdge` types are already defined. In TypeScript, you can define an array as such
 
 ```typescript
 // server/src/domain/lnd/LndRestTypes
 
 export interface Graph {
-  // Exercise: implement this interface by adding the properties
-  // returned in the result of the https://api.lightning.community/#v1-graph.
-  // Note that the LightningNode and ChannelEdge types are already
-  // defined below
+  // Exercise: define the `nodes` and `edges` properties in this interface.
+  // These arrays of LightningNode and ChannelEdge objects.
 }
 ```
 
@@ -238,7 +234,7 @@ Now that our environment variables are in our configuration file, we need to get
 
 The class contains a factory method `fromEnv` that allows us to construct our options from environment variables. We're going to modify the `Options` class to read our newly defined environment variables.
 
-This method is partially implemented, but your next exercise is to finish the method by
+This method is partially implemented, but your next exercise is to finish the method by reading the cert file into a Buffer.
 
 ```typescript
 // server/src/Options
@@ -279,11 +275,11 @@ In this exercise, construct an instance of the `LndRestClient` type and supply i
     const graphAdapter: IGraphService = new LndGraphService(lnd);
 ```
 
-At this point, our server code is ready. We'll take a look at a few other things before give it a test.
+At this point, our server code is ready. We'll take a look at a few other things before we give it a test.
 
 ### Looking at LndGraphService
 
-The `LndRestClient` instance that we just created will be used by `LndGraphService`. This class follows the adapter design pattern: which is a way to make code that operates in one way, adapt to another use. The `LndGraphService` is the place were we make the `LndRestClient` do things that our application needs.
+The `LndRestClient` instance that we just created will be used by `LndGraphService`. This class follows the adapter design pattern: which is a way to make code that operates in one way, adapt to another use. The `LndGraphService` is the place where we make the `LndRestClient` do things that our application needs.
 
 ```typescript
 export class LndGraphService extends EventEmitter implements IGraphService {
@@ -302,11 +298,13 @@ export class LndGraphService extends EventEmitter implements IGraphService {
     }
 ```
 
-For the purposes of fetching the graph, we simply call `getGraph` on the `LndRestClient` and return the results. But if we modified our application to use a generic graph instead of the one returned by LND, we could do that translation between the `Lnd.Graph` type and our application's graph.
+For the purposes of fetching the graph, we simply call `getGraph` on the `LndRestClient` and return the results. But if we modified our application to use a generic graph instead of the one returned by LND, we could do that translation between the `Lnd.Graph` type and our application's graph here.
+
+At this point your server should capable of connecting to LND!
 
 ### Looking at the Graph API
 
-Now that you've correctly connected your application to LND! Since we're building a REST web service to power our front end application, we need to define an endpoint in our Express application.
+Since we're building a REST web service to power our front end application, we need to define an endpoint in our Express application.
 
 Take a look at `server/src/Server`. We're doing a lot of things in this file for simplicity sake. About half-way down you'll see a line:
 
@@ -318,16 +316,16 @@ app.use(graphApi(graphAdapter));
 
 This code attaches a router to the Express application.
 
-The router is defined in `server/src/api/GraphApi`. This file returns a function that accepts our `IGraphService` that we were just taking a look at. You can then see that we use the `IGraphService` inside an Express request handler where we return the results as JSON.
+The router is defined in `server/src/api/GraphApi`. This file returns a function that accepts our `IGraphService` that we were just taking a look at. You can then see that we use the `IGraphService` inside an Express request handler where and then return the graph as JSON.
 
 ```typescript
 // server/src/api/GraphApi
 
 export function graphApi(graphService: IGraphService): express.Router {
-  // construct a router object
+  // Construct a router object
   const router = express();
 
-  // adds a handler for returning the graph. By default express doe not
+  // Adds a handler for returning the graph. By default express does not
   // understand async code, but we can easily adapt Express by calling
   // a promise based handler and if it fails catching the error and
   // supplying it with `next` to allow Express to handle the error.
@@ -347,11 +345,11 @@ export function graphApi(graphService: IGraphService): express.Router {
 
 Dev Note: Express does not natively understanding `async` code but we can easily retrofit it. To do this we define the handler with a lambda function that has arguments for the `Request`, `Response`, and `next` arguments (has the type `(req, res, next) => void`). Inside that lambda, we then call our async code and attach the `catch(next)` to that function call. This way if our `async` function has an error, it will get passed to Express' error handler!
 
-We can now run `npm start` in the command line and our server should start up and connect to LND without issue.
+We can now run `npm run watch` at the root of our application and our server should start up and connect to LND without issue.
 
 If you're getting errors, check your work by making sure Polar is running, the environment variables are correct, and you've correctly wired the code together.
 
-You can also access `http://localhost:8001/api/graph` in your browser. You should see information about the network as understood by Alice!
+You can now access [http://localhost:8001/api/graph](http://localhost:8001/api/graph) in your browser and you'll see information about the network as understood by Alice!
 
 ## User Interface
 
@@ -361,7 +359,7 @@ Now that we have a functioning server, let's jump into the user interface! This 
 
 The user interface sub-project lives inside the `client` folder of our repository. Inside `client/src` is our application code.
 
-The entry point of the application is `App.tsx`. This code uses `react-router` to allow us to link URLs to various scenes of our application. Once we've built-up our entry point we embed the application into DOM.
+The entry point of the application is `App.tsx`. This code uses `react-router` to allow us to link URLs to various scenes of our application. Once we've built-up our entry point we embed the application into the DOM.
 
 ```typescript
 // client/src/App
@@ -379,7 +377,7 @@ ReactDom.render(
 );
 ```
 
-From this you will see that we render a single component, `<LayoutScene>`. It lives inside the `client/src/scenes/layout`. Inside this folder is where we define things related to our application layout.
+From this you will see that we render a single component, `<LayoutScene>`. It lives inside `client/src/scenes/layout`. Inside this folder is where we define things related to our application layout.
 
 The `LayoutScene` component is also where we use `react-router` to define our various scenes based on the URL path.
 
@@ -405,7 +403,7 @@ export const LayoutScene = () => {
 };
 ```
 
-Here you can see that inside the `<Routes>` component we define a single `<Route>` that is bound to the root path `/` and it renders the `GraphScene` component which will be responsible for rendering our graph!
+Here you can see that inside the `<Routes>` component we define a single `<Route>` that is bound to the root path `/`. This route renders the `GraphScene` component which renders our graph!
 
 So our folder structure looks like this:
 
@@ -445,23 +443,19 @@ client\
           Graph.tsx
 ```
 
-Now that we've laid out how our application works let's build our application and see what happens. In the command line, navigate to the `client` folder and run the following command:
+Because we're already ran `npm run watch` at the root of the application, our client side code is already being built for us.
 
-```
-npm run watch
-```
+This command builds the React application and place it into the `dist` folder.
 
-This command should build the React application and place it into the `dist` folder.
-
-You can now use your browser to navigate to `http://localhost:8001` and view the application!
+You can now use your browser to navigate to [http://localhost:8001](http://localhost:8001) and view the application!
 
 ![Blank Slate](/images/ch1_app_01.png)
 
 ### Exercise: Loading the Graph
 
-Now that we're setup need to wire up the graph API we previously created. To make our life easier we will use an `ApiService` to abstract the calls to our API endpoint.
+Our next task is wiring up the graph API we previously created to our user interface. To make our life easier we will use an `ApiService` to house the calls to our API.
 
-In your IDE, navigate to `/client/src/services/ApiService.ts` and create a method that uses the get helper `get` to retrieve
+In your IDE, navigate to `/client/src/services/ApiService.ts` and create a method that uses the get helper `get` to retrieve retrieve the graph.
 
 ```typescript
 // client/src/services/ApiService
@@ -477,7 +471,7 @@ export class ApiService {
   }
 
   // Exercise: Create a public fetchGraph method that returns Promise<Lnd.Graph>.
-  // You can use the get helper method above by supplying it with an API path.
+  // You can use the get helper method above by supplying it with the path /api/graph.
   public async fetchGraph(): Promise<Lnd.Graph> {
     return undefined;
   }
@@ -488,7 +482,7 @@ This class is conveniently accessible by using the `useApi` hook located in the 
 
 ### Exercise: Wire up the API Call
 
-Next let's point our IDE at the `GraphScene` component in `client/src/scenes/graph` and see if we can wire up the API call for the graph to this scene.
+Next let's point our IDE at the `GraphScene` component in `client/src/scenes/graph` and see if we can wire up the API to a component.
 
 For this exercise, inside the `useEffect` hook, call the api's `fetchGraph` method. Be mindful that this method returns a promise, which you will need to retrieve the results from. To test your code, simply log the results to the console.
 
@@ -529,15 +523,15 @@ When you refresh your browser, the background will now be gray but you won't yet
 
 ### Graph Component Overview
 
-The `Graph` component is a bit different from a normal React component because it is encapsulating D3. Typically React controls rendering to the DOM, but for this component React will only control the SVG element where the D3 Graph will be rendered.
+The `Graph` component, `client/src/scenes/graph/components/Graph`, is a bit different from a normal React component because it is encapsulating D3. Typically React is in charge of rendering the DOM. For this component, React will only control the SVG element. D3 will take control of the SVG element and render elements into it.
 
-We control D3 with two methods on the component: `createGraph` and `updateGraph`. Each method takes information from our domain and converts it into objects that D3 can control and render.
+React interfaces with D3 via two methods on the component: `createGraph` and `updateGraph`. Each method takes information from our domain and converts it into objects that D3 can control and render.
 
-As a result, we transition from the declarative style of programming used by React and use imperative code to call these functions. If that's a little confusing, take a gander at `GraphScene` and `Graph`. Notice that `GraphScene` renders `Graph` as a child, but we use the `createGraph` method to push information into D3.
+For those familiar with React this may be a bit weird since we are transitioning from the declarative style of programming used by React and using imperative code to call these functions. If that's a little confusing, take a gander at `GraphScene` and `Graph`. Notice that `GraphScene` renders `Graph` as a child, but we use the `createGraph` method to push information into D3.
 
 ### Exercise: Creating the Graph
 
-After loading the page, we don't yet see the graph because we haven't fully implemented the `createGraph` method in the `Graph` component. This method is responsible for converting our `Lnd.Graph` object into objects that can be used by D3.
+After loading the page, we don't yet see the graph because we haven't fully implemented the `createGraph` method in the `Graph` component. `createGraph` is responsible for converting our `Lnd.Graph` object into objects that can be used by D3.
 
 As defined in `server/src/domain/lnd/LndRestTypes`, our `Lnd.Graph` object has two arrays: `nodes` and `edges`.
 
@@ -557,7 +551,7 @@ Using this information we need to construct new objects that can be controlled b
 
 This gets us to our next exercise. We need to modify the `Graph` component's `createGraph` method to convert our Lightning graph objects into D3 controlled objects. To do this we create two arrays:
 
-- one array for the graph's nodes created from our `Lnd.LightningNode` where our `pub_key` maps to `id`, and the `alias` maps to the D3 node's title.
+- one array for the graph's nodes created from our `Lnd.LightningNode`. We map `pub_key` to `id`, map `color` to `color`, and map `alias` to `title`.
   ```typescript
   interface D3Node {
     id: string;
@@ -565,7 +559,7 @@ This gets us to our next exercise. We need to modify the `Graph` component's `cr
     title: string;
   }
   ```
-- one array for the graph's links created from our `Lnd.ChannelEdge` objects where the `channel_id` maps to the the `id` and `node1_pub` maps to `source` and `node2_pub` maps to target.
+- one array for the graph's links created from our `Lnd.ChannelEdge`. We map `channel_id` to `id`, `node1_pub` to `source` and `node2_pub` to `target`.
   ```typescript
   interface D3Link {
     id: string;
@@ -599,16 +593,9 @@ This is ok, but we can do better by passing updates to our user interface using 
 
 ### Exploring WebSocket Code
 
-The WebSocket code on our server uses the [ws](https://www.npmjs.com/package/ws) library and lives inside the `SocketServer` class. This class maintains a set of connected sockets. It also includes a `broadcast` method that allows us to send data for some channel to all connected sockets. These messages are sent in the form:
+The WebSocket code on our server uses the [ws](https://www.npmjs.com/package/ws) library and lives inside the `SocketServer` class. You don't have to make any changes to it, but you may want to take a look at it. This class maintains a set of connected sockets. It also includes a `broadcast` method that allows us to send data for some channel to all connected sockets. We'll use this `broadcast` method shortly to send graph updates to all connected WebSockets.
 
-```
-{
-  channel: string,
-  data: T
-}
-```
-
-The last bit of code for WebSockets lives inside `server/src/Server`. At the end of the `run` method, we create the `SocketServer` instance and have it listen to the HTTP server for connections.
+The code to start the `SocketServer` lives inside `Server`. At the end of the `run` method, we create the `SocketServer` instance and have it listen to the HTTP server for connections.
 
 ```typescript
 // server/src/Server
@@ -628,14 +615,16 @@ async function run() {
     socketServer.listen(server);
 ```
 
-### Exercise: Implement
+All of this is ready to go, all we need to do is subscribe to updates from LND and do something with them.
 
-Back in our server code's `LndGraphService` is a method `subscribeGraph` that we need to modify. This method subscribes to LND API's `subscribeGraph` method and emit them as an event.
+### Exercise: Subscribe to Updates
+
+Back in our server code's `LndGraphService` is a method `subscribeGraph` that we need to implement. This method subscribes to graph updates from LND using it's `subscribeGraph` method. The requirement for this function is that it needs to emit these updates as events.
 
 ```typescript
   public async subscribeGraph(): Promise<void> {
-        // Exercise: subscribe to the Lnd graph updates using `this.lnd.subscribeGraph`
-        // and emit a "update" event each time the handler is called.
+    // Exercise: subscribe to the Lnd graph updates using `this.lnd.subscribeGraph`
+    // and emit a "update" event each time the handler is called.
   }
 ```
 
@@ -643,7 +632,7 @@ Dev Note: This class is an [EventEmitter](https://nodejs.dev/learn/the-nodejs-ev
 
 ### Exploring WebSocket Broadcasting
 
-The next logical step is consuming the `update` event and sending the update to the client over a WebSocket. If you navigate back to the trusty `Server` you will find some interesting code.
+The next logical step is consuming the `update` event that we just created and sending the update to the client over a WebSocket. If you navigate back to the trusty `Server` you will find some interesting code at the bottom of the `run` function.
 
 ```typescript
 // server/src/Server
@@ -668,7 +657,7 @@ async function run() {
 }
 ```
 
-From this code, you can see that we subscribe to the `update` event, and add an arrow function as the handler. This arrow function broadcasts the graph update to all connected WebsSockets over the `graph` channel.
+We subscribe to the `update` event on `graphAdapter` that we just implemented. In the event handler we then broadcast the update to all of the WebSockets.
 
 After the event handler is defined, all of the plumbing is in place to for updates to go from `LND -> LndRestClient -> LndGraphAdapter -> WebSocket`.
 
@@ -718,14 +707,9 @@ With the lay of the land defined, we can now embark on our journey to finish the
 
 ### Exercise: Subscribe to Updates
 
-The logical place to add this connection is the `GraphScene` component. As previously established, this scene is responsible for wiring up data
-connections for graph related components.
+The logical place to subscribe to updates is in the `GraphScene` component. As previously established, this scene is responsible for wiring up data connections for graph related components.
 
-Pointing our IDE at the `GraphScene` component our next exercise is
-implementing the socket handler. Using the `useSocket` hook, subscribe
-to the same channel that you established on the server. The handler
-function should call the `graphRef.current.createGraph` method on the
-graph component.
+Pointing our IDE at the `GraphScene` component our next exercise is implementing the socket handler. Using the `useSocket` hook, subscribe to `graph` channel. The handler function should call the `graphRef.current.updateGraph` method on the graph component.
 
 ```typescript
 // client/src/scenes/graph/GraphScene
@@ -746,10 +730,9 @@ export const GraphScene = () => {
     });
   }, []);
 
-  // Exercise: with the useSocket hook, subscribe to the channel that
-  // the server is sending graph updates on. The handler function for
-  // this channel should call `graphRef.current.updateGraph` with the
-  // information.
+  useSocket("graph", (update: Lnd.GraphUpdate) => {
+    // Exercise: Call `graphRef.current.updateGraph` with the update
+  });
 
   return (
     <div className="container-fluid h-100">
@@ -815,7 +798,7 @@ The `updateGraph` method is partially implemented for the first three conditions
   }
 ```
 
-After completing this exercise we will have everything needed for our graph to be functional. Try adding or removing a channel, you should see our graph application automatically update with the changes!
+After completing this exercise we will have everything needed for our graph to be functional. Try adding or removing a channel, you should see our graph application automatically update with the changes! Keep in mind that it may take a moment for changes to propagate throughout your network.
 
 ## Further Exploration
 
@@ -823,7 +806,7 @@ This is just the beginning of interesting things we can do to help us visualize 
 
 A few ideas for how you can continue your exploration:
 
-- How would you add other information to our user interface? What part of the application need to be changed?
+- How would you add other information to our user interface? What part of the application needs to be changed?
 - How would you connect to c-lightning or Eclair? What would need to change about the architecture?
 - How would you connect to testnet or mainnet? How would you address scaling given that the main network has 10's of thousands of nodes and channels?
 - How would you make our application production ready? How would you add testing? What happens if LND restarts? What happens if the REST/WebSocket server restarts?
