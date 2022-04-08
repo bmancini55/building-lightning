@@ -91,7 +91,7 @@ Fortunately, Polar provides us with a nice interface with all of this informatio
 
 In Polar, to access Alice's node by click on Alice and then click on the `Connect` tab. You will be shown the information on how to connect to the GRPC and REST interfaces. Additionally you will be given paths to the network certificates and macaroon files that we will need in `.env`.
 
-![Connect to Alice](/images/ch1_polar_connect_to_alice.png)
+![Connect to Alice](../images/ch1_polar_connect_to_alice.png)
 
 Go ahead and add the three environment variables defined above to `.env`.
 

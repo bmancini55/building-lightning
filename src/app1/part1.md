@@ -22,7 +22,7 @@ For Windows, it will be an .exe file that you can run.
 
 Once Polar is running, you can create a new network. Polar allows us to run many different networks with varying configurations. For this application we will start the network with 1 LND node, 1 c-lightning node, 1 Eclair, and 1 Bitcoin Core node. Provide a name for this network and create it!
 
-![Polar Network](/images/ch1_polar_create.png)
+![Polar Network](../images/ch1_polar_create.png)
 
 Next, start the network. Polar will launch Docker containers for each of the nodes in your network. This may take a few minutes for the nodes to come online.
 
@@ -32,16 +32,16 @@ We will start by depositing some funds into Alice's node. To do this, click on A
 
 We will then deposit 1,000,000 satoshis into Alice's node. When you click the `Deposit` button, the Bitcoin Core node running in regtest will create new blocks to an address and 0.01000000 bitcoin (1,000,000 satoshis) will deposited into an address controlled by Alice's Lightning Network node.
 
-![Alice with 1mil Sats](/images/ch1_polar_deposit.png)
+![Alice with 1mil Sats](../images/ch1_polar_deposit.png)
 
 Now that Alice has some funds, she can create a channel with another node on the network. We can do this by opening an outgoing channel by clicking the `Outgoing` button in the `Open Channel` section of Alice's Actions tab.
 
 Let's choose Bob as the channel counterparty and fund the channel with 250,000 satoshis.
 
-![Alice to Bob Create Channel](/images/ch1_polar_open_channel.png)
+![Alice to Bob Create Channel](../images/ch1_polar_open_channel.png)
 
 We should now see a channel link between Alice and Bob in our channel graph.
 
-![Alice to Bob Channel](/images/ch1_polar_alice_bob.png)
+![Alice to Bob Channel](../images/ch1_polar_alice_bob.png)
 
 At this point, we are ready to write some code!

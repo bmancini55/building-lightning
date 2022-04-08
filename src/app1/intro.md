@@ -1,4 +1,4 @@
-# Visualizing the Lightning Network Graph
+# Visualizing the Lightning Network
 
 Welcome to Building on Lightning! This series will acquaint you with tools and techniques you will need to build Lightning Network applications. The first application we will build is a visualizer of the nodes and channels from the perspective of one node in Lightning Network. You will learn how to connect a web application to a Lightning Network node and receive real-time updates from that node.
 

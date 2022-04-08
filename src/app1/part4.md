@@ -96,7 +96,7 @@ This command builds the React application and place it into the `dist` folder.
 
 You can now use your browser to navigate to [http://localhost:8001](http://localhost:8001) and view the application!
 
-![Blank Slate](/images/ch1_app_01.png)
+![Blank Slate](../images/ch1_app_01.png)
 
 ## Exercise: Loading the Graph
 
@@ -166,7 +166,7 @@ Dev Note: [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Ref
 
 When you refresh your browser, the background will now be gray but you won't yet see the graph yet. If you open your developer tools, you will see the graph output that you wrote with console.log!
 
-![Console with Graph](/images/ch1_app_02.png)
+![Console with Graph](../images/ch1_app_02.png)
 
 ## Graph Component Overview
 
@@ -228,4 +228,4 @@ This gets us to our next exercise. We need to modify the `Graph` component's `cr
 
 Once we have created these maps we can refresh our browser and we should see the current graph!
 
-![Graph](/images/ch1_app_03.png)
+![Graph](../images/ch1_app_03.png)
