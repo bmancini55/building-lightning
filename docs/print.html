@@ -1,0 +1,782 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Building on Lightning</title>
+        <meta name="robots" content="noindex" />
+
+
+        <!-- Custom HTML head -->
+        
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="app1/intro.html"><strong aria-hidden="true">1.</strong> Lightning Graph Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="app1/part1.html"><strong aria-hidden="true">1.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="app1/part2.html"><strong aria-hidden="true">1.2.</strong> Code Setup</a></li><li class="chapter-item expanded "><a href="app1/part3.html"><strong aria-hidden="true">1.3.</strong> Building the Server</a></li><li class="chapter-item expanded "><a href="app1/part4.html"><strong aria-hidden="true">1.4.</strong> Building the UI</a></li><li class="chapter-item expanded "><a href="app1/part5.html"><strong aria-hidden="true">1.5.</strong> Real-Time Updates</a></li><li class="chapter-item expanded "><a href="app1/part6.html"><strong aria-hidden="true">1.6.</strong> Exploration</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Building on Lightning</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="visualizing-the-lightning-network"><a class="header" href="#visualizing-the-lightning-network">Visualizing the Lightning Network</a></h1>
+<p>Welcome to Building on Lightning! This series will acquaint you with tools and techniques you will need to build Lightning Network applications. The first application we will build is a visualizer of the nodes and channels from the perspective of one node in Lightning Network. You will learn how to connect a web application to a Lightning Network node and receive real-time updates from that node.</p>
+<p>This project uses <a href="https://www.typescriptlang.org/">TypeScript</a> in the <a href="https://nodejs.org/en/">Node.js</a> runtime. If you're not familiar with TypeScript, you may want to do a tutorial to help you understand the code. Node.js is a popular runtime for web development. When combined with TypeScript it allows us to build large applications with compile-time type checking. This helps us reduce mistakes and properly structure our applications for future changes. This project also uses <a href="https://expressjs.com">Express</a> as the web framework. It is a fast, easy to use, and popular web framework. Lastly this project uses <a href="https://reactjs.org/">React</a> and <a href="https://d3js.org/">D3</a> for creating the visualization of the Lightning Network graph.</p>
+<h2 id="the-lightning-network-as-a-graph"><a class="header" href="#the-lightning-network-as-a-graph">The Lightning Network as a Graph</a></h2>
+<p>We'll start with a brief discussion of why we can conceptualize the Lightning Network as a graph. The Lightning Network consists of many computers running software that understands the Lightning Network protocols as defined in the <a href="https://github.com/lightning/bolts/blob/master/00-introduction.md">BOLT specifications</a>. The goal is to allow trustless, bidirectional, off-chain payments between nodes. So why is a picture of the network important?</p>
+<p>Let's first consider payments between just two nodes: Alice and Carol. If Alice wants to pay Carol, she needs to know how to connect to Carol (the IP and port on which Carol's Lightning Network software is accessible). We refer to directly establishing a communication channel as becoming a peer. Once Alice and Carol are peers, Alice can establish a payment channel with Carol and finally pay her.</p>
+<p>This sounds good, but if this was all the Lightning Network was, it has a major shortcoming. Every payment requires two nodes to become peers and establish channels. This means there are delays in sending a first payment, on-chain cost to establish channels, and ongoing burden to manage the growing set of channels.</p>
+<p>Instead, the Lightning Network allows us to trustlessly route payments through other nodes in the network. If Alice wants to pay Carol, Alice doesn't need to be directly connected to Carol. Alice can pay Bob and Bob can pay Carol. However, Alice must <em>know</em> that she can pay through Bob.</p>
+<blockquote>
+<p>The prerequisite for routed payments is that you need an understanding of the paths that a payment can take.</p>
+</blockquote>
+<p>Without this understanding we cannot construct a route to make our payment.</p>
+<p>Conceptually we can think of the nodes and channels topology as a graph data structure. Each computer running Lightning Network software is a node in the graph. Each node is uniquely identified by a public key. The edges of the graph are the <em>public</em> channels that exist between nodes. The channels are uniquely identified by the UTXO of the channel's funding transaction.</p>
+<p>One consideration is that there is no such thing as a complete picture of the Lightning Network. The Lightning Network allows for private channels between nodes. Only nodes participating in a private channel will see these edges in their view of the network. As a result, the Lightning Network is much larger than the topology created by public channels alone.</p>
+<p>Another observation is that we often see visuals of the Lightning Network as an undirected graph. This makes sense when we are trying to get a picture of what channels exist. However there are complications when routing payments. Some balance of funds can exist on either side of the channel. This means that our ability to route through a channel is actually directional. For practical and privacy purposes, the balance on each side of the channel is opaque.</p>
+<p>This is a lot to unpack, but if you're curious and want to dig deeper into how node's gossip about the topology and how they perform route path finding, refer to Chapters 11 and 12 in <em>Mastering the Lightning Network</em> by Antonopoulos et al.</p>
+<p>For this visualization we'll be treating the graph as undirected. So without further ado, let's get started building!</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="environment-setup"><a class="header" href="#environment-setup">Environment Setup</a></h1>
+<p>We'll start by setting up your environment. Since we're going to build a Lightning Network application it should not be surprising that our infrastructure consists of a Bitcoin node and one or more Lightning Network nodes that we can control.</p>
+<p>As a user of Bitcoin and the Lightning Network you are most likely familiar with the main Bitcoin network. Bitcoin software actually has multiple networks that it can run on:</p>
+<ul>
+<li>mainnet - primary public network; the network a user interacts with.</li>
+<li>testnet - alternate network used for testing. It is typically smaller in size and has some other properties that make it useful for testing software built on top of Bitcoin. <a href="https://en.bitcoin.it/wiki/Testnet">More info</a>.</li>
+<li>regtest - regression testing network that gives us full control of block creation.</li>
+</ul>
+<p>For creating and testing our Lightning Network applications we'll want our infrastructure to start with the regtest network to give us control and speed up our development process. At a future time we can transition to running in testnet or mainnet.</p>
+<p>As you can imagine, getting all this running can be a chore. Fortunately, there is the tool <a href="https://lightningpolar.com">Polar</a> that allows us to spin up Lightning network testing environments easily!</p>
+<p>Our first step is to download and install Polar for your operating system from the <a href="https://lightningpolar.com">website</a>.</p>
+<p>For a Linux system, it will be as an AppImage. You will need to grant executable rights to the file, then you can run the application.</p>
+<p>For Mac it will be a .dmg file that you will need to install.</p>
+<p>For Windows, it will be an .exe file that you can run.</p>
+<p>Once Polar is running, you can create a new network. Polar allows us to run many different networks with varying configurations. For this application we will start the network with 1 LND node, 1 c-lightning node, 1 Eclair, and 1 Bitcoin Core node. Provide a name for this network and create it!</p>
+<p><img src="app1/../images/ch1_polar_create.png" alt="Polar Network" /></p>
+<p>Next, start the network. Polar will launch Docker containers for each of the nodes in your network. This may take a few minutes for the nodes to come online.</p>
+<p>Polar also provides a few tools to allow us to easily perform common tasks.</p>
+<p>We will start by depositing some funds into Alice's node. To do this, click on Alice's node, then click on the <code>Actions</code> tab.</p>
+<p>We will then deposit 1,000,000 satoshis into Alice's node. When you click the <code>Deposit</code> button, the Bitcoin Core node running in regtest will create new blocks to an address and 0.01000000 bitcoin (1,000,000 satoshis) will deposited into an address controlled by Alice's Lightning Network node.</p>
+<p><img src="app1/../images/ch1_polar_deposit.png" alt="Alice with 1mil Sats" /></p>
+<p>Now that Alice has some funds, she can create a channel with another node on the network. We can do this by opening an outgoing channel by clicking the <code>Outgoing</code> button in the <code>Open Channel</code> section of Alice's Actions tab.</p>
+<p>Let's choose Bob as the channel counterparty and fund the channel with 250,000 satoshis.</p>
+<p><img src="app1/../images/ch1_polar_open_channel.png" alt="Alice to Bob Create Channel" /></p>
+<p>We should now see a channel link between Alice and Bob in our channel graph.</p>
+<p><img src="app1/../images/ch1_polar_alice_bob.png" alt="Alice to Bob Channel" /></p>
+<p>At this point, we are ready to write some code!</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="code-setup"><a class="header" href="#code-setup">Code Setup</a></h1>
+<p>Before we get started writing code, we have a few small things we need to take care of.</p>
+<h2 id="ide-setup"><a class="header" href="#ide-setup">IDE Setup</a></h2>
+<p>For web applications, I like to use <a href="https://code.visualstudio.com/">Visual Studio Code</a> as my IDE. It has excellent tooling for TypeScript and web development. I install the ESLint and Prettier plugins to give me real time feedback of any problems that my application may have.</p>
+<h2 id="runtime-setup"><a class="header" href="#runtime-setup">Runtime Setup</a></h2>
+<p>You will need to install <a href="https://nodejs.org/en/">Node.js 16</a> by following the instructions for your operating system.</p>
+<h2 id="repository-setup"><a class="header" href="#repository-setup">Repository Setup</a></h2>
+<p>With general prerequisites setup, we can now clone the repository:</p>
+<p>Clone the repository:</p>
+<pre><code>git clone https://github.com/bmancini55/building-lightning-graph.git
+</code></pre>
+<p>Navigate to the repository:</p>
+<pre><code>cd building-lightning-graph
+</code></pre>
+<p>The repository uses <code>npm</code> scripts to perform common tasks. To install the dependencies, run:</p>
+<pre><code>npm install
+</code></pre>
+<p>This will install all of the dependencies for the three sub-modules in the project: <code>client</code>, <code>server</code>, and <code>style</code>. You may get some warnings, but as long as the install command has exit code 0 for all three sub-projects you should be good. If you do encounter any errors, you can try browsing to the individual sub-project and running the <code>npm install</code> command inside each directory.</p>
+<h2 id="repository-walk-through"><a class="header" href="#repository-walk-through">Repository Walk-Through</a></h2>
+<p>The repository is split into three parts, each of which has a <code>package.json</code> to install Node.js dependencies for that sub-application. Each also has unique set of <code>npm</code> scripts that can be run. The three parts are:</p>
+<ol>
+<li><code>client</code> - Our React application lives in this directory.</li>
+<li><code>server</code> - Our Express server code lives in this directory.</li>
+<li><code>style</code> - Our code to create CSS lives here.</li>
+</ol>
+<p>We will discuss the <code>client</code> and <code>server</code> sections in more detail as we go through the various parts of the application.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="creating-an-api"><a class="header" href="#creating-an-api">Creating an API</a></h1>
+<p>Our first coding task is going to be creating a REST API of our own to provide graph information to our application. We'll start by getting our server connected to Alice's LND node.</p>
+<h2 id="connecting-to-alices-node"><a class="header" href="#connecting-to-alices-node">Connecting to Alice's node</a></h2>
+<p>We've chosen to connect to LND for this application but we could just as easily use c-lightning or Eclair.</p>
+<p>LND also a <a href="https://docs.lightning.engineering/">Builder's Guide</a> that you may want to explore to learn more about commonly performed tasks.</p>
+<p>LND has two ways we can interact with it from code: a <a href="https://api.lightning.community/#lnd-rest-api-reference">REST API</a> and a <a href="https://api.lightning.community/#lnd-grpc-api-reference">gRPC API</a>. gRPC is a high performance RPC framework. With gRPC, the wire protocol is defined in a protocol definition file. This file is used by a code generators to construct a client in the programming language of your choice. gRPC is a fantastic mechanism for efficient network communication, but it comes with a bit of setup cost. The REST API requires less effort to get started but is less efficient over the wire. For applications with a large amount of interactivity, you would want to use gRPC connectivity. For this application we'll be using the REST API because it is highly relatable for web developers.</p>
+<h2 id="lnd-api-client"><a class="header" href="#lnd-api-client">LND API Client</a></h2>
+<p>Inside our <code>server</code> sub-project is the start of code to connect to LND's REST API. We'll add to this for our application.</p>
+<p>Why are we not leveraging an existing library from NPM? The first reason is that it is a nice exercise to help demonstrate how we can build connectivity. Lightning Network is still a nascent technology and developers need to be comfortable building tools to help them interact with Bitcoin and Lightning Network nodes. The second and arguably more important reason is that as developers in the Bitcoin ecosystem, we need to be extremely wary of outside packages that we pull into our projects, especially if they are cryptocurrency related. Outside dependencies pose a security risk that could compromise our application. As such, my general rule is that runtime dependencies should generally be built unless it is burdensome to do so and maintain.</p>
+<p>With that said, point your IDE at the <code>server/src/domain/lnd/LndRestTypes.ts</code> file. This file contains a subset of TypeScript type definitions from the <a href="https://api.lightning.community/#lnd-rest-api-reference">REST API</a> documentation. We are only building a subset of the API that we'll need for understanding the graph.</p>
+<h2 id="exercise--defining-the-graph-type"><a class="header" href="#exercise--defining-the-graph-type">Exercise : Defining the <code>Graph</code> Type</a></h2>
+<p>In <code>LndRestTypes</code> you'll see our first exercise. It requires us to define the resulting object obtained by calling LND's <a href="https://api.lightning.community/#v1-graph"><code>/v1/graph</code></a> API. You will need to add two properties to the <code>Graph</code> interface. To help you, the <code>LightningNode</code> and <code>ChannelEdge</code> types are already defined. In TypeScript, you can define an array as such</p>
+<pre><code class="language-typescript">// server/src/domain/lnd/LndRestTypes
+
+export interface Graph {
+  // Exercise: define the `nodes` and `edges` properties in this interface.
+  // These arrays of LightningNode and ChannelEdge objects.
+}
+</code></pre>
+<h2 id="exercise-making-the-call"><a class="header" href="#exercise-making-the-call">Exercise: Making the Call</a></h2>
+<p>Now that we've defined the results from a call to <a href="https://api.lightning.community/#v1-graph"><code>/v1/graph</code></a>, we need to point our IDE at <code>server/src/domain/lnd/LndRestClient.ts</code> so we can write the code that makes this API call.</p>
+<p><code>LndRestClient</code> implements a basic LND REST client. We can add methods to it that are needed by our application. It also takes care of the heavy lifting for establishing a connection to LND. You'll notice that the constructor takes three parameters: <code>host</code>, <code>macaroon</code>, and <code>cert</code>. The <code>macaroon</code> is similar to a security token. The macaroon that you provide will dictate the security role you use when calling the API. The <code>cert</code> is a TLS certificate that enables a secure and authenticated connection to LND.</p>
+<pre><code class="language-typescript">// server/src/domain/lnd/LndRestClient
+
+export class LndRestClient {
+  constructor(
+    readonly host: string,
+    readonly macaroon: Buffer,
+    readonly cert: Buffer
+  ) {}
+}
+</code></pre>
+<p>This class also has a <code>get</code> method that is a helper for making HTTP GET requests to LND. This helper method applies the macaroon and ensures the connection is made using the TLS certificate.</p>
+<p>Your next exercise is to implement the <code>getGraph</code> method in <code>server/src/domain/lnd/LndRestClient.ts</code>. Use the <code>get</code> helper method to call the <a href="https://api.lightning.community/#v1-graph"><code>/v1/graph</code></a> API and return the results.</p>
+<pre><code class="language-typescript">// server/src/domain/lnd/LndRestClient
+
+  public async getGraph(): Promise&lt;Lnd.Graph&gt; {
+      // Exercise: use the `get` method below to call `/v1/graph` API
+      // and return the results
+  }
+</code></pre>
+<p>After this is complete, we should have a functional API client. In order to test this we will need to provide the macaroon and certificate.</p>
+<h2 id="exercise-configuring-env-to-connect-to-lnd"><a class="header" href="#exercise-configuring-env-to-connect-to-lnd">Exercise: Configuring <code>.env</code> to Connect to LND</a></h2>
+<p>In this application we use the <code>dotenv</code> package to simplify environment variables. We can populate a <code>.env</code> file with key value pairs and the application will treat these as environment variables.</p>
+<p>Remember that environment variables can be read in Node.js from the <code>process.env</code> object. So if we have an environment variable <code>PORT</code>:</p>
+<pre><code>$ export PORT=8000
+$ node app.js
+</code></pre>
+<p>This environment variable can be read with:</p>
+<pre><code class="language-typescript">const port = process.env.PORT;
+</code></pre>
+<p>Our next exercise is adding some values to <code>.env</code> inside the <code>server</code> sub-project. We'll add three new environment variables:</p>
+<ul>
+<li><code>LND_HOST</code> is the host where our LND node resides</li>
+<li><code>LND_READONLY_MACAROON_PATH</code> is the file path to the readonly Macaroon</li>
+<li><code>LND_CERT_PATH</code> is the certificate we use to securely connect with LND</li>
+</ul>
+<p>Fortunately, Polar provides us with a nice interface with all of this information. Polar also conveniently puts files in our local file system to make our lives as developers a bit easier.</p>
+<p>In Polar, to access Alice's node by click on Alice and then click on the <code>Connect</code> tab. You will be shown the information on how to connect to the GRPC and REST interfaces. Additionally you will be given paths to the network certificates and macaroon files that we will need in <code>.env</code>.</p>
+<p><img src="app1/../images/ch1_polar_connect_to_alice.png" alt="Connect to Alice" /></p>
+<p>Go ahead and add the three environment variables defined above to <code>.env</code>.</p>
+<pre><code># Express configuration
+PORT=8001
+
+# LND configuration
+# Exercise: Provide values for Alice's node
+LND_HOST=
+LND_READONLY_MACAROON_PATH=
+LND_CERT_PATH=
+</code></pre>
+<h2 id="exercise-reading-the-options"><a class="header" href="#exercise-reading-the-options">Exercise: Reading the Options</a></h2>
+<p>Now that our environment variables are in our configuration file, we need to get them into the application. The server project uses <code>server/src/Options</code> to read and store application options.</p>
+<p>The class contains a factory method <code>fromEnv</code> that allows us to construct our options from environment variables. We're going to modify the <code>Options</code> class to read our newly defined environment variables.</p>
+<p>This method is partially implemented, but your next exercise is to finish the method by reading the cert file into a Buffer.</p>
+<pre><code class="language-typescript">// server/src/Options
+
+  public static async fromEnv(): Promise&lt;Options&gt; {
+    const port: number = Number(process.env.PORT),
+    const host: string = process.env.LND_HOST,
+    const macaroon: Buffer = await fs.readFile(process.env.LND_READONLY_MACAROON_PATH),
+
+    // Exercise: Using fs.readFile read the file in the LND_CERT_PATH
+    // environment variable
+    const cert: Buffer = undefined;
+
+    return new Options(port, host, macaroon, cert);
+  }
+</code></pre>
+<p>Note: In this example we use TypeScript's <a href="https://www.typescriptlang.org/docs/handbook/2/classes.html#parameter-properties">Parameter Properties</a> feature. This feature creates class properties from <code>readonly</code> parameters. I like it because it saves a few keystrokes by removing the boilerplate of defining the property in the class, then assigning its value in the constructor. There are pros and cons to this approach, so feel free to construct your objects how think is best and in a way that is likely to reduce errors.</p>
+<h2 id="exercise-create-the-lnd-client"><a class="header" href="#exercise-create-the-lnd-client">Exercise: Create the LND client</a></h2>
+<p>The last step before we can see if our application can connect to LND is that we need to create the LND client! We will do this in the entrypoint of our server code <code>server/src/Server</code>.</p>
+<p>In this exercise, construct an instance of the <code>LndRestClient</code> type and supply it with the options found in the <code>options</code> variable.</p>
+<pre><code class="language-typescript">// server/src/Server
+
+  async function run() {
+    // construct the options
+    const options = await Options.fromEnv();
+
+    // Exercise: using the Options defined above, construct an instance
+    // of the LndRestClient using the options.
+    const lnd: LndRestClient = undefined;
+
+    // construct an IGraphService for use by the application
+    const graphAdapter: IGraphService = new LndGraphService(lnd);
+</code></pre>
+<p>At this point, our server code is ready. We'll take a look at a few other things before we give it a test.</p>
+<h2 id="looking-at-lndgraphservice"><a class="header" href="#looking-at-lndgraphservice">Looking at LndGraphService</a></h2>
+<p>The <code>LndRestClient</code> instance that we just created will be used by <code>LndGraphService</code>. This class follows the adapter design pattern: which is a way to make code that operates in one way, adapt to another use. The <code>LndGraphService</code> is the place where we make the <code>LndRestClient</code> do things that our application needs.</p>
+<pre><code class="language-typescript">export class LndGraphService extends EventEmitter implements IGraphService {
+    constructor(readonly lnd: LndRestClient) {
+        super();
+    }
+
+    /**
+     * Loads a graph from LND and returns the type. If we were mapping
+     * the returned value into a generic Graph type, this would be the
+     * place to do it.
+     * @returns
+     */
+    public async getGraph(): Promise&lt;Lnd.Graph&gt; {
+        return await this.lnd.getGraph();
+    }
+</code></pre>
+<p>For the purposes of fetching the graph, we simply call <code>getGraph</code> on the <code>LndRestClient</code> and return the results. But if we modified our application to use a generic graph instead of the one returned by LND, we could do that translation between the <code>Lnd.Graph</code> type and our application's graph here.</p>
+<p>At this point your server should capable of connecting to LND!</p>
+<h2 id="looking-at-the-graph-api"><a class="header" href="#looking-at-the-graph-api">Looking at the Graph API</a></h2>
+<p>Since we're building a REST web service to power our front end application, we need to define an endpoint in our Express application.</p>
+<p>Take a look at <code>server/src/Server</code>. We're doing a lot of things in this file for simplicity sake. About half-way down you'll see a line:</p>
+<pre><code class="language-typescript">// server/src/Server
+
+app.use(graphApi(graphAdapter));
+</code></pre>
+<p>This code attaches a router to the Express application.</p>
+<p>The router is defined in <code>server/src/api/GraphApi</code>. This file returns a function that accepts our <code>IGraphService</code> that we were just taking a look at. You can then see that we use the <code>IGraphService</code> inside an Express request handler where and then return the graph as JSON.</p>
+<pre><code class="language-typescript">// server/src/api/GraphApi
+
+export function graphApi(graphService: IGraphService): express.Router {
+  // Construct a router object
+  const router = express();
+
+  // Adds a handler for returning the graph. By default express does not
+  // understand async code, but we can easily adapt Express by calling
+  // a promise based handler and if it fails catching the error and
+  // supplying it with `next` to allow Express to handle the error.
+  router.get(&quot;/api/graph&quot;, (req, res, next) =&gt; getGraph(req, res).catch(next));
+
+  /**
+   * Handler that obtains the graph and returns it via JSON
+   */
+  async function getGraph(req: express.Request, res: express.Response) {
+    const graph = await graphService.getGraph();
+    res.json(graph);
+  }
+
+  return router;
+}
+</code></pre>
+<p>Dev Note: Express does not natively understanding <code>async</code> code but we can easily retrofit it. To do this we define the handler with a lambda function that has arguments for the <code>Request</code>, <code>Response</code>, and <code>next</code> arguments (has the type <code>(req, res, next) =&gt; void</code>). Inside that lambda, we then call our async code and attach the <code>catch(next)</code> to that function call. This way if our <code>async</code> function has an error, it will get passed to Express' error handler!</p>
+<p>We can now run <code>npm run watch</code> at the root of our application and our server should start up and connect to LND without issue.</p>
+<p>If you're getting errors, check your work by making sure Polar is running, the environment variables are correct, and you've correctly wired the code together.</p>
+<p>You can now access <a href="http://localhost:8001/api/graph">http://localhost:8001/api/graph</a> in your browser and you'll see information about the network as understood by Alice!</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="user-interface"><a class="header" href="#user-interface">User Interface</a></h1>
+<p>Now that we have a functioning server, let's jump into the user interface! This application uses the React.js framework and D3.js. If you're not familiar with React, I suggest finding a tutorial to get familiar with the concepts and basic mechanics. We'll again be using TypeScript for our React code to help us add compile-time type-checking.</p>
+<h2 id="exploring-the-user-interface"><a class="header" href="#exploring-the-user-interface">Exploring the User Interface</a></h2>
+<p>The user interface sub-project lives inside the <code>client</code> folder of our repository. Inside <code>client/src</code> is our application code.</p>
+<p>The entry point of the application is <code>App.tsx</code>. This code uses <code>react-router</code> to allow us to link URLs to various scenes of our application. Once we've built-up our entry point we embed the application into the DOM.</p>
+<pre><code class="language-typescript">// client/src/App
+
+import React from &quot;react&quot;;
+import ReactDom from &quot;react-dom&quot;;
+import { BrowserRouter } from &quot;react-router-dom&quot;;
+import { LayoutScene } from &quot;./scenes/layout/LayoutScene&quot;;
+
+ReactDom.render(
+  &lt;BrowserRouter&gt;
+    &lt;LayoutScene /&gt;
+  &lt;/BrowserRouter&gt;,
+  document.getElementById(&quot;app&quot;)
+);
+</code></pre>
+<p>From this you will see that we render a single component, <code>&lt;LayoutScene&gt;</code>. It lives inside <code>client/src/scenes/layout</code>. Inside this folder is where we define things related to our application layout.</p>
+<p>The <code>LayoutScene</code> component is also where we use <code>react-router</code> to define our various scenes based on the URL path.</p>
+<pre><code class="language-typescript">// client/src/scenes/layout/LayoutScene
+
+import React from &quot;react&quot;;
+import { Route, Routes } from &quot;react-router-dom&quot;;
+import { AppNav } from &quot;./components/AppNav&quot;;
+import { GraphScene } from &quot;../graph/GraphScene&quot;;
+
+export const LayoutScene = () =&gt; {
+  return (
+    &lt;div className=&quot;layout&quot;&gt;
+      &lt;div className=&quot;container-fluid mb-3&quot;&gt;
+        &lt;AppNav /&gt;
+      &lt;/div&gt;
+      &lt;Routes&gt;
+        &lt;Route path=&quot;/&quot; element={&lt;GraphScene /&gt;} /&gt;
+      &lt;/Routes&gt;
+    &lt;/div&gt;
+  );
+};
+</code></pre>
+<p>Here you can see that inside the <code>&lt;Routes&gt;</code> component we define a single <code>&lt;Route&gt;</code> that is bound to the root path <code>/</code>. This route renders the <code>GraphScene</code> component which renders our graph!</p>
+<p>So our folder structure looks like this:</p>
+<pre><code>client\
+  src\
+    App.tsx
+    scenes\
+      layout\
+        LayoutScene.tsx
+      graph\
+        GraphScene.tsx
+</code></pre>
+<p>And our code component hierarchy looks like this:</p>
+<pre><code>App
+  LayoutScene
+    GraphScene
+</code></pre>
+<p>Each of the scenes can also have components that are specific to the the scene. These are stored inside the <code>components</code> folder inside each scene.</p>
+<pre><code>client\
+  src\
+    App.tsx
+    scenes\
+      layout\
+        LayoutScene.tsx
+        components\
+          NavBar.tsx
+      graph\
+        GraphScene.tsx
+        components\
+          Graph.tsx
+</code></pre>
+<p>Because we're already ran <code>npm run watch</code> at the root of the application, our client side code is already being built for us.</p>
+<p>This command builds the React application and place it into the <code>dist</code> folder.</p>
+<p>You can now use your browser to navigate to <a href="http://localhost:8001">http://localhost:8001</a> and view the application!</p>
+<p><img src="app1/../images/ch1_app_01.png" alt="Blank Slate" /></p>
+<h2 id="exercise-loading-the-graph"><a class="header" href="#exercise-loading-the-graph">Exercise: Loading the Graph</a></h2>
+<p>Our next task is wiring up the graph API we previously created to our user interface. To make our life easier we will use an <code>ApiService</code> to house the calls to our API.</p>
+<p>In your IDE, navigate to <code>/client/src/services/ApiService.ts</code> and create a method that uses the get helper <code>get</code> to retrieve retrieve the graph.</p>
+<pre><code class="language-typescript">// client/src/services/ApiService
+
+import { Lnd } from &quot;./ApiTypes&quot;;
+
+export class ApiService {
+  constructor(readonly host: string = &quot;http://127.0.0.1:8001&quot;) {}
+
+  protected async get&lt;T&gt;(path: string): Promise&lt;T&gt; {
+    const res = await fetch(path, { credentials: &quot;include&quot; });
+    return await res.json();
+  }
+
+  // Exercise: Create a public fetchGraph method that returns Promise&lt;Lnd.Graph&gt;.
+  // You can use the get helper method above by supplying it with the path /api/graph.
+  public async fetchGraph(): Promise&lt;Lnd.Graph&gt; {
+    return undefined;
+  }
+}
+</code></pre>
+<p>This class is conveniently accessible by using the <code>useApi</code> hook located in the <code>hooks</code> folder. By adding our <code>fetchGraph</code> method to the <code>ApiService</code>, we can gain access to it with the <code>useApi</code> hook inside any component! Feel free to take a look at the <code>useApi</code> hook code and if you're confused read up on React hooks.</p>
+<h2 id="exercise-wire-up-the-api-call"><a class="header" href="#exercise-wire-up-the-api-call">Exercise: Wire up the API Call</a></h2>
+<p>Next let's point our IDE at the <code>GraphScene</code> component in <code>client/src/scenes/graph</code> and see if we can wire up the API to a component.</p>
+<p>For this exercise, inside the <code>useEffect</code> hook, call the api's <code>fetchGraph</code> method. Be mindful that this method returns a promise, which you will need to retrieve the results from. To test your code, simply log the results to the console.</p>
+<pre><code class="language-typescript">// client/src/scenes/graph/GraphScene
+
+import React, { useEffect, useRef } from &quot;react&quot;;
+import { useApi } from &quot;../../hooks/UseApi&quot;;
+import { Graph } from &quot;./components/Graph&quot;;
+
+export const GraphScene = () =&gt; {
+  const api = useApi();
+  const graphRef = useRef&lt;Graph&gt;();
+
+  useEffect(() =&gt; {
+    // Exercise: Using the api, call the fetchGraph method. Since this returns a promise,
+    // we need to use the `then` method to retrieve the results. With the results, call
+    // `graphRef.current.createGraph` and add a console.log statement so you see the graph.
+  }, []);
+
+  return (
+    &lt;div className=&quot;container-fluid h-100&quot;&gt;
+      &lt;div className=&quot;row h-100&quot;&gt;
+        &lt;div className=&quot;col h-100&quot;&gt;{&lt;Graph ref={graphRef} /&gt;}&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+};
+</code></pre>
+<p>Dev Note: The <code>useEffect</code> hook has two arguments: a callback function and an array of variables that when changed will trigger the callback function. Providing an empty array means our callback function will only be called when the component mounts, which is the functionality we are looking for.</p>
+<p>Dev Note: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promises</a> are a mechanism for working with asynchronous operations. When a promise completes, the results are available in the <code>then</code> method.</p>
+<p>When you refresh your browser, the background will now be gray but you won't yet see the graph yet. If you open your developer tools, you will see the graph output that you wrote with console.log!</p>
+<p><img src="app1/../images/ch1_app_02.png" alt="Console with Graph" /></p>
+<h2 id="graph-component-overview"><a class="header" href="#graph-component-overview">Graph Component Overview</a></h2>
+<p>The <code>Graph</code> component, <code>client/src/scenes/graph/components/Graph</code>, is a bit different from a normal React component because it is encapsulating D3. Typically React is in charge of rendering the DOM. For this component, React will only control the SVG element. D3 will take control of the SVG element and render elements into it.</p>
+<p>React interfaces with D3 via two methods on the component: <code>createGraph</code> and <code>updateGraph</code>. Each method takes information from our domain and converts it into objects that D3 can control and render.</p>
+<p>For those familiar with React this may be a bit weird since we are transitioning from the declarative style of programming used by React and using imperative code to call these functions. If that's a little confusing, take a gander at <code>GraphScene</code> and <code>Graph</code>. Notice that <code>GraphScene</code> renders <code>Graph</code> as a child, but we use the <code>createGraph</code> method to push information into D3.</p>
+<h2 id="exercise-creating-the-graph"><a class="header" href="#exercise-creating-the-graph">Exercise: Creating the Graph</a></h2>
+<p>After loading the page, we don't yet see the graph because we haven't fully implemented the <code>createGraph</code> method in the <code>Graph</code> component. <code>createGraph</code> is responsible for converting our <code>Lnd.Graph</code> object into objects that can be used by D3.</p>
+<p>As defined in <code>server/src/domain/lnd/LndRestTypes</code>, our <code>Lnd.Graph</code> object has two arrays: <code>nodes</code> and <code>edges</code>.</p>
+<p>Each <code>Lnd.LightningNode</code> object has three properties that we will use:</p>
+<ul>
+<li><code>pub_key</code> - a string that is the unique identifier for the node</li>
+<li><code>color</code> - the color of the node that is specified by the node operator</li>
+<li><code>alias</code> - the friendly name of the node that is specified by the node operator</li>
+</ul>
+<p>Each <code>Lnd.ChannelEdge</code> object has three properties that we will use:</p>
+<ul>
+<li><code>channel_id</code> - the unique identifier for the channel</li>
+<li><code>node1_pub</code> - the identifier for the first node, when sorted, of the channel</li>
+<li><code>node2_pub</code> - the identifier for the second node, when sorted, of the channel</li>
+</ul>
+<p>Using this information we need to construct new objects that can be controlled by D3. We need to do this because D3 will store rendering state on the objects. We don't want D3 to mutate the original objects so we'll construct new ones that D3 can control.</p>
+<p>This gets us to our next exercise. We need to modify the <code>Graph</code> component's <code>createGraph</code> method to convert our Lightning graph objects into D3 controlled objects. To do this we create two arrays:</p>
+<ul>
+<li>one array for the graph's nodes created from our <code>Lnd.LightningNode</code>. We map <code>pub_key</code> to <code>id</code>, map <code>color</code> to <code>color</code>, and map <code>alias</code> to <code>title</code>.
+<pre><code class="language-typescript">interface D3Node {
+  id: string;
+  color: string;
+  title: string;
+}
+</code></pre>
+</li>
+<li>one array for the graph's links created from our <code>Lnd.ChannelEdge</code>. We map <code>channel_id</code> to <code>id</code>, <code>node1_pub</code> to <code>source</code> and <code>node2_pub</code> to <code>target</code>.
+<pre><code class="language-typescript">interface D3Link {
+  id: string;
+  source: string;
+  target: string;
+}
+</code></pre>
+</li>
+</ul>
+<pre><code class="language-typescript">// client/src/scenes/graph/components/Graph
+
+    createGraph(graph: LightningGraph) {
+        // map the graph's nodes into d3 nodes
+        this.nodes = [];
+
+        // map the graph's channels into d3 links
+        this.links = [];
+</code></pre>
+<p>Once we have created these maps we can refresh our browser and we should see the current graph!</p>
+<p><img src="app1/../images/ch1_app_03.png" alt="Graph" /></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="real-time-server-updates"><a class="header" href="#real-time-server-updates">Real Time Server Updates</a></h1>
+<p>At this point we've successfully connected our user interface to a REST server! However what happens if a new channel is created or a new node creates a channel? Our Lightning Network nodes will have new graph information but we would need to manually refresh the page.</p>
+<p>Go ahead and give it a try by creating a channel between Bob and Carol. When we refresh the browser we should see a new link between Bob and Carol.</p>
+<p>This is ok, but we can do better by passing updates to our user interface using WebSockets.</p>
+<h2 id="exploring-websocket-code"><a class="header" href="#exploring-websocket-code">Exploring WebSocket Code</a></h2>
+<p>The WebSocket code on our server uses the <a href="https://www.npmjs.com/package/ws">ws</a> library and lives inside the <code>SocketServer</code> class. You don't have to make any changes to it, but you may want to take a look at it. This class maintains a set of connected sockets. It also includes a <code>broadcast</code> method that allows us to send data for some channel to all connected sockets. We'll use this <code>broadcast</code> method shortly to send graph updates to all connected WebSockets.</p>
+<p>The code to start the <code>SocketServer</code> lives inside <code>Server</code>. At the end of the <code>run</code> method, we create the <code>SocketServer</code> instance and have it listen to the HTTP server for connections.</p>
+<pre><code class="language-typescript">// server/src/Server
+
+async function run() {
+    // OTHER CODE IS HERE...
+
+  // start the server on the port
+    const server = app.listen(Number(options.port), () =&gt; {
+        console.log(`server listening on ${options.port}`);
+    });
+
+    // start the socket server
+    const socketServer = new SocketServer();
+
+    // start listening for http connections
+    socketServer.listen(server);
+</code></pre>
+<p>All of this is ready to go, all we need to do is subscribe to updates from LND and do something with them.</p>
+<h2 id="exercise-subscribe-to-updates"><a class="header" href="#exercise-subscribe-to-updates">Exercise: Subscribe to Updates</a></h2>
+<p>Back in our server code's <code>LndGraphService</code> is a method <code>subscribeGraph</code> that we need to implement. This method subscribes to graph updates from LND using it's <code>subscribeGraph</code> method. The requirement for this function is that it needs to emit these updates as events.</p>
+<pre><code class="language-typescript">  public async subscribeGraph(): Promise&lt;void&gt; {
+    // Exercise: subscribe to the Lnd graph updates using `this.lnd.subscribeGraph`
+    // and emit a &quot;update&quot; event each time the handler is called.
+  }
+</code></pre>
+<p>Dev Note: This class is an <a href="https://nodejs.dev/learn/the-nodejs-event-emitter">EventEmitter</a>. EventEmitters can use the <code>emit</code> method to tell other classes that something has happened. These other classes are &quot;observers&quot; and can listen using the <code>on</code> method. Using EventEmitters allows us to keep code decoupled and avoid messy callback nesting.</p>
+<h2 id="exploring-websocket-broadcasting"><a class="header" href="#exploring-websocket-broadcasting">Exploring WebSocket Broadcasting</a></h2>
+<p>The next logical step is consuming the <code>update</code> event that we just created and sending the update to the client over a WebSocket. If you navigate back to the trusty <code>Server</code> you will find some interesting code at the bottom of the <code>run</code> function.</p>
+<pre><code class="language-typescript">// server/src/Server
+
+async function run() {
+  // other code is here...
+
+  // construct the socket server
+  const socketServer = new SocketServer();
+
+  // start listening for http connections using the http server
+  socketServer.listen(server);
+
+  // attach an event handler for graph updates and broadcast them
+  // to WebSocket using the socketServer.
+  graphAdapter.on(&quot;update&quot;, (update: Lnd.GraphUpdate) =&gt; {
+    socketServer.broadcast(&quot;graph&quot;, update);
+  });
+
+  // subscribe to graph updates
+  graphAdapter.subscribeGraph();
+}
+</code></pre>
+<p>We subscribe to the <code>update</code> event on <code>graphAdapter</code> that we just implemented. In the event handler we then broadcast the update to all of the WebSockets.</p>
+<p>After the event handler is defined, all of the plumbing is in place to for updates to go from <code>LND -&gt; LndRestClient -&gt; LndGraphAdapter -&gt; WebSocket</code>.</p>
+<p>You should now be able to connect a WebSocket to the server and receive updates by generating channel opens or closes in Polar.</p>
+<h1 id="real-time-user-interface"><a class="header" href="#real-time-user-interface">Real Time User Interface</a></h1>
+<p>Now that our WebSocket server is sending updates, we need to wire these updates into our user interface.</p>
+<h2 id="exploring-socket-connectivity"><a class="header" href="#exploring-socket-connectivity">Exploring Socket Connectivity</a></h2>
+<p>The application already has some code to help us. We use React's context to establish a long-lived WebSocket that can be used by any component in the component hierarchy. This code lives in <code>client/src/context/SocketContext</code>.</p>
+<p>To integrate this context into our components we can use a custom hook: <code>useSocket</code> that lives in <code>client/src/hooks/UseSocket</code>. This hook allows us to retrieve the websocket and subscribe to events for a any channel.</p>
+<pre><code class="language-typescript">export const SomeComponent = () =&gt; {
+  const socket = useSocket(&quot;some_channel&quot;, (data) =&gt; {
+    // do something with data
+    console.log(data);
+  });
+};
+</code></pre>
+<p>The last thing we should know is that in order for this to work, we need to establish the React Context higher in the component hierarchy. A great place is at the root!. We add the context via the <code>SocketProvider</code> component in our application's root component: <code>App</code>.</p>
+<pre><code class="language-typescript">// client/src/App
+
+import React from &quot;react&quot;;
+import ReactDom from &quot;react-dom&quot;;
+import { BrowserRouter } from &quot;react-router-dom&quot;;
+import { SocketProvider } from &quot;./context/SocketContext&quot;;
+import { LayoutScene } from &quot;./scenes/layout/LayoutScene&quot;;
+
+ReactDom.render(
+  &lt;SocketProvider&gt;
+    &lt;BrowserRouter&gt;
+      &lt;LayoutScene /&gt;
+    &lt;/BrowserRouter&gt;
+  &lt;/SocketProvider&gt;,
+  document.getElementById(&quot;app&quot;)
+);
+</code></pre>
+<p>With the lay of the land defined, we can now embark on our journey to finish the real time updates.</p>
+<h2 id="exercise-subscribe-to-updates-1"><a class="header" href="#exercise-subscribe-to-updates-1">Exercise: Subscribe to Updates</a></h2>
+<p>The logical place to subscribe to updates is in the <code>GraphScene</code> component. As previously established, this scene is responsible for wiring up data connections for graph related components.</p>
+<p>Pointing our IDE at the <code>GraphScene</code> component our next exercise is implementing the socket handler. Using the <code>useSocket</code> hook, subscribe to <code>graph</code> channel. The handler function should call the <code>graphRef.current.updateGraph</code> method on the graph component.</p>
+<pre><code class="language-typescript">// client/src/scenes/graph/GraphScene
+
+import React, { useEffect, useRef } from &quot;react&quot;;
+import { useSocket } from &quot;../../hooks/UseSocket&quot;;
+import { useApi } from &quot;../../hooks/UseApi&quot;;
+import { Graph } from &quot;./components/Graph&quot;;
+
+export const GraphScene = () =&gt; {
+  const api = useApi();
+  const graphRef = useRef&lt;Graph&gt;();
+
+  useEffect(() =&gt; {
+    api.fetchGraph().then((graph) =&gt; {
+      console.log(&quot;received graph&quot;, graph);
+      graphRef.current.createGraph(graph);
+    });
+  }, []);
+
+  useSocket(&quot;graph&quot;, (update: Lnd.GraphUpdate) =&gt; {
+    // Exercise: Call `graphRef.current.updateGraph` with the update
+  });
+
+  return (
+    &lt;div className=&quot;container-fluid h-100&quot;&gt;
+      &lt;div className=&quot;row h-100&quot;&gt;
+        &lt;div className=&quot;col h-100&quot;&gt;{&lt;Graph ref={graphRef} /&gt;}&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+};
+</code></pre>
+<h2 id="exercise-update-the-graph"><a class="header" href="#exercise-update-the-graph">Exercise: Update the Graph</a></h2>
+<p>We are almost done! The final step is completing the <code>updateGraph</code> method. This method converts our <code>Lnd.GraphUpdate</code> object into <code>D3Node</code> and <code>D3Link</code> objects.</p>
+<p>The <code>Lnd.GraphUpdate</code> object we receive from the server is defined in <code>server/src/domain/lnd/LndRestTypes</code>. It consists of four pieces of data that we care about:</p>
+<ol>
+<li>new nodes that are don't yet have in the graph</li>
+<li>existing nodes that need to have their title and alias updated</li>
+<li>new channels that we need to add to the graph</li>
+<li>closed channels that we need to remove from the graph</li>
+</ol>
+<p>The <code>updateGraph</code> method is partially implemented for the first three conditions. Your last task is to remove a channel from the links if it has been closed.</p>
+<pre><code class="language-typescript">// client/src/scenes/graph/components/Graph
+
+  updateGraph(update: Lnd.GraphUpdate) {
+      // Updates existing nodes or adds new ones if they don't already
+      // exist in the graph
+      for (const nodeUpdate of update.result.node_updates) {
+          const node = this.nodes.find(p =&gt; p.id === nodeUpdate.identity_key);
+          if (node) {
+              node.title = nodeUpdate.alias;
+              node.color = nodeUpdate.color;
+          } else {
+              this.nodes.push({
+                  id: nodeUpdate.identity_key,
+                  color: nodeUpdate.color,
+                  title: nodeUpdate.alias,
+              });
+          }
+      }
+
+      // Adds new channels to the graph. Note that for the purposes of
+      // our visualization we only care that a link exists. We will end
+      // up receiving two updates, one from each node and we just add
+      // the first one.
+      for (const channelUpdate of update.result.channel_updates) {
+          const channel = this.links.find(p =&gt; p.id === channelUpdate.chan_id);
+          if (!channel) {
+              this.links.push({
+                  source: channelUpdate.advertising_node,
+                  target: channelUpdate.connecting_node,
+                  id: channelUpdate.chan_id,
+              });
+          }
+      }
+
+      // Exercise: Remove closed channels from `this.links`.
+
+      this.draw();
+  }
+</code></pre>
+<p>After completing this exercise we will have everything needed for our graph to be functional. Try adding or removing a channel, you should see our graph application automatically update with the changes! Keep in mind that it may take a moment for changes to propagate throughout your network.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="further-exploration"><a class="header" href="#further-exploration">Further Exploration</a></h1>
+<p>This is just the beginning of interesting things we can do to help us visualize the Lightning Network. Hopefully this tutorial provided you with an overview of how we can interface with a Lightning Network node to retrieve information and receive real time updates.</p>
+<p>A few ideas for how you can continue your exploration:</p>
+<ul>
+<li>How would you add other information to our user interface? What part of the application needs to be changed?</li>
+<li>How would you connect to c-lightning or Eclair? What would need to change about the architecture?</li>
+<li>How would you connect to testnet or mainnet? How would you address scaling given that the main network has 10's of thousands of nodes and channels?</li>
+<li>How would you make our application production ready? How would you add testing? What happens if LND restarts? What happens if the REST/WebSocket server restarts?</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script type="text/javascript">
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </body>
+</html>

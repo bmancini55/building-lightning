@@ -1,0 +1,356 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Building the Server - Building on Lightning</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../app1/intro.html"><strong aria-hidden="true">1.</strong> Lightning Graph Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app1/part1.html"><strong aria-hidden="true">1.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app1/part2.html"><strong aria-hidden="true">1.2.</strong> Code Setup</a></li><li class="chapter-item expanded "><a href="../app1/part3.html" class="active"><strong aria-hidden="true">1.3.</strong> Building the Server</a></li><li class="chapter-item expanded "><a href="../app1/part4.html"><strong aria-hidden="true">1.4.</strong> Building the UI</a></li><li class="chapter-item expanded "><a href="../app1/part5.html"><strong aria-hidden="true">1.5.</strong> Real-Time Updates</a></li><li class="chapter-item expanded "><a href="../app1/part6.html"><strong aria-hidden="true">1.6.</strong> Exploration</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Building on Lightning</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="creating-an-api"><a class="header" href="#creating-an-api">Creating an API</a></h1>
+<p>Our first coding task is going to be creating a REST API of our own to provide graph information to our application. We'll start by getting our server connected to Alice's LND node.</p>
+<h2 id="connecting-to-alices-node"><a class="header" href="#connecting-to-alices-node">Connecting to Alice's node</a></h2>
+<p>We've chosen to connect to LND for this application but we could just as easily use c-lightning or Eclair.</p>
+<p>LND also a <a href="https://docs.lightning.engineering/">Builder's Guide</a> that you may want to explore to learn more about commonly performed tasks.</p>
+<p>LND has two ways we can interact with it from code: a <a href="https://api.lightning.community/#lnd-rest-api-reference">REST API</a> and a <a href="https://api.lightning.community/#lnd-grpc-api-reference">gRPC API</a>. gRPC is a high performance RPC framework. With gRPC, the wire protocol is defined in a protocol definition file. This file is used by a code generators to construct a client in the programming language of your choice. gRPC is a fantastic mechanism for efficient network communication, but it comes with a bit of setup cost. The REST API requires less effort to get started but is less efficient over the wire. For applications with a large amount of interactivity, you would want to use gRPC connectivity. For this application we'll be using the REST API because it is highly relatable for web developers.</p>
+<h2 id="lnd-api-client"><a class="header" href="#lnd-api-client">LND API Client</a></h2>
+<p>Inside our <code>server</code> sub-project is the start of code to connect to LND's REST API. We'll add to this for our application.</p>
+<p>Why are we not leveraging an existing library from NPM? The first reason is that it is a nice exercise to help demonstrate how we can build connectivity. Lightning Network is still a nascent technology and developers need to be comfortable building tools to help them interact with Bitcoin and Lightning Network nodes. The second and arguably more important reason is that as developers in the Bitcoin ecosystem, we need to be extremely wary of outside packages that we pull into our projects, especially if they are cryptocurrency related. Outside dependencies pose a security risk that could compromise our application. As such, my general rule is that runtime dependencies should generally be built unless it is burdensome to do so and maintain.</p>
+<p>With that said, point your IDE at the <code>server/src/domain/lnd/LndRestTypes.ts</code> file. This file contains a subset of TypeScript type definitions from the <a href="https://api.lightning.community/#lnd-rest-api-reference">REST API</a> documentation. We are only building a subset of the API that we'll need for understanding the graph.</p>
+<h2 id="exercise--defining-the-graph-type"><a class="header" href="#exercise--defining-the-graph-type">Exercise : Defining the <code>Graph</code> Type</a></h2>
+<p>In <code>LndRestTypes</code> you'll see our first exercise. It requires us to define the resulting object obtained by calling LND's <a href="https://api.lightning.community/#v1-graph"><code>/v1/graph</code></a> API. You will need to add two properties to the <code>Graph</code> interface. To help you, the <code>LightningNode</code> and <code>ChannelEdge</code> types are already defined. In TypeScript, you can define an array as such</p>
+<pre><code class="language-typescript">// server/src/domain/lnd/LndRestTypes
+
+export interface Graph {
+  // Exercise: define the `nodes` and `edges` properties in this interface.
+  // These arrays of LightningNode and ChannelEdge objects.
+}
+</code></pre>
+<h2 id="exercise-making-the-call"><a class="header" href="#exercise-making-the-call">Exercise: Making the Call</a></h2>
+<p>Now that we've defined the results from a call to <a href="https://api.lightning.community/#v1-graph"><code>/v1/graph</code></a>, we need to point our IDE at <code>server/src/domain/lnd/LndRestClient.ts</code> so we can write the code that makes this API call.</p>
+<p><code>LndRestClient</code> implements a basic LND REST client. We can add methods to it that are needed by our application. It also takes care of the heavy lifting for establishing a connection to LND. You'll notice that the constructor takes three parameters: <code>host</code>, <code>macaroon</code>, and <code>cert</code>. The <code>macaroon</code> is similar to a security token. The macaroon that you provide will dictate the security role you use when calling the API. The <code>cert</code> is a TLS certificate that enables a secure and authenticated connection to LND.</p>
+<pre><code class="language-typescript">// server/src/domain/lnd/LndRestClient
+
+export class LndRestClient {
+  constructor(
+    readonly host: string,
+    readonly macaroon: Buffer,
+    readonly cert: Buffer
+  ) {}
+}
+</code></pre>
+<p>This class also has a <code>get</code> method that is a helper for making HTTP GET requests to LND. This helper method applies the macaroon and ensures the connection is made using the TLS certificate.</p>
+<p>Your next exercise is to implement the <code>getGraph</code> method in <code>server/src/domain/lnd/LndRestClient.ts</code>. Use the <code>get</code> helper method to call the <a href="https://api.lightning.community/#v1-graph"><code>/v1/graph</code></a> API and return the results.</p>
+<pre><code class="language-typescript">// server/src/domain/lnd/LndRestClient
+
+  public async getGraph(): Promise&lt;Lnd.Graph&gt; {
+      // Exercise: use the `get` method below to call `/v1/graph` API
+      // and return the results
+  }
+</code></pre>
+<p>After this is complete, we should have a functional API client. In order to test this we will need to provide the macaroon and certificate.</p>
+<h2 id="exercise-configuring-env-to-connect-to-lnd"><a class="header" href="#exercise-configuring-env-to-connect-to-lnd">Exercise: Configuring <code>.env</code> to Connect to LND</a></h2>
+<p>In this application we use the <code>dotenv</code> package to simplify environment variables. We can populate a <code>.env</code> file with key value pairs and the application will treat these as environment variables.</p>
+<p>Remember that environment variables can be read in Node.js from the <code>process.env</code> object. So if we have an environment variable <code>PORT</code>:</p>
+<pre><code>$ export PORT=8000
+$ node app.js
+</code></pre>
+<p>This environment variable can be read with:</p>
+<pre><code class="language-typescript">const port = process.env.PORT;
+</code></pre>
+<p>Our next exercise is adding some values to <code>.env</code> inside the <code>server</code> sub-project. We'll add three new environment variables:</p>
+<ul>
+<li><code>LND_HOST</code> is the host where our LND node resides</li>
+<li><code>LND_READONLY_MACAROON_PATH</code> is the file path to the readonly Macaroon</li>
+<li><code>LND_CERT_PATH</code> is the certificate we use to securely connect with LND</li>
+</ul>
+<p>Fortunately, Polar provides us with a nice interface with all of this information. Polar also conveniently puts files in our local file system to make our lives as developers a bit easier.</p>
+<p>In Polar, to access Alice's node by click on Alice and then click on the <code>Connect</code> tab. You will be shown the information on how to connect to the GRPC and REST interfaces. Additionally you will be given paths to the network certificates and macaroon files that we will need in <code>.env</code>.</p>
+<p><img src="../images/ch1_polar_connect_to_alice.png" alt="Connect to Alice" /></p>
+<p>Go ahead and add the three environment variables defined above to <code>.env</code>.</p>
+<pre><code># Express configuration
+PORT=8001
+
+# LND configuration
+# Exercise: Provide values for Alice's node
+LND_HOST=
+LND_READONLY_MACAROON_PATH=
+LND_CERT_PATH=
+</code></pre>
+<h2 id="exercise-reading-the-options"><a class="header" href="#exercise-reading-the-options">Exercise: Reading the Options</a></h2>
+<p>Now that our environment variables are in our configuration file, we need to get them into the application. The server project uses <code>server/src/Options</code> to read and store application options.</p>
+<p>The class contains a factory method <code>fromEnv</code> that allows us to construct our options from environment variables. We're going to modify the <code>Options</code> class to read our newly defined environment variables.</p>
+<p>This method is partially implemented, but your next exercise is to finish the method by reading the cert file into a Buffer.</p>
+<pre><code class="language-typescript">// server/src/Options
+
+  public static async fromEnv(): Promise&lt;Options&gt; {
+    const port: number = Number(process.env.PORT),
+    const host: string = process.env.LND_HOST,
+    const macaroon: Buffer = await fs.readFile(process.env.LND_READONLY_MACAROON_PATH),
+
+    // Exercise: Using fs.readFile read the file in the LND_CERT_PATH
+    // environment variable
+    const cert: Buffer = undefined;
+
+    return new Options(port, host, macaroon, cert);
+  }
+</code></pre>
+<p>Note: In this example we use TypeScript's <a href="https://www.typescriptlang.org/docs/handbook/2/classes.html#parameter-properties">Parameter Properties</a> feature. This feature creates class properties from <code>readonly</code> parameters. I like it because it saves a few keystrokes by removing the boilerplate of defining the property in the class, then assigning its value in the constructor. There are pros and cons to this approach, so feel free to construct your objects how think is best and in a way that is likely to reduce errors.</p>
+<h2 id="exercise-create-the-lnd-client"><a class="header" href="#exercise-create-the-lnd-client">Exercise: Create the LND client</a></h2>
+<p>The last step before we can see if our application can connect to LND is that we need to create the LND client! We will do this in the entrypoint of our server code <code>server/src/Server</code>.</p>
+<p>In this exercise, construct an instance of the <code>LndRestClient</code> type and supply it with the options found in the <code>options</code> variable.</p>
+<pre><code class="language-typescript">// server/src/Server
+
+  async function run() {
+    // construct the options
+    const options = await Options.fromEnv();
+
+    // Exercise: using the Options defined above, construct an instance
+    // of the LndRestClient using the options.
+    const lnd: LndRestClient = undefined;
+
+    // construct an IGraphService for use by the application
+    const graphAdapter: IGraphService = new LndGraphService(lnd);
+</code></pre>
+<p>At this point, our server code is ready. We'll take a look at a few other things before we give it a test.</p>
+<h2 id="looking-at-lndgraphservice"><a class="header" href="#looking-at-lndgraphservice">Looking at LndGraphService</a></h2>
+<p>The <code>LndRestClient</code> instance that we just created will be used by <code>LndGraphService</code>. This class follows the adapter design pattern: which is a way to make code that operates in one way, adapt to another use. The <code>LndGraphService</code> is the place where we make the <code>LndRestClient</code> do things that our application needs.</p>
+<pre><code class="language-typescript">export class LndGraphService extends EventEmitter implements IGraphService {
+    constructor(readonly lnd: LndRestClient) {
+        super();
+    }
+
+    /**
+     * Loads a graph from LND and returns the type. If we were mapping
+     * the returned value into a generic Graph type, this would be the
+     * place to do it.
+     * @returns
+     */
+    public async getGraph(): Promise&lt;Lnd.Graph&gt; {
+        return await this.lnd.getGraph();
+    }
+</code></pre>
+<p>For the purposes of fetching the graph, we simply call <code>getGraph</code> on the <code>LndRestClient</code> and return the results. But if we modified our application to use a generic graph instead of the one returned by LND, we could do that translation between the <code>Lnd.Graph</code> type and our application's graph here.</p>
+<p>At this point your server should capable of connecting to LND!</p>
+<h2 id="looking-at-the-graph-api"><a class="header" href="#looking-at-the-graph-api">Looking at the Graph API</a></h2>
+<p>Since we're building a REST web service to power our front end application, we need to define an endpoint in our Express application.</p>
+<p>Take a look at <code>server/src/Server</code>. We're doing a lot of things in this file for simplicity sake. About half-way down you'll see a line:</p>
+<pre><code class="language-typescript">// server/src/Server
+
+app.use(graphApi(graphAdapter));
+</code></pre>
+<p>This code attaches a router to the Express application.</p>
+<p>The router is defined in <code>server/src/api/GraphApi</code>. This file returns a function that accepts our <code>IGraphService</code> that we were just taking a look at. You can then see that we use the <code>IGraphService</code> inside an Express request handler where and then return the graph as JSON.</p>
+<pre><code class="language-typescript">// server/src/api/GraphApi
+
+export function graphApi(graphService: IGraphService): express.Router {
+  // Construct a router object
+  const router = express();
+
+  // Adds a handler for returning the graph. By default express does not
+  // understand async code, but we can easily adapt Express by calling
+  // a promise based handler and if it fails catching the error and
+  // supplying it with `next` to allow Express to handle the error.
+  router.get(&quot;/api/graph&quot;, (req, res, next) =&gt; getGraph(req, res).catch(next));
+
+  /**
+   * Handler that obtains the graph and returns it via JSON
+   */
+  async function getGraph(req: express.Request, res: express.Response) {
+    const graph = await graphService.getGraph();
+    res.json(graph);
+  }
+
+  return router;
+}
+</code></pre>
+<p>Dev Note: Express does not natively understanding <code>async</code> code but we can easily retrofit it. To do this we define the handler with a lambda function that has arguments for the <code>Request</code>, <code>Response</code>, and <code>next</code> arguments (has the type <code>(req, res, next) =&gt; void</code>). Inside that lambda, we then call our async code and attach the <code>catch(next)</code> to that function call. This way if our <code>async</code> function has an error, it will get passed to Express' error handler!</p>
+<p>We can now run <code>npm run watch</code> at the root of our application and our server should start up and connect to LND without issue.</p>
+<p>If you're getting errors, check your work by making sure Polar is running, the environment variables are correct, and you've correctly wired the code together.</p>
+<p>You can now access <a href="http://localhost:8001/api/graph">http://localhost:8001/api/graph</a> in your browser and you'll see information about the network as understood by Alice!</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../app1/part2.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next" href="../app1/part4.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../app1/part2.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next" href="../app1/part4.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </body>
+</html>
