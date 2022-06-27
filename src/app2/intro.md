@@ -1,18 +1,44 @@
 # Building on Lightning: Working with Invoices
 
-Now that you've become familiar with connecting to a Lightning Network node, we will create a new application that leverages the power of invoices.
+This section is going to focus on building an application to accept payments using the Lightning Network.
 
-Invoices are the Lightning Network's mechanism for requesting payments. The standard flow works by the payee (eg: an online retailer) generating an invoice for a specific amount. This invoice contains a hash of some value that only the payee knows. Upon receipt of payment, the payee release the preimage of the hash. Knowledge of the preimage acts as a receipt of payment (there is no way to guess the preimage without being given it).
+Payments in Bitcoin are fairly straightforward because they use a "account-like" system that is familiar to most people. In Bitcoin, the recipient of a payment provides an address to the sender. The address can be provided out-of-band (through a website, email, or text message) to anyone. The payment sender can then initiates a payment to the address at any time and for any amount. They can even make multiple payments to the same address.
+
+The Lightning Network handles payments in a different manner. The primary mechanism for sending payments uses invoices also known as payment requests. An invoice acts like a payment instructions for a conditional payment. As such invoices are typically one time use and are intended for a specific purpose and amount. Functionally, this means that an invoices tells the sender: who, how much, and within what time frame to send a payment. The invoice is also digitally signed by the recipient. The signature ensures that an invoice can't be forged (Carol can't create an invoice for Alice). The last and possibly most important piece is that the invoice includes the hash of information that only the recipient knows (under normal circumstances at least).
+
+Let's consider an example. Say Alice runs a web store and Bob wants to buy a t-shirt. He adds the shirt to his cart and goes to check out. At this point, Alice creates an invoice for Bob. This invoice includes the cost of the shirt, a timeout that Bob needs to complete the transaction, some secret value hidden in a hash, and Alice's signature for the invoice.
+
+When Bob pays Alice she reveals the preimage for the secret and this acts as a proof of payment. Alice would only ever reveal the preimage to Bob if he made payment. Bob can only have the preimage for the invoice if he makes the payment. Bob has a signed invoice from Alice stating the conditions of the transaction and has proof that he paid her in the form of the preimage for the hash in the invoice.
+
+So why all this complexity? It enables one of the primary purposes of the of the Lightning Network which is to enable trustless payments through the network. This scheme allows payments to flow through the network even if Bob and Alice aren't directly connected. If you're unsure on how this works or want a refresher, I recommend reading this [article](https://medium.com/@peter_r/visualizing-htlcs-and-the-lightning-networks-dirty-little-secret-cb9b5773a0).
+
+For this application we'll be using the idea of generating a secret based on some information that only the server knows. We can then reveal this information publicly and publicly prove that a payment was made.
+
+For a more thorough walk through of invoices, check out Chapter 15 of _Mastering the Lightning Network_ by Antonopoulos et al.
 
 # Goal of the Application
 
-This application is going to use the Lightning Network to create a virtual game of "king of the hill". In this game you become the leader by paying an invoice. Someone else can be the new leader by paying an invoice for more than you paid and so on.
+This application is going to use the Lightning Network to create a virtual game of "king of the hill". In this game someone become the leader by paying an invoice. Someone else can be the new leader by paying an invoice for more than the last leader. The neat thing is that we'll do this in a way that any leader along the way can cryptographically prove they paid to be the leader.
 
-So for instance if Alice is the first leader for 1000 satoshis. Bob can pay an invoice for 1001 satoshis and become the leader.
+We'll get into the details of the application as we go, but we'll show what the game looks like from the perspective of Bob, who wants to become the first leader.
 
-The neat thing is that we'll do this in a way that Bob can cryptographically prove that paid to be the leader over Alice.
+![Initial App](/images/ch2_app_01.png)
 
-This construct is the beginning of a protocol that could be used for more advanced provenance of digital assets, or for something entirely unrelated.
+If Bob wants to become the leader he can do by digitally signing a message the application requires to become the new leader.
+
+![Bob Signs](/images/ch2_app_02.png)
+
+Bob then provides his signature to the application. The server (run by Alice) creates an invoice on Alice's node that is specific to Bob and returns the invoice to Bob via the user interface.
+
+![Bob Invoice](/images/ch2_app_03.png)
+
+At this point, Bob can pay the invoice.
+
+![Bob Pays](/images/ch2_app_04.png)
+
+Once Bob has paid the invoice he is now the new leader of the game.
+
+![Bob is the Leader](/images/ch2_app_05.png)
 
 The main goal of this is to show how to build an application entirely using invoices and a node's invoice database.
 
