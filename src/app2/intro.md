@@ -252,54 +252,31 @@ We define this behavior in the `IInvoiceDataMapper` interface that looks like:
 ```typescript
 export interface IInvoiceDataMapper {
   add(value: number, memo: string, preimage: Buffer): Promise<string>;
-  sync(): Promise<void>;
+  sync(handler: InvoiceHandler): Promise<void>;
 }
 ```
 
-For loading invoices we're concerned with the `sync` method.
+The `InvoiceHandler` delegate is just any function that receives an `Invoice` as an argument:
 
-The `sync` method reaches out to our invoice database and requests all invoices. It will also subscribe to creation of new invoices or the settlement of existing invoices. Because the syncing process and the subscription are long lived, we will use notification to alert our application code about invoice events instead of returning a list of `Invoice`s.
+```typescript
+export type InvoiceHandler = (invoice: Invoice) => Promise<void>;
+```
 
 The `LndInvoiceDataMapper` class implements `IInvoiceDataMapper` and is located in `server/data/lnd` folder. This constructor of this class accepts an interface `ILndClient` that defines functions for interacting with an LND node.
 
 There are two classes that implement `ILndClient`: `LndRestClient` and `LndRpcClient` that connect to LND over REST and GRPC. We'll be using the latter to connect to LND over the GRPC API. For the purposes of our application, either client could be used. The indication of code isolates our data mapper logic from the logic specific to each of the APIs. This is similar to how our we isolate our application code from the specifics of LND. Feel free to explore the `LndRpcClient` and `LndRestClient` to see how they manage the details of establishing connections to the different APIs.
 
-Dev note: If you take a closer look at `LndInvoiceDataMapper` you may notice that it is not a Nodejs [`EventEmitter`](https://nodejs.dev/learn/the-nodejs-event-emitter). Instead we manually implement the [observer pattern](https://en.wikipedia.org/wiki/Observer_pattern) with the `addHandler` and `notifyHandlers` methods. The reason we don't use EventEmitter is that we want our handler functions to be async and we want notification to block / await completion of the prior handler. This is something to be mindful of when working events and async/await code. They don't always play nice and you may need to make some extra steps to prevent unexpected errors.
+For loading invoices we're concerned with the `sync` method.
 
-The `addHandler` method simply adds a delegate to the class so that the delegate can be called when an invoice is processed. This method allows us to attach some outside observer to the list of invoices that get processed at any time.
+The `sync` method reaches out to our invoice database and requests all invoices. It will also subscribe to creation of new invoices or the settlement of existing invoices. Because the syncing process and the subscription are long lived, we will use notification to alert our application code about invoice events instead of returning a list of `Invoice`s.
 
-The `InvoiceHandler` delegate is just any function that receives an `Invoice` as an argument:
-
-```typescript
-export type InvoiceHandler = (invoice: Invoice) => void;
-```
-
-The `addHandler` method just adds the handler to a collection.
-
-```typescript
-public addHandler(handler: InvoiceHandler) {
-    this.handlers.add(handler);
-}
-```
-
-Once we have some handlers, we can notify them using the `notifyHandlers` method. This method is equally simply in that it just calls the handler with the invoice. The interesting thing here is that this method is `async` and we `await` on execution of each handler to serialization execution.
-
-```typescript
-public async notifyHandlers(invoice: Invoice) {
-    // emit to all async event handlers
-    for (const handler of this.handlers) {
-        await handler(invoice);
-    }
-}
-```
-
-If we again put our focus on the `sync` method inside `LndInvoiceDataMapper` we'll see that the method does two things:
+This method does two things:
 
 1. connects to LND and retrieves all invoices in the database
 1. subscribes to existing invoices and
 
 ```typescript
-public async sync(): Promise<void> {
+public async sync(handler: InvoiceHandler): Promise<void> {
     // fetch all invoices
     const num_max_invoices = Number.MAX_SAFE_INTEGER.toString();
     const index_offset = "0";
@@ -310,12 +287,12 @@ public async sync(): Promise<void> {
 
     // process all retrieved invoices
     for (const invoice of results.invoices) {
-        await this.notifyHandlers(this.convertInvoice(invoice));
+        await handler(this.convertInvoice(invoice));
     }
 
     // subscribe to all new invoices/settlements
     void this.client.subscribeInvoices(invoice => {
-        void this.notifyHandlers(this.convertInvoice(invoice));
+        void handler(this.convertInvoice(invoice));
     }, {});
 }
 ```
@@ -487,4 +464,191 @@ npm run test:server -- --grep createFromSettled
 
 Now that we have all the component pieces built, we'll turn our attention to the primary logic controller for our application! This resides in the `AppController` class located in `server/domain`. This class is responsible for constructing and maintaining the chain of ownership based on received invoices.
 
+The constructor of this class takes a few things we've previously worked on such as:
+
+- `IInvoiceDataMapper` - we'll use this to create and fetch invoices from our Lightning Network node
+- `IMessageSigner` - we'll use this validate signatures that we receive from remote nodes
+- `LinkFactory` - we'll use this to create links in our ownership chain
+
+If you take a look at this class, you'll also notice that we have the `chain` property that maintains the list of `Link`s in our application. This is where our application state will be retained in memory.
+
+```typescript
+public chain: Link[];
+```
+
+There is also a conveniently added `chaintip` property that returns the last record in the chain.
+
+```typescript
+public get chainTip(): Link {
+    return this.chain[this.chain.length - 1];
+}
+```
+
+One other note about our `AppController` is that it uses the `observer` pattern to notify a subscriber about changes to `Link`s in the chain. The observer will receive an array of `Link` whenever any changes occur to the chain. The observer will first need to assign a handler to `AppController.listener` in order to receive updates. We'll get to this in a future section once everything has been coded.
+
+Dev Note: Why not use `EventEmitter`? Well we certainly could. Since this example only has a single event it's easy to bake in a handler/callback function for `Link` change events.
+
+## Start
+
+We should now have a general understanding of the `AppController` class. You may be wondering how we use it. A great place to begin is how we start the application. We do this with the `start` method. This method is used to bootstrap our application under two start up scenarios:
+
+1. The first time the application is started
+1. Subsequent restarts when we have some links in the chain
+
+In either case, we need to get the application state synchronized so we can continue the game.
+
+To do this do two things:
+
+1. Create the first link from the seed
+1. Synchronize the application by looking at all of the invoices using `IInvoiceDataMapper`
+
+Back when we discussed the `IInvoiceDataMapper` we had a `sync` method. If you recall, this method accepted an `InvoiceHandler` that looked like this type:
+
+```typescript
+export type InvoiceHandler = (invoice: Invoice) => Promise<void>;
+```
+
+If you take a look at the `AppController`. You'll see that `handleInvoice` matches this signature! This is not a coincidence. We'll we use `handleInvoice` method to process invoices from our Lightning Network node.
+
+Now that we understand that, let's do an exercise and implement our `start` method then we'll implement `handleInvoice.
+
+# Exercise: Implement `start`
+
+To implement that method requires us to perform two tasks:
+
+1. Use the `linkFactory` to create the first `Link` from the seed argument
+1. Once the first link is created, initiate the synchronization of invoices using the `IInvoiceDataMapper` (as mentioned, provide the `AppController.handleInvoice` method as the handler).
+
+```typescript
+public async start(seed: string, startSats: number) {
+    // Exercise
+}
+```
+
+When you are finished you can verify you successfully implemented the method with the following command:
+
+```
+npm run test:server -- --grep AppController.*start
+```
+
+# Exercise: Implement `handleInvoice`
+
+Next on the docket, we need to process invoices we receive from our Lightning Network node. The `handleInvoice` is called every time an invoice is created or fulfilled by our Lightning Network node. This method does a few things to correctly process an invoice:
+
+1. checks if the invoice settles the current chain tip. Hint look at the `settles` method on the `Invoice`. If the invoice doesn't settle the current chaintip, no further action is required.
+1. If the invoice does settle the current chaintip, it should call the `settle` method on `Link` to settle the `Link`.
+1. It should then create a new `Link` using the `LinkFactory.createFromSettled`.
+1. It should add the new unsettled link to the chain
+1. Finally, it will send the settled link and the new link to the listener.
+
+This method is partially implemented for you. Complete the method by settling the current link and constructing the next link from the settled link.
+
+```typescript
+public async handleInvoice(invoice: Invoice) {
+    if (invoice.settles(this.chainTip)) {
+        // settle the current chain tip
+        const settled = this.chainTip;
+
+        // create a new unsettled Link
+
+        // add the new link to the chain
+
+        // send settled and new to the listener
+        if (this.listener) {
+            this.listener([settled, nextLink]);
+        }
+    }
+}
+```
+
+When you are finished you can verify you successfully implemented the method with the following command:
+
+```
+npm run test:server -- --grep AppController.*handleInvoice
+```
+
+# Exercise: `createInvoice`
+
+The last bit of code `AppController` is responsible for is creating invoices. This method is responsible for interacting with the Lightning Network node's message signature verification through the `IMessageSigner` interface. It will also interact with the Lightning Network node to create the invoice via the `IInvoiceDataMapper`.
+
+Recall that when someone wants to take ownership of the current link they'll need to send a digital signature of the last revealed preimage.
+
+Our method does a few things:
+
+1. Verifies the signature is for the current `chaintip`. If not, it returns a failure.
+1. Constructs the preimage for the invoice. Recall that we implemented the `createPreimage` method on `Invoice` previously.
+1. Constructs the memo for the invoice. Recall that we implemented the `createMemo` method on `Invoice` previously.
+1. Creates the invoice using the `IInvoiceDataMapper`
+1. Return success or failure result depending on the result
+
+This method is partially implemented for you.
+
+```typescript
+public async createInvoice(
+    remoteSignature: string,
+    sats: number,
+): Promise<CreateInvoiceResult> {
+    // verify the invoice provided by the user
+    const verification = await this.signer.verify(this.chainTip.priorPreimage, remoteSignature);
+
+    // return failure if signature fails
+    if (!verification.valid) {
+        return { success: false, error: "Invalid signature" };
+    }
+
+    // Exercise: create the preimage
+
+    // Exercise: create the memo
+
+    // try to create the invoice
+    try {
+        const paymentRequest = await this.invoiceDataMapper.add(sats, memo, preimage);
+        return {
+            success: true,
+            paymentRequest,
+        };
+    } catch (ex) {
+        return {
+            success: false,
+            error: ex.message,
+        };
+    }
+}
+
+```
+
+When you are finished you can verify you successfully implemented the method with the following command:
+
+```
+npm run test:server -- --grep AppController.*createInvoice
+```
+
 # Putting It All Together
+
+At this point, all of the core logic for our application is complete! The only remaining items are the usual endpoint and socket creation code. We'll skip going into the heavy details of those but call out a few things.
+
+If you take take a look at `server/Server.ts` you can see that we construct an instance of `AppController` and call the `start` method.
+
+```typescript
+// start the application logic
+await appController.start(
+  "0000000000000000000000000000000000000000000000000000000000000001",
+  1000
+);
+```
+
+You can see that we start our application with the seed value of `0000000000000000000000000000000000000000000000000000000000000001`. You can start your application with any seed value it will restart the game using that new seed.
+
+The remainder of this file constructs the Express webserver and starts the WebSocket server.
+
+You may also notice that we hook into the `AppController` to listen for changes to links. We broadcast those events over connected WebSockets.
+
+```typescript
+// broadcast updates to the client
+appController.listener = (links: Link[]) =>
+  socketServer.broadcast("links", links);
+```
+
+Lastly can take a look our two API's: `server/api/LinkApi` and `server/api/InvoiceApi`. Both of these APIs parse requests and call methods in our `AppController` to retrieve the list of `Link` or create a new invoice for a user.
+
+# Conclusion
