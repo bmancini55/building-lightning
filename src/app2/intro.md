@@ -18,17 +18,18 @@ For a more thorough walk through of invoices, check out Chapter 15 of _Mastering
 
 # Goal of the Application
 
-This application is going to use the Lightning Network to create a virtual game of "king of the hill". In this game someone become the leader by paying an invoice. Someone else can be the new leader by paying an invoice for more than the last leader. The neat thing is that we'll do this in a way that any leader along the way can cryptographically prove they paid to be the leader.
+We're going to create a self-contained application that relies on the invoice database in our Lightning Network node. We're going to use the Lightning Network and invoices to create a virtual game of "king of the hill". To play the game, someone becomes the leader by paying an invoice. Someone else can be the new leader by paying an invoice for more than the last leader. The neat thing is that we'll do this in a way that any leader along the way can cryptographically prove they paid to be the leader. In a sense, this application will act as a simple provenance chain for a "digital right" using invoices.
 
 We'll get into the details of the application as we go, but we'll show what the game looks like from the perspective of Bob, who wants to become the first leader.
 
 ![Initial App](/images/ch2_app_01.png)
 
-If Bob wants to become the leader he can do by digitally signing a message the application requires to become the new leader.
-
+If Bob wants to become the leader he digitally signs the message `0000000000000000000000000000000000000000000000000000000000000001` provided by the application using his Lightning Network node.
 ![Bob Signs](/images/ch2_app_02.png)
 
-Bob then provides his signature to the application. The server (run by Alice) creates an invoice on Alice's node that is specific to Bob and returns the invoice to Bob via the user interface.
+Note: In Polar we can open a terminal to do this by right-clicking on the node and selecting "Launch Terminal". With c-lightning, you can use the command `signmessage`. It will return a signature in hex and zbase32 formats. To simplify our application we'll use the zbase32 format since LND only interprets signatures in this format.
+
+Now that Bob has his signature, he provides the signature to the application in the user interface. The server (run by Alice) creates an invoice using Alice's Lightning Network node. This invoice is specific to Bob. Alice's server returns the invoice to Bob via the user interface.
 
 ![Bob Invoice](/images/ch2_app_03.png)
 
@@ -36,15 +37,27 @@ At this point, Bob can pay the invoice.
 
 ![Bob Pays](/images/ch2_app_04.png)
 
-Once Bob has paid the invoice he is now the new leader of the game.
+Once Bob has paid the invoice he is now the new leader of the game!
 
 ![Bob is the Leader](/images/ch2_app_05.png)
 
-The main goal of this is to show how to build an application entirely using invoices and a node's invoice database.
+If Carol wants to become the new leader, she can sign the message `9c769de3f07d527b7787969d8f10733d86c08b253d32c3adc7067f22902f6f38` using her Lightning Network node.
+
+![Carol Signs](/images/ch2_app_06.png)
+
+Note: In Polar, we once again can use the "Launch Terminal" option. With LND, you can also use the CLI command `signmessage`. This will only return a zbase32 format signature, which is the format our application requires.
+
+Carol provides this signature via the user interface and the Alice's server generates an invoice specifically for Carol to become the leader of the game at point `9c769de3f07d527b7787969d8f10733d86c08b253d32c3adc7067f22902f6f38`.
+
+![Carol Invoice](/images/ch2_app_07.png)
+
+When Carol pays the invoice she will become the new leader!
+
+![Carol Leader](/images/ch2_app_08.png)
 
 # Cryptographic Primitives
 
-This application uses hashes and digital signatures. We'll briefly perform a review, but you are encouraged to fully understand both of these method through self-study
+This application uses hashes and digital signatures. We'll briefly perform a review, but you are encouraged to fully understand both of these through self-study.
 
 ## Hashing
 
@@ -70,48 +83,57 @@ With the signature, you can also derive the public key that was used to create t
 
 # High Level Overview of Our Application
 
-So let's talk about our application! We're going to use a combination of digital signatures and hashing to create an ownership chain.
+You've seen the example of our application with Bob and Carol becoming the leaders. This section will dig into the details of how the application works.
 
-The basis of this chain is that the preimage from the last-settled invoice becomes the information that is signed to create the next preimage. In a sense this creates a hash-chain of ownership.
+In order to create the ownership chain we're going to use a combination of digital signatures and hashes.
 
-For example, consider if Alice is running the server for our application. She initiates the service with some `seed` value. Alice then signs a message with the `seed` and keeps her signature to herself for now. Alice can always easily re-derive this signature if she needs to by resigning the `seed`.
+The basis of this chain is that the preimage from the last-settled invoice is used as the identifier of the next link. In a sense this creates a hash-chain of ownership.
+
+![Basic Links](/images/ch2_diagram_01.png)
+
+While this diagram is fairly straight forward, the way we construct the actual ownership chain is a bit more complicated. This complication is necessary for a few reasons:
+
+1. Ensures that each invoice in a link has a unique preimage and hash
+1. Ensures that it is not possible to guess the preimage for an invoice
+1. Ensures that a leader can reconstruct the preimage using information that only they can generate once a payment has been made
+
+So let's explore the actual construct.
+
+Consider if Alice is running the server for our application. She initiates the service with some `seed` value. Alice then signs a message with the `seed` and keeps her signature to herself for now. Alice can always easily re-derive this signature if she needs to by resigning the `seed`.
 
 Bob accesses Alice's service, and discovers that he can "own" the `seed` by
 
 1. Creating a signature where the message is the `seed`
 1. Sending Alice the signature
 
-Alice then verifies the signature for the `seed` from Bob.
+Alice then verifies the signature for the `seed` from Bob. Only Bob will be able to generate this signature, but anyone can verify that the signature is valid.
 
-Alice can now create a preimage for an invoice by concatenating Alice's signature for the seed, Bob's signature for the seed, and the satoshis that Bob is willing to pay.
-
-```
-alice_sig(seed) || bob_sig(seed) || satoshis
-```
-
-The only issue is that Lightning Network invoices require the preimage to be 32-bytes. We get around this by simply using hashing to contain the value within 32-bytes:
+Alice can now create a preimage for an invoice by concatenating her signature for the seed, Bob's signature for the seed, and the satoshis that Bob is willing to pay.
 
 ```
-sha256(alice_sig(seed) || bob_sig(seed) || satoshis)
+preimage = alice_sig(seed) || bob_sig(seed) || satoshis
 ```
 
-Thus our hash for the invoice is the hash of the preimage:
+The only issue is that the Lightning Network invoices require the preimage to be 32-bytes. We get around this by simply using hashing to contain the value within 32-bytes:
 
 ```
-sha256(sha256(alice_sig(seed) || bob_sig(seed) || satoshis))
+preimage = sha256(alice_sig(seed) || bob_sig(seed) || satoshis)
 ```
 
-Alice now has a preimage that she can use for an invoice. She sends this invoice to Bob. Bob wants to take ownership, so he pays the invoice and receives the preimage.
+Then our hash in the invoice is the hash of the preimage:
 
-At this point, Bob can prove that he paid for it, but he can't quite prove to the entire world that he is the owner.
+```
+hash = sha256(preimage)
+hash = sha256(sha256(alice_sig(seed) || bob_sig(seed) || satoshis))
+```
 
-When Alice receives payment, she needs to publish her signature for the seed as well.
+Alice sends Bob the invoice. Bob wants to take ownership, so he pays the invoice and receives the preimage as proof of payment.
 
-Bob now has his signature and Alice's signature and can reconstruct the preimage at will to prove that is the rightful owner of the current seed.
+At this point, Bob can prove that he paid the invoice since he has the preimage, but he can't reconstruct the preimage. Alice needs to publish her signature to the website for Bob to be able reconstruct the preimage. Ideally we would have a scheme where Bob can prove ownership without needing out-of-band information, something encoded directly in the preimage itself.
 
-This is all well and good, but how does Carol take over ownership? In order to do this, Alice signs the preimage she just sent to Bob. She advertises Bob's preimage as well. Carol can sign Bob's preimage and perform the same functionality as Bob.
+So how does Carol take over ownership? In order to do this, Alice advertises Bob's preimage. Carol can sign Bob's preimage and perform the same upload/pay invoice that Bob did.
 
-Now that may be a lot to unpack, so you may want to go through it a few time. And don't worry, if you don't [grok](https://www.merriam-webster.com/dictionary/grok) the concept completely you'll still be able to build the application. After a few goes at making Alice, Bob, and Carol the leader it will hopefully become more intuitive.
+Now that may be a lot to unpack, so you may want to go through it a few time. And don't worry, if you don't [grok](https://www.merriam-webster.com/dictionary/grok) the concept completely you'll still be able to build the application. After a few goes at making Bob and Carol the leaders it will hopefully become more intuitive.
 
 # Building the Application
 
