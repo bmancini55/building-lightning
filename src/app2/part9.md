@@ -1,27 +1,9 @@
-# Putting It All Together
+# Further Exploration
 
-At this point, all of the core logic for our application is complete! The only remaining items are the usual endpoint and socket creation code. We'll skip going into the heavy details of those but call out a few things.
+We now have a basic application that uses invoices to chain ownership. Astute readers may have already recognized a few issues with this approach already.
 
-If you take take a look at `server/Server.ts` you can see that we construct an instance of `AppController` and call the `start` method.
+What if Bob and Carol both have invoices for to take leadership in a chain? A standard invoice is automatically resolved when payment is received. How could you modify the application to allow conditional payment resolution?
 
-```typescript
-// start the application logic
-await appController.start(
-  "0000000000000000000000000000000000000000000000000000000000000001",
-  1000
-);
-```
+This scheme could be extended to perform digital transfer. How might this scheme be modified to so that the current leader becomes part of the payment for the new transaction?
 
-You can see that we start our application with the seed value of `0000000000000000000000000000000000000000000000000000000000000001`. You can start your application with any seed value it will restart the game using that new seed.
-
-The remainder of this file constructs the Express webserver and starts the WebSocket server.
-
-You may also notice that we hook into the `AppController` to listen for changes to links. We broadcast those events over connected WebSockets.
-
-```typescript
-// broadcast updates to the client
-appController.listener = (links: Link[]) =>
-  socketServer.broadcast("links", links);
-```
-
-Lastly can take a look our two API's: `server/api/LinkApi` and `server/api/InvoiceApi`. Both of these APIs parse requests and call methods in our `AppController` to retrieve the list of `Link` or create a new invoice for a user.
+Lastly, the current scheme requires the server to publish its signature for an owner to reconstruct the proof. Is there anyway to modify the scheme so that the preimage contains all the information needed for the leader to construct a proof but still be a proof of payment (meaning it is not guessable by the payer unless they pay)?

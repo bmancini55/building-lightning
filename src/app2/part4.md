@@ -1,102 +1,75 @@
-# Invoices
+# Loading Invoices
 
-The next logical step is configuring how we'll handle invoices. For this application, we'll use LND and its invoice database to power our application. We'll be encoding some basic information into the invoice memo field so our application doesn't need to maintain or synchronize a separate database. In a production system we'd likely use a separate database system, but we've made this decision to keep the application tightly focused.
+Now that we've discussed some aspects of domain specific invoices, we need to connect to some Lightning Network node and load up invoices from its database. Our application does this using the [data mapper](https://martinfowler.com/eaaCatalog/dataMapper.html) design pattern to abstract specifics about data access.
 
-This time around we'll be using the [LND RPC API](https://api.lightning.community/#lnd-grpc-api-reference). This is similar to the REST interface we used in the previous application but uses a GRPC instead of HTTPS to communicate with the LND node. For the purposes of our application it will be remarkably similar and in reality, the only difference will be how we wire up the application. Which brings us to our next point.
-
-From a software engineering perspective, it's a good practice to isolate our application logic from the specifics of the underlying data persistence mechanism. This rule is often conveyed when working with relational databases systems where it would be poor form for your database tables to dictate how your application logic functions. This is no different than working with Lightning Network nodes! We break out our code so that we can tightly focus the critical application bits from the logic of how we retrieve that information. A by-product is that we could switch out from LND to c-lightning or Eclair without having to change our application's logic!
-
-To achieve this decoupling goal, instead of pinning our application to the structure of invoices in LND's database, we'll create our own `Invoice` type that is used throughout our application. This also allows us to add some methods or calculations to our `Invoice` type that are "domain" specific to our application.
-
-You can take a look at the `server/domain/Invoice` class. This class only has properties that the application is interested in such as the memo, preimage, hash, value in satoshis, and settlement information.
+We define this behavior in the `IInvoiceDataMapper` interface that looks like:
 
 ```typescript
-export class Invoice {
-  constructor(
-    public memo: string,
-    public preimage: string,
-    public hash: string,
-    public valueSat: string,
-    public settled: boolean = false,
-    public settleDate?: number
-  ) {}
-
-  // Methods not shown...
+export interface IInvoiceDataMapper {
+  add(value: number, memo: string, preimage: Buffer): Promise<string>;
+  sync(handler: InvoiceHandler): Promise<void>;
 }
 ```
 
-## Exercise: Implement `createMemo`
+The `InvoiceHandler` delegate is just any function that receives an `Invoice` as an argument:
 
-Our application is going be encoding some information into the memo field. We need to be careful about making the memo field too large but for our applications sake we'll construct the memo as such:
-
-```
-buy_{preimage}_{buyerId}
+```typescript
+export type InvoiceHandler = (invoice: Invoice) => Promise<void>;
 ```
 
-The `preimage` is going to 32-byte value (64 hex encoded characters). The `buyerId` is the 33-byte public key (66 hex encoded characters) of the buying node.
+The `LndInvoiceDataMapper` class implements `IInvoiceDataMapper` and is located in `server/data/lnd` folder. This constructor of this class accepts an interface `ILndClient` that defines functions for interacting with an LND node.
 
-Go ahead and implement the `createMemo` method in `server/domain/Invoice` class according to the rule specified
+There are two classes that implement `ILndClient`: `LndRestClient` and `LndRpcClient` that connect to LND over REST and GRPC. We'll be using the latter to connect to LND over the GRPC API. For the purposes of our application, either client could be used. The indication of code isolates our data mapper logic from the logic specific to each of the APIs. This is similar to how our we isolate our application code from the specifics of LND. Feel free to explore the `LndRpcClient` and `LndRestClient` to see how they manage the details of establishing connections to the different APIs.
+
+For loading invoices we're concerned with the `sync` method.
+
+The `sync` method reaches out to our invoice database and requests all invoices. It will also subscribe to creation of new invoices or the settlement of existing invoices. Because the syncing process and the subscription are long lived, we will use notification to alert our application code about invoice events instead of returning a list of `Invoice`s.
+
+This method does two things:
+
+1. connects to LND and retrieves all invoices in the database
+1. subscribes to existing invoices and
+
+```typescript
+public async sync(handler: InvoiceHandler): Promise<void> {
+    // fetch all invoices
+    const num_max_invoices = Number.MAX_SAFE_INTEGER.toString();
+    const index_offset = "0";
+    const results: Lnd.ListInvoiceResponse = await this.client.listInvoices({
+        index_offset,
+        num_max_invoices,
+    });
+
+    // process all retrieved invoices
+    for (const invoice of results.invoices) {
+        await handler(this.convertInvoice(invoice));
+    }
+
+    // subscribe to all new invoices/settlements
+    void this.client.subscribeInvoices(invoice => {
+        void handler(this.convertInvoice(invoice));
+    }, {});
+}
+```
+
+You'll see that we notify handlers of invoices after we call `convertInvoice` on LND's invoice.
+
+## Exercise: Implement `convertInvoice`
+
+This function is a mapping function that converts LND's invoice type in our domain's `Invoice` class.
+
+Go ahead and implement the `convertInvoice` method in the `server/data/LndInvoiceDataMapper` class. Make sure to perform proper type conversions.
+
+```typescript
+public convertInvoice(invoice: Lnd.Invoice): Invoice {
+    // Exercise: Implement
+}
+```
 
 When you are finished you can verify you successfully implemented the method with the following command:
 
 ```
-npm run test:server -- --grep createMemo
+npm run test:server -- --grep convertInvoice
 ```
 
-## Exercise: Implement `isAppInvoice`.
-
-We need a way to distinguish invoices that the application cares about from other invoices that the Lightning Network node may have created for other purpose.
-
-We'll do this by implementing the `isAppInvoice` method to check whether the memo conforms to the pattern we just created in the `createMemo` method.
-
-We will only return true when a few conditions have been met:
-
-1. The invoice's memo field starts with the prefix `buy_`
-1. The invoice's memo then contains 64 hex characters followed by another underscore
-1. The invoice's memo ends with 66 hex characters.
-
-Go ahead and implement the `isAppInvoice` in the `server/domain/Invoice` class.
-
-When you are finished you can verify you successfully implemented the method with the following command:
-
-```
-npm run test:server -- --grep isAppInvoice
-```
-
-## Exercise Implement `priorPreimage` and `buyerNodeId`
-
-We have two more helper methods we need to implement surrounding the memo field. We want a quick way to extract the prior preimage and the buyer's public key. We'll do this by implementing two helper methods that grab these values from the memo field. These two methods are very similar, so feel free to be creative in how you structure your code (and possibly refactor the `isAppInvoice` method).
-
-Go ahead and implement the `priorPreimage` getter in the `server/domain/Invoice` class.
-
-When you are finished you can verify you successfully implemented the method with the following command:
-
-```
-npm run test:server -- --grep priorPreimage
-```
-
-Then go ahead and implement the `buyerNodeId` getter in the `server/domain/Invoice` class.
-
-When you are finished you can verify you successfully implemented the method with the following command:
-
-```
-npm run test:server -- --grep buyerNodeId
-```
-
-## Exercise: Implement `createPreimage`
-
-The last method we'll implement is a helper method that we will use later. If you recall that we're going to calculate the preimage as:
-
-```
-sha256(alice_sig(seed) || bob_sig(seed) || satoshis)
-```
-
-where `||` denotes concatenation.
-
-Based on that information, go ahead and implement the `createPreimage` method in the `server/domain/Invoice` class.
-
-When you are finished you can verify you successfully implemented the method with the following command:
-
-```
-npm run test:server -- --grep createPreimage
-```
+At this point our application has all the necessary pieces to retrieve and process invoices.

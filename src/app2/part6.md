@@ -1,47 +1,36 @@
-# `Link` Class
+# Creating the `LinkFactory` Class
 
-For our application, we can think of the leadership chain as links in a chain. The last "closed" link in the chain is the current leader. However, by closing a link, we create a new link that is open for someone else to close if they pay an invoice to do so. The last "closed" link the chain is the current leader of the game.
+So you may be wondering how we create our first `Link`. Let us introduce you to the the `LinkFactory`. This class is responsible for creating `Link` object based on two common scenarios:
 
-The `Link` class defines a single link in the chain of ownership and it models this behavior of ownership. A `Link` can be in one of two states: `unsettled` or `settled`.
+1. `createFromSeed` - creates the first link in the chain
+1. `createFromSettled` - creates a new "tip of the chain" link when someone closes / settles a Link
 
-When a `Link` is unsettled, it means that no one has take ownership or closed that link. It is still open to the world and anyone can pay an invoice and take ownership.
+This class also takes care of the heavy lifting for creating a `Link` so that we can easily test our code, and consumers of this code aren't burdened by the implementation details of creating a `Link`.
 
-When a `Link` is settled, the payer of the invoice becomes the owner. If this is the last closed link in the chain it is considered the current leader of the game.
-
-So let's take a look at the `Link`.
+This class has a dependency on the `IMessageSigner` interface. This interface provides a method for signing a message from your Lightning Network node.
 
 ```typescript
-export class Link {
-  public invoice: Invoice;
-
-  constructor(
-    public priorPreimage: string,
-    public localSignature: string,
-    public minSats: number
-  ) {}
-
-  // Methods
+export interface IMessageSigner {
+  sign(msg: string): Promise<string>;
+  verify(msg: Buffer, signature: string): Promise<VerifySignatureResult>;
 }
 ```
 
-As you can see it's pretty straightforward.
+Under the covers, we have also implemented a `LndMessageSigner` class that uses LND to perform signature creation and verification. This will be wired up later.
 
-We define a few properties
+## Exercise: Implement `createFromSeed`
 
-- `priorPreimage` is the identifier. We "link" back to the last settled invoice by making the `Link` identifier the last settled preimage.
-- `localSignature` is our Lightning Network node's signature of the `priorPreimage`. We'll use this to construct invoices.
-- `minSats` is the minimum satoshis payment we're willing to accept payment to settle this Link.
+As we mentioned, a `Link` starts out in the `unsettled` state, which means that no one has taken ownership of it. Logically, the application starts off without any ownership. We simply create a link from some seed value.
 
-You'll also notice that there is an `invoice` property. This property will be assigned a settled invoice when someone pays the `Invoice`.
+In order to create a link we do two things:
 
-## Exercise: Implement `isSettled`
+1. Sign the seed value
+1. Construct a new `Link` with the seed, signature, and minimum satoshis values
 
-A `Link` is only considered settled when it has an invoice assigned and that invoice is settled.
-
-Go ahead and implement the `isSettled` getter.
+Go ahead and implement the `createFromSeed` method.
 
 ```typescript
-public get isSettled(): boolean {
+public async createFromSeed(seed: string, startSats: number): Promise<Link> {
     // Exercise
 }
 ```
@@ -49,19 +38,23 @@ public get isSettled(): boolean {
 When you are finished you can verify you successfully implemented the method with the following command:
 
 ```
-npm run test:server -- --grep isSettled
+npm run test:server -- --grep createFromSeed
 ```
 
-## Exercise: Implement `next`
+## Exercise: Implement `createFromSettled`
 
-Once a `Link` is settled, the `next` property makes reference to the identifier of the next `Link` in the chain, which is the settled invoice's preimage.
+The next logical piece is implementing the `createFromSettled` method which will create the next `unsettled` link from a `settled` link.
 
-This property should only return a value when a `Link` is settled. When the `Link` is settled it should return the invoice's preimage.
+Instead of a seed, we'll use the preimage from the settled invoice of the prior Link. This method will need to do three things:
 
-Go ahead and implement the `next` getter.
+1. Use the `IMessageSigner.sign` method to sign the preimage
+1. Increment the minimum satoshis to +1 more than the settled invoice
+1. Construct the new `unsettled` `Link`
+
+Go ahead and implement the `createFromSettled` method.
 
 ```typescript
-public get next(): string {
+public async createFromSettled(settled: Link): Promise<Link> {
     // Exercise
 }
 ```
@@ -69,5 +62,5 @@ public get next(): string {
 When you are finished you can verify you successfully implemented the method with the following command:
 
 ```
-npm run test:server -- --grep next
+npm run test:server -- --grep createFromSettled
 ```

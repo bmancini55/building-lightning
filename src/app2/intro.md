@@ -1,4 +1,4 @@
-# Building on Lightning: Working with Invoices
+# Working with Invoices
 
 This section is going to focus on building an application to accept payments using the Lightning Network.
 

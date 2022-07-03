@@ -1,53 +1,52 @@
-# Our Application
+# Environment Setup
 
-You've seen the example of our application with Bob and Carol becoming the leaders. This section will dig into the details of how the application works.
+The application uses the same template we used in Graph exercise, so you should already be familiar with the structure. As a quick refresher. For this application we'll be focused on building logic inside the `server` sub-project.
 
-In order to create the ownership chain we're going to use a combination of digital signatures and hashes.
-
-The basis of this chain is that the preimage from the last-settled invoice is used as the identifier of the next link. In a sense this creates a hash-chain of ownership.
-
-![Basic Links](/images/ch2_diagram_01.png)
-
-While this diagram is fairly straight forward, the way we construct the actual ownership chain is a bit more complicated. This complication is necessary for a few reasons:
-
-1. Ensures that each invoice in a link has a unique preimage and hash
-1. Ensures that it is not possible to guess the preimage for an invoice
-1. Ensures that a leader can reconstruct the preimage using information that only they can generate once a payment has been made
-
-So let's explore the actual construct.
-
-Consider if Alice is running the server for our application. She initiates the service with some `seed` value. Alice then signs a message with the `seed` and keeps her signature to herself for now. Alice can always easily re-derive this signature if she needs to by resigning the `seed`.
-
-Bob accesses Alice's service, and discovers that he can "own" the `seed` by
-
-1. Creating a signature where the message is the `seed`
-1. Sending Alice the signature
-
-Alice then verifies the signature for the `seed` from Bob. Only Bob will be able to generate this signature, but anyone can verify that the signature is valid.
-
-Alice can now create a preimage for an invoice by concatenating her signature for the seed, Bob's signature for the seed, and the satoshis that Bob is willing to pay.
+The application code is available in the [Building on Lightning Invoices Project](https://github.com/bmancini55/building-lightning-invoices) on GitHub. You can clone this repository to begin.
 
 ```
-preimage = alice_sig(seed) || bob_sig(seed) || satoshis
+git clone https://github.com/bmancini55/building-lightning-graph.git
 ```
 
-The only issue is that the Lightning Network invoices require the preimage to be 32-bytes. We get around this by simply using hashing to contain the value within 32-bytes:
+Navigate to the repository:
 
 ```
-preimage = sha256(alice_sig(seed) || bob_sig(seed) || satoshis)
+cd building-lightning-graph
 ```
 
-Then our hash in the invoice is the hash of the preimage:
+The repository uses `npm` scripts to perform common tasks. To install the dependencies, run:
 
 ```
-hash = sha256(preimage)
-hash = sha256(sha256(alice_sig(seed) || bob_sig(seed) || satoshis))
+npm install
 ```
 
-Alice sends Bob the invoice. Bob wants to take ownership, so he pays the invoice and receives the preimage as proof of payment.
+This will install all of the dependencies for the three sub-modules in the project: `client`, `server`, and `style`. You may get some warnings, but as long as the install command has exit code 0 for all three sub-projects you should be good. If you do encounter any errors, you can try browsing to the individual sub-project and running the `npm install` command inside each directory.
 
-At this point, Bob can prove that he paid the invoice since he has the preimage, but he can't reconstruct the preimage. Alice needs to publish her signature to the website for Bob to be able reconstruct the preimage. Ideally we would have a scheme where Bob can prove ownership without needing out-of-band information, something encoded directly in the preimage itself.
+We'll also need a Lightning Network environment to test. You can use the existing environment you created with Polar in the first project. We'll again be building the application from the perspective of Alice using an LND node.
 
-So how does Carol take over ownership? In order to do this, Alice advertises Bob's preimage. Carol can sign Bob's preimage and perform the same upload/pay invoice that Bob did.
+## Exercise: Configuring `.env` to Connect to LND
 
-Now that may be a lot to unpack, so you may want to go through it a few time. And don't worry, if you don't [grok](https://www.merriam-webster.com/dictionary/grok) the concept completely you'll still be able to build the application. After a few goes at making Bob and Carol the leaders it will hopefully become more intuitive.
+We'll again use the `dotenv` package to simplify environment variables.
+
+Our next exercise is adding some values to `.env` inside the `server` sub-project. We'll add three new environment variables:
+
+- `LND_RPC_HOST` is the host for LND RPC
+- `LND_ADMIN_MACAROON_PATH` is the file path to the admin Macaroon
+- `LND_CERT_PATH` is the certificate we use to securely connect with LND
+
+In Polar, to access Alice's node by click on Alice and then click on the `Connect` tab. You will be shown the information on how to connect to the GRPC and REST interfaces. Additionally you will be given paths to the network certificates and macaroon files that we will need in `.env`.
+
+![Connect to Alice](../images/ch1_polar_connect_to_alice.png)
+
+Go ahead and add the three environment variables defined above to `.env`.
+
+```
+# Express configuration
+PORT=8001
+
+# LND configuration
+# Exercise: Provide values for Alice's node
+LND_RPC_HOST=
+LND_ADMIN_MACAROON_PATH=
+LND_CERT_PATH=
+```
