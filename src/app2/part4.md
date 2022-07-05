@@ -62,7 +62,7 @@ Go ahead and implement the `convertInvoice` method in the `server/data/LndInvoic
 
 ```typescript
 public convertInvoice(invoice: Lnd.Invoice): Invoice {
-    // Exercise: Implement
+    // Exercise
 }
 ```
 

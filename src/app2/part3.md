@@ -35,7 +35,14 @@ buy_{preimage}_{buyerId}
 
 The `preimage` is going to 32-byte value (64 hex encoded characters). The `buyerId` is the 33-byte public key (66 hex encoded characters) of the buying node.
 
-Go ahead and implement the `createMemo` method in `server/domain/Invoice` class according to the rule specified
+Go ahead and implement the `createMemo` method in `server/domain/Invoice` class according to the rule specified.
+
+```typescript
+//
+public static createMemo(priorPreimage: string, buyer: string) {
+    // Exercise
+}
+```
 
 When you are finished you can verify you successfully implemented the method with the following command:
 
@@ -57,6 +64,12 @@ We will only return true when a few conditions have been met:
 
 Go ahead and implement the `isAppInvoice` in the `server/domain/Invoice` class.
 
+```typescript
+public isAppInvoice(): boolean {
+    // Exercise
+}
+```
+
 When you are finished you can verify you successfully implemented the method with the following command:
 
 ```
@@ -69,6 +82,12 @@ We have two more helper methods we need to implement surrounding the memo field.
 
 Go ahead and implement the `priorPreimage` getter in the `server/domain/Invoice` class.
 
+```typescript
+public get priorPreimage(): string {
+    // Exercise
+}
+```
+
 When you are finished you can verify you successfully implemented the method with the following command:
 
 ```
@@ -76,6 +95,12 @@ npm run test:server -- --grep priorPreimage
 ```
 
 Then go ahead and implement the `buyerNodeId` getter in the `server/domain/Invoice` class.
+
+```typescript
+public get buyerNodeId(): string {
+    // Exercise
+}
+```
 
 When you are finished you can verify you successfully implemented the method with the following command:
 
@@ -94,6 +119,12 @@ sha256(alice_sig(seed) || bob_sig(seed) || satoshis)
 where `||` denotes concatenation.
 
 Based on that information, go ahead and implement the `createPreimage` method in the `server/domain/Invoice` class.
+
+```typescript
+public static createPreimage(local: string, remote: string, sats: number) {
+    // Exercise
+}
+```
 
 When you are finished you can verify you successfully implemented the method with the following command:
 
