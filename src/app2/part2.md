@@ -5,13 +5,13 @@ The application uses the same template we used in Graph exercise, so you should 
 The application code is available in the [Building on Lightning Invoices Project](https://github.com/bmancini55/building-lightning-invoices) on GitHub. You can clone this repository to begin.
 
 ```
-git clone https://github.com/bmancini55/building-lightning-graph.git
+git clone https://github.com/bmancini55/building-lightning-invoices.git
 ```
 
 Navigate to the repository:
 
 ```
-cd building-lightning-graph
+cd building-lightning-invoices
 ```
 
 The repository uses `npm` scripts to perform common tasks. To install the dependencies, run:
