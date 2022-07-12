@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../app1/intro.html"><strong aria-hidden="true">1.</strong> Lightning Graph Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app1/part1.html" class="active"><strong aria-hidden="true">1.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app1/part2.html"><strong aria-hidden="true">1.2.</strong> Code Setup</a></li><li class="chapter-item expanded "><a href="../app1/part3.html"><strong aria-hidden="true">1.3.</strong> Building the Server</a></li><li class="chapter-item expanded "><a href="../app1/part4.html"><strong aria-hidden="true">1.4.</strong> Building the UI</a></li><li class="chapter-item expanded "><a href="../app1/part5.html"><strong aria-hidden="true">1.5.</strong> Real-Time Updates</a></li><li class="chapter-item expanded "><a href="../app1/part6.html"><strong aria-hidden="true">1.6.</strong> Exploration</a></li></ol></li><li class="chapter-item expanded "><a href="../app2/intro.html"><strong aria-hidden="true">2.</strong> Lightning Network Invoices</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app2/part1.html"><strong aria-hidden="true">2.1.</strong> Application Walk-Through</a></li><li class="chapter-item expanded "><a href="../app2/part2.html"><strong aria-hidden="true">2.2.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app2/part3.html"><strong aria-hidden="true">2.3.</strong> Invoices</a></li><li class="chapter-item expanded "><a href="../app2/part4.html"><strong aria-hidden="true">2.4.</strong> Loading Invoices</a></li><li class="chapter-item expanded "><a href="../app2/part5.html"><strong aria-hidden="true">2.5.</strong> Creating the Link Class</a></li><li class="chapter-item expanded "><a href="../app2/part6.html"><strong aria-hidden="true">2.6.</strong> Creating the LinkFactory Class</a></li><li class="chapter-item expanded "><a href="../app2/part7.html"><strong aria-hidden="true">2.7.</strong> Creating the AppController Class</a></li><li class="chapter-item expanded "><a href="../app2/part8.html"><strong aria-hidden="true">2.8.</strong> Putting It All Together</a></li><li class="chapter-item expanded "><a href="../app2/part9.html"><strong aria-hidden="true">2.9.</strong> Exploration</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../app1/intro.html"><strong aria-hidden="true">1.</strong> Lightning Graph Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app1/part1.html"><strong aria-hidden="true">1.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app1/part2.html"><strong aria-hidden="true">1.2.</strong> Code Setup</a></li><li class="chapter-item expanded "><a href="../app1/part3.html"><strong aria-hidden="true">1.3.</strong> Building the Server</a></li><li class="chapter-item expanded "><a href="../app1/part4.html"><strong aria-hidden="true">1.4.</strong> Building the UI</a></li><li class="chapter-item expanded "><a href="../app1/part5.html"><strong aria-hidden="true">1.5.</strong> Real-Time Updates</a></li><li class="chapter-item expanded "><a href="../app1/part6.html"><strong aria-hidden="true">1.6.</strong> Exploration</a></li></ol></li><li class="chapter-item expanded "><a href="../app2/intro.html"><strong aria-hidden="true">2.</strong> Lightning Network Invoices</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app2/part1.html"><strong aria-hidden="true">2.1.</strong> Application Walk-Through</a></li><li class="chapter-item expanded "><a href="../app2/part2.html" class="active"><strong aria-hidden="true">2.2.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app2/part3.html"><strong aria-hidden="true">2.3.</strong> Invoices</a></li><li class="chapter-item expanded "><a href="../app2/part4.html"><strong aria-hidden="true">2.4.</strong> Loading Invoices</a></li><li class="chapter-item expanded "><a href="../app2/part5.html"><strong aria-hidden="true">2.5.</strong> Creating the Link Class</a></li><li class="chapter-item expanded "><a href="../app2/part6.html"><strong aria-hidden="true">2.6.</strong> Creating the LinkFactory Class</a></li><li class="chapter-item expanded "><a href="../app2/part7.html"><strong aria-hidden="true">2.7.</strong> Creating the AppController Class</a></li><li class="chapter-item expanded "><a href="../app2/part8.html"><strong aria-hidden="true">2.8.</strong> Putting It All Together</a></li><li class="chapter-item expanded "><a href="../app2/part9.html"><strong aria-hidden="true">2.9.</strong> Exploration</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -143,42 +143,48 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="environment-setup"><a class="header" href="#environment-setup">Environment Setup</a></h1>
-<p>We'll start by setting up your environment. Since we're going to build a Lightning Network application it should not be surprising that our infrastructure consists of a Bitcoin node and one or more Lightning Network nodes that we can control.</p>
-<p>As a user of Bitcoin and the Lightning Network you are most likely familiar with the main Bitcoin network. Bitcoin software actually has multiple networks that it can run on:</p>
+<p>The application uses the same template we used in Graph exercise, so you should already be familiar with the structure. As a quick refresher. For this application we'll be focused on building logic inside the <code>server</code> sub-project.</p>
+<p>The application code is available in the <a href="https://github.com/bmancini55/building-lightning-invoices">Building on Lightning Invoices Project</a> on GitHub. You can clone this repository to begin.</p>
+<pre><code>git clone https://github.com/bmancini55/building-lightning-invoices.git
+</code></pre>
+<p>Navigate to the repository:</p>
+<pre><code>cd building-lightning-invoices
+</code></pre>
+<p>The repository uses <code>npm</code> scripts to perform common tasks. To install the dependencies, run:</p>
+<pre><code>npm install
+</code></pre>
+<p>This will install all of the dependencies for the three sub-modules in the project: <code>client</code>, <code>server</code>, and <code>style</code>. You may get some warnings, but as long as the install command has exit code 0 for all three sub-projects you should be good. If you do encounter any errors, you can try browsing to the individual sub-project and running the <code>npm install</code> command inside each directory.</p>
+<p>We'll also need a Lightning Network environment to test. You can use the existing environment you created with Polar in the first project. We'll again be building the application from the perspective of Alice using an LND node.</p>
+<h2 id="exercise-configuring-env-to-connect-to-lnd"><a class="header" href="#exercise-configuring-env-to-connect-to-lnd">Exercise: Configuring <code>.env</code> to Connect to LND</a></h2>
+<p>We'll again use the <code>dotenv</code> package to simplify environment variables.</p>
+<p>Our next exercise is adding some values to <code>.env</code> inside the <code>server</code> sub-project. We'll add three new environment variables:</p>
 <ul>
-<li>mainnet - primary public network; the network a user interacts with.</li>
-<li>testnet - alternate network used for testing. It is typically smaller in size and has some other properties that make it useful for testing software built on top of Bitcoin. <a href="https://en.bitcoin.it/wiki/Testnet">More info</a>.</li>
-<li>regtest - regression testing network that gives us full control of block creation.</li>
+<li><code>LND_RPC_HOST</code> is the host for LND RPC</li>
+<li><code>LND_ADMIN_MACAROON_PATH</code> is the file path to the admin Macaroon</li>
+<li><code>LND_CERT_PATH</code> is the certificate we use to securely connect with LND</li>
 </ul>
-<p>For creating and testing our Lightning Network applications we'll want our infrastructure to start with the regtest network to give us control and speed up our development process. At a future time we can transition to running in testnet or mainnet.</p>
-<p>As you can imagine, getting all this running can be a chore. Fortunately, there is the tool <a href="https://lightningpolar.com">Polar</a> that allows us to spin up Lightning network testing environments easily!</p>
-<p>Our first step is to download and install Polar for your operating system from the <a href="https://lightningpolar.com">website</a>.</p>
-<p>For a Linux system, it will be as an AppImage. You will need to grant executable rights to the file, then you can run the application.</p>
-<p>For Mac it will be a .dmg file that you will need to install.</p>
-<p>For Windows, it will be an .exe file that you can run.</p>
-<p>Once Polar is running, you can create a new network. Polar allows us to run many different networks with varying configurations. For this application we will start the network with 1 LND node, 1 c-lightning node, 1 Eclair, and 1 Bitcoin Core node. Provide a name for this network and create it!</p>
-<p><img src="../images/ch1_polar_create.png" alt="Polar Network" /></p>
-<p>Next, start the network. Polar will launch Docker containers for each of the nodes in your network. This may take a few minutes for the nodes to come online.</p>
-<p>Polar also provides a few tools to allow us to easily perform common tasks.</p>
-<p>We will start by depositing some funds into Alice's node. To do this, click on Alice's node, then click on the <code>Actions</code> tab.</p>
-<p>We will then deposit 1,000,000 satoshis into Alice's node. When you click the <code>Deposit</code> button, the Bitcoin Core node running in regtest will create new blocks to an address and 0.01000000 bitcoin (1,000,000 satoshis) will deposited into an address controlled by Alice's Lightning Network node.</p>
-<p><img src="../images/ch1_polar_deposit.png" alt="Alice with 1mil Sats" /></p>
-<p>Now that Alice has some funds, she can create a channel with another node on the network. We can do this by opening an outgoing channel by clicking the <code>Outgoing</code> button in the <code>Open Channel</code> section of Alice's Actions tab.</p>
-<p>Let's choose Bob as the channel counterparty and fund the channel with 250,000 satoshis.</p>
-<p><img src="../images/ch1_polar_open_channel.png" alt="Alice to Bob Create Channel" /></p>
-<p>We should now see a channel link between Alice and Bob in our channel graph.</p>
-<p><img src="../images/ch1_polar_alice_bob.png" alt="Alice to Bob Channel" /></p>
-<p>At this point, we are ready to write some code!</p>
+<p>In Polar, to access Alice's node by click on Alice and then click on the <code>Connect</code> tab. You will be shown the information on how to connect to the GRPC and REST interfaces. Additionally you will be given paths to the network certificates and macaroon files that we will need in <code>.env</code>.</p>
+<p><img src="../images/ch1_polar_connect_to_alice.png" alt="Connect to Alice" /></p>
+<p>Go ahead and add the three environment variables defined above to <code>.env</code>.</p>
+<pre><code># Express configuration
+PORT=8001
+
+# LND configuration
+# Exercise: Provide values for Alice's node
+LND_RPC_HOST=
+LND_ADMIN_MACAROON_PATH=
+LND_CERT_PATH=
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../app1/intro.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../app2/part1.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="../app1/part2.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../app2/part3.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -188,11 +194,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../app1/intro.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../app2/part1.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="../app1/part2.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../app2/part3.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
