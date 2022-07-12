@@ -1,6 +1,6 @@
 # Creating the `AppController` Class
 
-Now that we have all the component pieces built, we'll turn our attention to the primary logic controller for our application! This resides in the `AppController` class located in `server/domain`. This class is responsible for constructing and maintaining the chain of ownership based on received invoices.
+Now that we have all the component pieces built, we'll turn our attention to the primary logic controller for our application! This resides in the `AppController` class located in `server/domain`. This class is responsible for constructing and maintaining the chain of ownership based on the paid invoices.
 
 The constructor of this class takes a few things we've previously worked on such as:
 
@@ -8,7 +8,7 @@ The constructor of this class takes a few things we've previously worked on such
 - `IMessageSigner` - we'll use this validate signatures that we receive from remote nodes
 - `LinkFactory` - we'll use this to create links in our ownership chain
 
-If you take a look at this class, you'll also notice that we have the `chain` property that maintains the list of `Link`s in our application. This is where our application state will be retained in memory.
+If you take a look at this class, you'll also notice that we have the `chain` property that maintains the list of `Link` in our application. This is where our application state will be retained in memory.
 
 ```typescript
 public chain: Link[];
@@ -22,7 +22,7 @@ public get chainTip(): Link {
 }
 ```
 
-One other note about our `AppController` is that it uses the `observer` pattern to notify a subscriber about changes to `Link`s in the chain. The observer will receive an array of `Link` whenever any changes occur to the chain. The observer will first need to assign a handler to `AppController.listener` in order to receive updates. We'll get to this in a future section once everything has been coded.
+One other note about our `AppController` is that it uses the `observer` pattern to notify a subscriber about changes to the chain. The observer will receive an array of changed `Link` whenever the chain changes. 
 
 Dev Note: Why not use `EventEmitter`? Well we certainly could. Since this example only has a single event it's easy to bake in a handler/callback function for `Link` change events.
 
@@ -71,7 +71,7 @@ npm run test:server -- --grep AppController.*start
 
 ## Exercise: Implement `handleInvoice`
 
-Next on the docket, we need to process invoices we receive from our Lightning Network node. The `handleInvoice` is called every time an invoice is created or fulfilled by our Lightning Network node. This method does a few things to correctly process an invoice:
+Next on the docket, we need to process invoices we receive from our Lightning Network node. The `handleInvoice` is called every time an invoice is found, created or fulfilled by our Lightning Network node. This method does a few things to correctly process an invoice:
 
 1. checks if the invoice settles the current chain tip. Hint look at the `settles` method on the `Invoice`. If the invoice doesn't settle the current chaintip, no further action is required.
 1. If the invoice does settle the current chaintip, it should call the `settle` method on `Link` to settle the `Link`.
@@ -84,8 +84,9 @@ This method is partially implemented for you. Complete the method by settling th
 ```typescript
 public async handleInvoice(invoice: Invoice) {
     if (invoice.settles(this.chainTip)) {
+        const current = this.chainTip;
+        
         // settle the current chain tip
-        const settled = this.chainTip;
 
         // create a new unsettled Link
 
