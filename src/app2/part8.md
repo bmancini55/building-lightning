@@ -1,6 +1,6 @@
 # Putting It All Together
 
-At this point, all of the core logic for our application is complete! The only remaining items are the usual endpoint and socket creation code. We'll skip going into the heavy details of those but call out a few things.
+We have now completed all of the applications core logic. The only code that we have talked about is the glue that holds it all together. As with our previous application the application is bootstrapped inside of `server/Server.ts`. We're going to skip going into the heavy details of these but you should take a look to become familiar.
 
 If you take take a look at `server/Server.ts` you can see that we construct an instance of `AppController` and call the `start` method.
 
@@ -25,3 +25,6 @@ appController.listener = (links: Link[]) =>
 ```
 
 Lastly can take a look our two API's: `server/api/LinkApi` and `server/api/InvoiceApi`. Both of these APIs parse requests and call methods in our `AppController` to retrieve the list of `Link` or create a new invoice for a user.
+
+
+With that, your application is ready to fire up and test! You should be able to run the `npm start` from the command line to start the application!

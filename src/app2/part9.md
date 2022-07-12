@@ -1,6 +1,6 @@
 # Further Exploration
 
-We now have a basic application that uses invoices to chain ownership. Astute readers may have already recognized a few issues with this approach already.
+I hope you have enjoyed building this application and learned a bit more about building Lightning Applications with invoices. There is still a lot to explore and this application is ripe for extending in interesting ways. Astute readers may have already recognized a few issues with this approach already. A few thoughts to leave you with:
 
 What if Bob and Carol both have invoices for to take leadership in a chain? A standard invoice is automatically resolved when payment is received. How could you modify the application to allow conditional payment resolution?
 
