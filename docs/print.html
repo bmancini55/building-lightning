@@ -747,23 +747,23 @@ export const GraphScene = () =&gt; {
 <h1 id="goal-of-the-application"><a class="header" href="#goal-of-the-application">Goal of the Application</a></h1>
 <p>We're now going to create a self-contained application that relies on the invoice database in our Lightning Network node. We're going to use the Lightning Network and invoices to create a virtual game of <a href="https://en.wikipedia.org/wiki/King_of_the_Hill_(game)">king of the hill</a>. To play the game, someone becomes the leader by paying an invoice. Someone else can be the new leader by paying an invoice for more than the last leader. The neat thing is that we'll do this in a way that any leader along the way can cryptographically prove they paid to be the leader. In a sense, this application will act as a simple provenance chain for a &quot;digital right&quot; using invoices.</p>
 <p>We'll get into the details of the application as we go, but we'll show what the game looks like from the perspective of Bob, who wants to become the first leader.</p>
-<p><img src="app2//images/ch2_app_01.png" alt="Initial App" /></p>
+<p><img src="app2/../images/ch2_app_01.png" alt="Initial App" /></p>
 <p>If Bob wants to become the leader he digitally signs the message <code>0000000000000000000000000000000000000000000000000000000000000001</code> provided by the application using his Lightning Network node.
-<img src="app2//images/ch2_app_02.png" alt="Bob Signs" /></p>
+<img src="app2/../images/ch2_app_02.png" alt="Bob Signs" /></p>
 <p>Note: In Polar we can open a terminal to do this by right-clicking on the node and selecting &quot;Launch Terminal&quot;. With c-lightning, you can use the command <code>signmessage</code>. It will return a signature in hex and zbase32 formats. To simplify our application we'll use the zbase32 format since LND only interprets signatures in this format.</p>
 <p>Now that Bob has his signature, he provides the signature to the application's user interface. The server (run by Alice) creates an invoice using Alice's Lightning Network node. This invoice is specific to Bob. Alice's server returns the invoice to Bob via the user interface.</p>
-<p><img src="app2//images/ch2_app_03.png" alt="Bob Invoice" /></p>
+<p><img src="app2/../images/ch2_app_03.png" alt="Bob Invoice" /></p>
 <p>At this point, Bob can pay the invoice.</p>
-<p><img src="app2//images/ch2_app_04.png" alt="Bob Pays" /></p>
+<p><img src="app2/../images/ch2_app_04.png" alt="Bob Pays" /></p>
 <p>Once Bob has paid the invoice he is now the new leader of the game!</p>
-<p><img src="app2//images/ch2_app_05.png" alt="Bob is the Leader" /></p>
+<p><img src="app2/../images/ch2_app_05.png" alt="Bob is the Leader" /></p>
 <p>If Carol wants to become the new leader, she can sign the message <code>9c769de3f07d527b7787969d8f10733d86c08b253d32c3adc7067f22902f6f38</code> using her Lightning Network node.</p>
-<p><img src="app2//images/ch2_app_06.png" alt="Carol Signs" /></p>
+<p><img src="app2/../images/ch2_app_06.png" alt="Carol Signs" /></p>
 <p>Note: In Polar, we once again can use the &quot;Launch Terminal&quot; option. With LND, you can also use the CLI command <code>signmessage</code>. This will only return a zbase32 format signature, which is the format our application requires.</p>
 <p>Carol provides this signature via the user interface and the Alice's server generates an invoice specifically for Carol to become the leader of the game at point <code>9c769de3f07d527b7787969d8f10733d86c08b253d32c3adc7067f22902f6f38</code>.</p>
-<p><img src="app2//images/ch2_app_07.png" alt="Carol Invoice" /></p>
+<p><img src="app2/../images/ch2_app_07.png" alt="Carol Invoice" /></p>
 <p>When Carol pays the invoice she will become the new leader!</p>
-<p><img src="app2//images/ch2_app_08.png" alt="Carol Leader" /></p>
+<p><img src="app2/../images/ch2_app_08.png" alt="Carol Leader" /></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="application-walk-through"><a class="header" href="#application-walk-through">Application Walk-Through</a></h1>
 <p>You've seen the example of our application with Bob and Carol becoming the leaders. This section will dig into the details of how the application works. Before we do that however, we'll do a quick refresher on some cryptographic primitives.</p>
 <h2 id="cryptographic-hash-function"><a class="header" href="#cryptographic-hash-function">Cryptographic Hash Function</a></h2>
