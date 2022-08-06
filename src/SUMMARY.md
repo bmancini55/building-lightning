@@ -10,8 +10,8 @@
   - [Exploration](./app1/part6.md)
 
 - [Lightning Network Invoices](./app2/intro.md)
-
-  - [Application Walk-Through](./app2/part1.md)
+  - [Application Walk-Through](./app2/part1-1.md)
+  - [Application Algorithm](./app2/part1-2.md)
   - [Environment Setup](./app2/part2.md)
   - [Invoices](./app2/part3.md)
   - [Loading Invoices](./app2/part4.md)
