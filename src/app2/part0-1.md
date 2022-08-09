@@ -1,6 +1,6 @@
 # Environment Setup
 
-The application uses the same template we used in Graph exercise, so you should already be familiar with the structure. For this application we'll only be focusing on building logic inside the `server` sub-project.
+Before we get started with invoices we first need to get our environment setup again. This application uses the same template we used in the Graph exercise, so you should already be familiar with the structure. For this application we'll only be focusing on building logic inside the `server` sub-project.
 
 The application code is available in the [Building on Lightning Invoices Project](https://github.com/bmancini55/building-lightning-invoices) on GitHub. To get started, you can clone this repository:
 

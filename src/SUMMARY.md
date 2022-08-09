@@ -10,9 +10,10 @@
   - [Exploration](./app1/part6.md)
 
 - [Lightning Network Invoices](./app2/intro.md)
+  - [Environment Setup](./app2/part0-1.md)
+  - [Creating an Invoice in Code](./app2/part0-2.md)
   - [Application Walk-Through](./app2/part1-1.md)
   - [Application Algorithm](./app2/part1-2.md)
-  - [Environment Setup](./app2/part2.md)
   - [Invoices](./app2/part3.md)
   - [Loading Invoices](./app2/part4.md)
   - [Creating the `Link` Class](./app2/part5.md)
