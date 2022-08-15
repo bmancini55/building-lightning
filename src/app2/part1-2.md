@@ -43,7 +43,7 @@ Given just the signature (and a bit of extra metadata), it is also possible to d
 
 In our application we'll be using both digital signature and hashes to construct a chain of ownership. The basis of this chain is that the preimage from the last-settled invoice is used as an identifier of the next link. In a sense this creates a hash-chain of ownership.
 
-![Basic Links](/images/ch2_diagram_01.png)
+![Basic Links](../images/ch2_diagram_01.png)
 
 This diagram shows you that the first link starts with some arbitrary id, in this case `id=0`. We start with an arbitrary identifier because there was no prior state. In each link, many invoices can be generated using this identifier. Each invoice will have a unique preimage that ties it to the user that wants to pay the invoice. When an invoice is finally paid (say with `preimage=X` for instance) a new link is generated and the identifier of the new link becomes the preimage of the settled invoice (so `id=X` for this example). So as you can see, when an invoice is paid, its preimage becomes identifier of our application.
 
