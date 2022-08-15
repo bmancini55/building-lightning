@@ -30,17 +30,17 @@ export class Invoice {
 Our application is going be encoding some information into the memo field. We need to be careful about making the memo field too large but for our applications sake we'll construct the memo as such:
 
 ```
-buy_{priorPreimage}_{buyerId}
+buy_{linkId}_{buyerId}
 ```
 
-The `priorPreimage` is going to 32-byte value (64 hex encoded characters). As we discussed in the last section, the prior preimage is used as the current state of the game. We use the `priorPreimage` to help us identify which state the invoice was for.
+The `linkId` is going to be a 32-byte value (64 hex encoded characters). As we discussed in the last section, the linkId is the current point of the game. We use the `linkId` to help us identify which point of the game the invoice was for.
 
 The `buyerId` is the 33-byte public key (66 hex encoded characters) of the node that we are generating the invoice for. In this case, if Bob requested an invoice to pay, this value would be the public key of Bob's Lightning Network node.
 
 Go ahead and implement the `createMemo` method in `server/domain/Invoice` class according to the rule specified.
 
 ```typescript
-public static createMemo(priorPreimage: string, buyer: string) {
+public static createMemo(linkId: string, buyer: string) {
     // Exercise
 }
 ```
@@ -67,12 +67,12 @@ public isAppInvoice(): boolean {
 }
 ```
 
-## Helper Functions `priorPreimage` and `buyerNodeId`
+## Helper Functions `linkId` and `buyerNodeId`
 
-We have two more helper methods that will be useful for our application. We want a quick way to extract the prior preimage and the buyer's public key. We'll do this by implementing two helper methods that grab these values from the memo field. These two methods are very similar.
+We have two more helper methods that will be useful for our application. We want a quick way to extract the link identifier and the buyer's public key from the memo. We'll do this by implementing two helper methods that grab these values from the memo field. These two methods are very similar.
 
 ```typescript
-public get priorPreimage(): string {
+public get linkId(): string {
     return this.memo.split("_")[1];
 }
 

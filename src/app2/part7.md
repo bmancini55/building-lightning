@@ -22,7 +22,7 @@ public get chainTip(): Link {
 }
 ```
 
-One other note about our `AppController` is that it uses the `observer` pattern to notify a subscriber about changes to the chain. The observer will receive an array of changed `Link` whenever the chain changes. 
+One other note about our `AppController` is that it uses the `observer` pattern to notify a subscriber about changes to the chain. The observer will receive an array of changed `Link` whenever the chain changes.
 
 Dev Note: Why not use `EventEmitter`? Well we certainly could. Since this example only has a single event it's easy to bake in a handler/callback function for `Link` change events.
 
@@ -85,7 +85,7 @@ This method is partially implemented for you. Complete the method by settling th
 public async handleInvoice(invoice: Invoice) {
     if (invoice.settles(this.chainTip)) {
         const current = this.chainTip;
-        
+
         // settle the current chain tip
 
         // create a new unsettled Link
@@ -128,7 +128,7 @@ public async createInvoice(
     sats: number,
 ): Promise<CreateInvoiceResult> {
     // verify the invoice provided by the user
-    const verification = await this.signer.verify(this.chainTip.priorPreimage, remoteSignature);
+    const verification = await this.signer.verify(this.chainTip.linkId, remoteSignature);
 
     // return failure if signature fails
     if (!verification.valid) {

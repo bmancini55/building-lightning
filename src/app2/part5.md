@@ -21,7 +21,7 @@ export class Link {
   public invoice: Invoice;
 
   constructor(
-    public priorPreimage: string,
+    public linkId: string,
     public localSignature: string,
     public minSats: number
   ) {}
@@ -32,8 +32,8 @@ export class Link {
 
 This type has a few properties:
 
-- `priorPreimage` is the identifier of the link.
-- `localSignature` is our Lightning Network node's signature of the `priorPreimage`. We'll use this to construct invoices using our `createPreimage` helper function
+- `linkId` is the identifier of the link and will either be a seed value for the first link or the preimage of the the settling invoice of the previous link.
+- `localSignature` is our Lightning Network node's signature of the `linkId`. We'll use this to construct invoices using our `createPreimage` helper function
 - `minSats` is the minimum satoshis payment we're willing to accept payment to settle this `Link`. This value will be larger than the last link.
 
 You'll also notice that there is an `invoice` property. This property will be assigned when a invoice when someone pays the `Invoice` that corresponds to this link.
@@ -56,16 +56,16 @@ When you are finished you can verify you successfully implemented the method wit
 npm run test:server -- --grep isSettled
 ```
 
-## Exercise: Implement `next`
+## Exercise: Implement `nextLinkId`
 
-Once a `Link` is settled, the `next` property should contain the settling invoice's preimage.
+Once a `Link` is settled, the `nextLinkId` property should contain the settling invoice's preimage.
 
 This property should only return a value when a `Link` is settled. When the `Link` is settled it should return the invoice's preimage.
 
-Go ahead and implement the `next` getter.
+Go ahead and implement the `nextLinkId` getter.
 
 ```typescript
-public get next(): string {
+public get nextLinkId(): string {
     // Exercise
 }
 ```
@@ -73,5 +73,5 @@ public get next(): string {
 When you are finished you can verify you successfully implemented the method with the following command:
 
 ```
-npm run test:server -- --grep next
+npm run test:server -- --grep nextLinkId
 ```
