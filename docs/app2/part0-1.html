@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Application Walk-Through - Building on Lightning</title>
+        <title>Environment Setup - Building on Lightning</title>
 
 
         <!-- Custom HTML head -->
@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../app1/intro.html"><strong aria-hidden="true">1.</strong> Lightning Graph Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app1/part1.html"><strong aria-hidden="true">1.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app1/part2.html"><strong aria-hidden="true">1.2.</strong> Code Setup</a></li><li class="chapter-item expanded "><a href="../app1/part3.html"><strong aria-hidden="true">1.3.</strong> Building the Server</a></li><li class="chapter-item expanded "><a href="../app1/part4.html"><strong aria-hidden="true">1.4.</strong> Building the UI</a></li><li class="chapter-item expanded "><a href="../app1/part5.html"><strong aria-hidden="true">1.5.</strong> Real-Time Updates</a></li><li class="chapter-item expanded "><a href="../app1/part6.html"><strong aria-hidden="true">1.6.</strong> Exploration</a></li></ol></li><li class="chapter-item expanded "><a href="../app2/intro.html"><strong aria-hidden="true">2.</strong> Lightning Network Invoices</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app2/part1.html" class="active"><strong aria-hidden="true">2.1.</strong> Application Walk-Through</a></li><li class="chapter-item expanded "><a href="../app2/part2.html"><strong aria-hidden="true">2.2.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app2/part3.html"><strong aria-hidden="true">2.3.</strong> Invoices</a></li><li class="chapter-item expanded "><a href="../app2/part4.html"><strong aria-hidden="true">2.4.</strong> Loading Invoices</a></li><li class="chapter-item expanded "><a href="../app2/part5.html"><strong aria-hidden="true">2.5.</strong> Creating the Link Class</a></li><li class="chapter-item expanded "><a href="../app2/part6.html"><strong aria-hidden="true">2.6.</strong> Creating the LinkFactory Class</a></li><li class="chapter-item expanded "><a href="../app2/part7.html"><strong aria-hidden="true">2.7.</strong> Creating the AppController Class</a></li><li class="chapter-item expanded "><a href="../app2/part8.html"><strong aria-hidden="true">2.8.</strong> Putting It All Together</a></li><li class="chapter-item expanded "><a href="../app2/part9.html"><strong aria-hidden="true">2.9.</strong> Exploration</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../app1/intro.html"><strong aria-hidden="true">1.</strong> Lightning Graph Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app1/part1.html"><strong aria-hidden="true">1.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app1/part2.html"><strong aria-hidden="true">1.2.</strong> Code Setup</a></li><li class="chapter-item expanded "><a href="../app1/part3.html"><strong aria-hidden="true">1.3.</strong> Building the Server</a></li><li class="chapter-item expanded "><a href="../app1/part4.html"><strong aria-hidden="true">1.4.</strong> Building the UI</a></li><li class="chapter-item expanded "><a href="../app1/part5.html"><strong aria-hidden="true">1.5.</strong> Real-Time Updates</a></li><li class="chapter-item expanded "><a href="../app1/part6.html"><strong aria-hidden="true">1.6.</strong> Exploration</a></li></ol></li><li class="chapter-item expanded "><a href="../app2/intro.html"><strong aria-hidden="true">2.</strong> Lightning Network Invoices</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app2/part0-1.html" class="active"><strong aria-hidden="true">2.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app2/part0-2.html"><strong aria-hidden="true">2.2.</strong> Creating an Invoice in Code</a></li><li class="chapter-item expanded "><a href="../app2/part1-1.html"><strong aria-hidden="true">2.3.</strong> Application Walk-Through</a></li><li class="chapter-item expanded "><a href="../app2/part1-2.html"><strong aria-hidden="true">2.4.</strong> Application Algorithm</a></li><li class="chapter-item expanded "><a href="../app2/part3.html"><strong aria-hidden="true">2.5.</strong> Creating the Invoice Class</a></li><li class="chapter-item expanded "><a href="../app2/part4.html"><strong aria-hidden="true">2.6.</strong> Loading Invoices</a></li><li class="chapter-item expanded "><a href="../app2/part5.html"><strong aria-hidden="true">2.7.</strong> Creating the Link Class</a></li><li class="chapter-item expanded "><a href="../app2/part6.html"><strong aria-hidden="true">2.8.</strong> Creating the LinkFactory Class</a></li><li class="chapter-item expanded "><a href="../app2/part7.html"><strong aria-hidden="true">2.9.</strong> Creating the AppController Class</a></li><li class="chapter-item expanded "><a href="../app2/part8.html"><strong aria-hidden="true">2.10.</strong> Putting It All Together</a></li><li class="chapter-item expanded "><a href="../app2/part9.html"><strong aria-hidden="true">2.11.</strong> Exploration</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -142,53 +142,41 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="application-walk-through"><a class="header" href="#application-walk-through">Application Walk-Through</a></h1>
-<p>You've seen the example of our application with Bob and Carol becoming the leaders. This section will dig into the details of how the application works. Before we do that however, we'll do a quick refresher on some cryptographic primitives.</p>
-<h2 id="cryptographic-hash-function"><a class="header" href="#cryptographic-hash-function">Cryptographic Hash Function</a></h2>
-<p>A cryptographic hash function is a one-way function. The input to the function is known as a preimage. When the preimage is run through the hash function it produces a digest. Hash functions are cryptographically secure when the digest is indistinguishable from random. More simply, this means that there are no discernable patterns produced by the hash function. Additionally, when we say that a hash is a one-way function it means that given the digest, there is no way we can determine the preimage.</p>
-<p>For example, if we use the SHA-256 hash algorithm:</p>
-<p>sha256(&quot;a&quot;) = ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb
-sha256(&quot;b&quot;) = 3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d
-sha256(&quot;ab&quot;) = fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603</p>
-<p>There is no way to derive (other than brute force) that the hash for &quot;ab&quot; is derived from the concatenation of &quot;a&quot; and &quot;b&quot;.</p>
-<h2 id="elliptic-curve-digital-signature-algorithm-ecdsa"><a class="header" href="#elliptic-curve-digital-signature-algorithm-ecdsa">Elliptic Curve Digital Signature Algorithm (ECDSA)</a></h2>
-<p>This application will also make use of digital signatures created with the elliptic curve digital signature algorithm.</p>
-<p>Digital signatures are created by a using a private key to sign a message. The resulting signature can be verified by anyone with the message. The neat aspect of digital signatures is that the signature can't be forged. Given a message, only the holder of the public key can create the signature.</p>
-<p>If you are provided with the a public key, you can verify that the signature was signed by the owner of the public key.</p>
-<p>With the signature, you can also derive the public key that was used to create the signature. When verifying a signature, Lightning Network nodes will derive the public key and check it against the database in the network graph.</p>
-<h1 id="our-algorithm"><a class="header" href="#our-algorithm">Our Algorithm</a></h1>
-<p>You've seen the example of our application with Bob and Carol becoming the leaders. This section will dig into the details of how the application works.</p>
-<p>In order to create the ownership chain we're going to use a combination of digital signatures and hashes.</p>
-<p>The basis of this chain is that the preimage from the last-settled invoice is used as the identifier of the next link. In a sense this creates a hash-chain of ownership.</p>
-<p><img src="/images/ch2_diagram_01.png" alt="Basic Links" /></p>
-<p>While this diagram is fairly straight forward, the way we construct the actual ownership chain is a bit more complicated. This complication is necessary for a few reasons:</p>
-<ol>
-<li>Ensures that each invoice in a link has a unique preimage and hash</li>
-<li>Ensures that it is not possible to guess the preimage for an invoice</li>
-<li>Ensures that a leader can reconstruct the preimage using information that only they can generate once a payment has been made</li>
-</ol>
-<p>So let's explore the actual construct.</p>
-<p>Consider if Alice is running the server for our application. She initiates the service with some <code>seed</code> value. Alice then signs a message with the <code>seed</code> and keeps her signature to herself for now. Alice can always easily re-derive this signature if she needs to by resigning the <code>seed</code>.</p>
-<p>Bob accesses Alice's service, and discovers that he can &quot;own&quot; the <code>seed</code> by</p>
-<ol>
-<li>Creating a signature where the message is the <code>seed</code></li>
-<li>Sending Alice the signature</li>
-</ol>
-<p>Alice then verifies the signature for the <code>seed</code> from Bob. Only Bob will be able to generate this signature, but anyone can verify that the signature is valid.</p>
-<p>Alice can now create a preimage for an invoice by concatenating her signature for the seed, Bob's signature for the seed, and the satoshis that Bob is willing to pay.</p>
-<pre><code>preimage = alice_sig(seed) || bob_sig(seed) || satoshis
+                        <h1 id="environment-setup"><a class="header" href="#environment-setup">Environment Setup</a></h1>
+<p>Before we get started with invoices we first need to get our environment setup again. This application uses the same template we used in the Graph exercise, so you should already be familiar with the structure. For this application we'll only be focusing on building logic inside the <code>server</code> sub-project.</p>
+<p>The application code is available in the <a href="https://github.com/bmancini55/building-lightning-invoices">Building on Lightning Invoices Project</a> on GitHub. To get started, you can clone this repository:</p>
+<pre><code>git clone https://github.com/bmancini55/building-lightning-invoices.git
 </code></pre>
-<p>The only issue is that the Lightning Network invoices require the preimage to be 32-bytes. We get around this by simply using hashing to contain the value within 32-bytes:</p>
-<pre><code>preimage = sha256(alice_sig(seed) || bob_sig(seed) || satoshis)
+<p>Navigate to the repository:</p>
+<pre><code>cd building-lightning-invoices
 </code></pre>
-<p>Then our hash in the invoice is the hash of the preimage:</p>
-<pre><code>hash = sha256(preimage)
-hash = sha256(sha256(alice_sig(seed) || bob_sig(seed) || satoshis))
+<p>The repository uses <code>npm</code> scripts to perform common tasks. To install the dependencies, run:</p>
+<pre><code>npm install
 </code></pre>
-<p>Alice sends Bob the invoice. Bob wants to take ownership, so he pays the invoice and receives the preimage as proof of payment.</p>
-<p>At this point, Bob can prove that he paid the invoice since he has the preimage, but he can't reconstruct the preimage. Alice needs to publish her signature to the website for Bob to be able reconstruct the preimage. Ideally we would have a scheme where Bob can prove ownership without needing out-of-band information, something encoded directly in the preimage itself.</p>
-<p>So how does Carol take over ownership? In order to do this, Alice advertises Bob's preimage. Carol can sign Bob's preimage and perform the same upload/pay invoice that Bob did.</p>
-<p>Now that may be a lot to unpack, so you may want to go through it a few time. And don't worry, if you don't <a href="https://www.merriam-webster.com/dictionary/grok">grok</a> the concept completely you'll still be able to build the application. After a few goes at making Bob and Carol the leaders it will hopefully become more intuitive.</p>
+<p>This will install all of the dependencies for the three sub-modules in the project: <code>client</code>, <code>server</code>, and <code>style</code>. You may get some warnings, but as long as the install command has exit code 0 for all three sub-projects you should be good. If you do encounter any errors, you can try browsing to the individual sub-project and running the <code>npm install</code> command inside each directory.</p>
+<p>We'll also need a Lightning Network environment to test. You can use the existing environment you created with Polar in the first project.</p>
+<p>We'll again be building the application from the perspective of Alice using an LND node.</p>
+<h2 id="exercise-configuring-env-to-connect-to-lnd"><a class="header" href="#exercise-configuring-env-to-connect-to-lnd">Exercise: Configuring <code>.env</code> to Connect to LND</a></h2>
+<p>We'll again use the <code>dotenv</code> package to simplify environment variables.</p>
+<p>You'll need to add some values to the <code>.env</code> inside the <code>server</code> sub-project. Specifically we'll set values for the following:</p>
+<ul>
+<li><code>LND_RPC_HOST</code> is the host for LND RPC</li>
+<li><code>LND_HOST</code> is the host for LND RPC</li>
+<li><code>LND_ADMIN_MACAROON_PATH</code> is the file path to the admin Macaroon</li>
+<li><code>LND_CERT_PATH</code> is the certificate we use to securely connect with LND</li>
+</ul>
+<p>To populate these values navigate to Polar. To access Alice's node by clicking on Alice and then click on the <code>Connect</code> tab. You will be shown the information on how to connect to the GRPC and REST interfaces. Additionally you will be given paths to the network certificates and macaroon files that we will need in <code>.env</code>.</p>
+<p><img src="../images/ch1_polar_connect_to_alice.png" alt="Connect to Alice" /></p>
+<p>Go ahead and add the three environment variables defined above to <code>.env</code>.</p>
+<pre><code># Express configuration
+PORT=8001
+
+# LND configuration
+# Exercise: Provide values for Alice's node
+LND_RPC_HOST=
+LND_ADMIN_MACAROON_PATH=
+LND_CERT_PATH=
+</code></pre>
 
                     </main>
 
@@ -198,7 +186,7 @@ hash = sha256(sha256(alice_sig(seed) || bob_sig(seed) || satoshis))
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="../app2/part2.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../app2/part0-2.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -212,7 +200,7 @@ hash = sha256(sha256(alice_sig(seed) || bob_sig(seed) || satoshis))
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="../app2/part2.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../app2/part0-2.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

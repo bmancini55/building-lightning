@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../app1/intro.html"><strong aria-hidden="true">1.</strong> Lightning Graph Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app1/part1.html"><strong aria-hidden="true">1.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app1/part2.html"><strong aria-hidden="true">1.2.</strong> Code Setup</a></li><li class="chapter-item expanded "><a href="../app1/part3.html"><strong aria-hidden="true">1.3.</strong> Building the Server</a></li><li class="chapter-item expanded "><a href="../app1/part4.html"><strong aria-hidden="true">1.4.</strong> Building the UI</a></li><li class="chapter-item expanded "><a href="../app1/part5.html"><strong aria-hidden="true">1.5.</strong> Real-Time Updates</a></li><li class="chapter-item expanded "><a href="../app1/part6.html"><strong aria-hidden="true">1.6.</strong> Exploration</a></li></ol></li><li class="chapter-item expanded "><a href="../app2/intro.html"><strong aria-hidden="true">2.</strong> Lightning Network Invoices</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app2/part1.html"><strong aria-hidden="true">2.1.</strong> Application Walk-Through</a></li><li class="chapter-item expanded "><a href="../app2/part2.html"><strong aria-hidden="true">2.2.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app2/part3.html"><strong aria-hidden="true">2.3.</strong> Invoices</a></li><li class="chapter-item expanded "><a href="../app2/part4.html" class="active"><strong aria-hidden="true">2.4.</strong> Loading Invoices</a></li><li class="chapter-item expanded "><a href="../app2/part5.html"><strong aria-hidden="true">2.5.</strong> Creating the Link Class</a></li><li class="chapter-item expanded "><a href="../app2/part6.html"><strong aria-hidden="true">2.6.</strong> Creating the LinkFactory Class</a></li><li class="chapter-item expanded "><a href="../app2/part7.html"><strong aria-hidden="true">2.7.</strong> Creating the AppController Class</a></li><li class="chapter-item expanded "><a href="../app2/part8.html"><strong aria-hidden="true">2.8.</strong> Putting It All Together</a></li><li class="chapter-item expanded "><a href="../app2/part9.html"><strong aria-hidden="true">2.9.</strong> Exploration</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../app1/intro.html"><strong aria-hidden="true">1.</strong> Lightning Graph Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app1/part1.html"><strong aria-hidden="true">1.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app1/part2.html"><strong aria-hidden="true">1.2.</strong> Code Setup</a></li><li class="chapter-item expanded "><a href="../app1/part3.html"><strong aria-hidden="true">1.3.</strong> Building the Server</a></li><li class="chapter-item expanded "><a href="../app1/part4.html"><strong aria-hidden="true">1.4.</strong> Building the UI</a></li><li class="chapter-item expanded "><a href="../app1/part5.html"><strong aria-hidden="true">1.5.</strong> Real-Time Updates</a></li><li class="chapter-item expanded "><a href="../app1/part6.html"><strong aria-hidden="true">1.6.</strong> Exploration</a></li></ol></li><li class="chapter-item expanded "><a href="../app2/intro.html"><strong aria-hidden="true">2.</strong> Lightning Network Invoices</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app2/part0-1.html"><strong aria-hidden="true">2.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app2/part0-2.html"><strong aria-hidden="true">2.2.</strong> Creating an Invoice in Code</a></li><li class="chapter-item expanded "><a href="../app2/part1-1.html"><strong aria-hidden="true">2.3.</strong> Application Walk-Through</a></li><li class="chapter-item expanded "><a href="../app2/part1-2.html"><strong aria-hidden="true">2.4.</strong> Application Algorithm</a></li><li class="chapter-item expanded "><a href="../app2/part3.html"><strong aria-hidden="true">2.5.</strong> Creating the Invoice Class</a></li><li class="chapter-item expanded "><a href="../app2/part4.html" class="active"><strong aria-hidden="true">2.6.</strong> Loading Invoices</a></li><li class="chapter-item expanded "><a href="../app2/part5.html"><strong aria-hidden="true">2.7.</strong> Creating the Link Class</a></li><li class="chapter-item expanded "><a href="../app2/part6.html"><strong aria-hidden="true">2.8.</strong> Creating the LinkFactory Class</a></li><li class="chapter-item expanded "><a href="../app2/part7.html"><strong aria-hidden="true">2.9.</strong> Creating the AppController Class</a></li><li class="chapter-item expanded "><a href="../app2/part8.html"><strong aria-hidden="true">2.10.</strong> Putting It All Together</a></li><li class="chapter-item expanded "><a href="../app2/part9.html"><strong aria-hidden="true">2.11.</strong> Exploration</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -144,23 +144,34 @@
                     <main>
                         <h1 id="loading-invoices"><a class="header" href="#loading-invoices">Loading Invoices</a></h1>
 <p>Now that we've discussed some aspects of domain specific invoices, we need to connect to our Lightning Network node and load invoices from its database. Our application does this using the <a href="https://martinfowler.com/eaaCatalog/dataMapper.html">data mapper</a> design pattern to isolate the specifics about data access from the remainder of our application logic.</p>
-<p>We define our data access behavior in the <code>IInvoiceDataMapper</code> interface that contains two methods for adding and invoice and performing a synchronization with the database.</p>
-<pre><code class="language-typescript">export type InvoiceHandler = (invoice: Invoice) =&gt; Promise&lt;void&gt;;
-
-export interface IInvoiceDataMapper {
+<p>We define our data access behavior in the <code>IInvoiceDataMapper</code> interface that contains two methods for adding an invoice and performing a synchronization with the database.</p>
+<pre><code class="language-typescript">export interface IInvoiceDataMapper {
+  /**
+   * Adds an invoice to the Lightning Network node
+   */
   add(value: number, memo: string, preimage: Buffer): Promise&lt;string&gt;;
+
+  /**
+   * Synchronizes the application with the current state of invoices. The
+   * handler method will be called for each invoice found in the invoice
+   * database and will be called when a new invoice is created, settled,
+   * or changes.
+   */
   sync(handler: InvoiceHandler): Promise&lt;void&gt;;
 }
+
+/**
+ * Defines a callback function that can be used to process a found invoice.
+ */
+export type InvoiceHandler = (invoice: Invoice) =&gt; Promise&lt;void&gt;;
 </code></pre>
-<p>The <code>InvoiceHandler</code> type is just a function that receives an <code>Invoice</code> as an argument.</p>
-<p>The <code>LndInvoiceDataMapper</code> class implements <code>IInvoiceDataMapper</code> and is located in the <code>server/data/lnd</code> folder. The constructor of this class accepts the interface <code>ILndClient</code>. There are two classes that implement <code>ILndClient</code>: <code>LndRestClient</code> and <code>LndRpcClient</code> that connect to LND over REST and GRPC respectively. We'll be using the latter to connect to LND over the GRPC API. </p>
-<p>For the purposes of our application, either client could be used. The indirection of code isolates our data mapper logic from the logic specific to each of the APIs. This is similar to how our we isolate our application code from the specifics of data access using LND. Feel free to explore the <code>LndRpcClient</code> and <code>LndRestClient</code> to see how they manage the details of establishing connections to the different APIs.</p>
-<p>For loading invoices we're concerned with the <code>sync</code> method.</p>
-<p>The <code>sync</code> method reaches out to our invoice database and requests all invoices. It will also subscribe to creation of new invoices or the settlement of existing invoices. Because the syncing process and the subscription are long lived, we will use notifications to alert our application code about invoice events instead of returning a list of the <code>Invoice</code> type.</p>
+<p>With the <code>IInvoiceDataMapper</code> defined, we need to implement a concrete version of it that works with LND. The <code>LndInvoiceDataMapper</code> class does just that. It is located in the <code>server/data/lnd</code> folder. The constructor of this class accepts the interface <code>ILndClient</code>. There are two classes that implement <code>ILndClient</code>: <code>LndRestClient</code> and <code>LndRpcClient</code> that connect to LND over REST and GRPC respectively. We'll be using the latter to connect to LND over the GRPC API. With this code structure, our application could switch to other types of Lightning Network nodes by implementing a new <code>IInvoiceDataMapper</code>. Or if we wanted to switch between the LNDs REST or GRPC client we can supply a different <code>ILndClient</code> to the <code>LndInvoiceDataMapper</code>.</p>
+<p>We'll now explore the methods on the <code>LndInvoiceDataMapper</code>. For loading invoices we're concerned with the <code>sync</code> method.</p>
+<p>The <code>sync</code> method reaches out to our invoice database and requests all invoices. It will also subscribe to creation of new invoices or the settlement of existing invoices. Because the syncing process and the subscription are long lived, we will use notifications to alert our application code about invoice events instead of returning a list of the <code>Invoice</code> type. You may have noticed the <code>InvoiceHandler</code> type. This type defines any function that receives an <code>Invoice</code> as an argument. Our <code>sync</code> method takes a single argument which must be an <code>InvoiceHandler</code>. This handler function will be called every time an invoice of is found or changes.</p>
 <p>The <code>sync</code> method does two things:</p>
 <ol>
 <li>connects to LND and retrieves all invoices in the database</li>
-<li>subscribes to existing invoices and</li>
+<li>subscribes to existing invoices for changes</li>
 </ol>
 <pre><code class="language-typescript">public async sync(handler: InvoiceHandler): Promise&lt;void&gt; {
     // fetch all invoices
@@ -171,7 +182,7 @@ export interface IInvoiceDataMapper {
         num_max_invoices,
     });
 
-    // process all retrieved invoices
+    // process all retrieved invoices by calling the handler
     for (const invoice of results.invoices) {
         await handler(this.convertInvoice(invoice));
     }
@@ -183,7 +194,7 @@ export interface IInvoiceDataMapper {
 }
 </code></pre>
 <p>Looking at this code, you'll see that the method receives a <code>handler: InvoiceHandler</code> parameter and we call that handler for each invoice that our database returns and when there is a change as a result of the subscription.</p>
-<p>Before we call the handler we need to convert the invoice from LND's invoice to our application's <code>Invoice</code> type.</p>
+<p>But, before we call the handler we need to convert the invoice from LND's invoice to our application's <code>Invoice</code> type.</p>
 <h2 id="exercise-implement-convertinvoice"><a class="header" href="#exercise-implement-convertinvoice">Exercise: Implement <code>convertInvoice</code></a></h2>
 <p>This function is a mapping function that converts LND's invoice type into our application domain's <code>Invoice</code> class.</p>
 <p>Go ahead and implement the <code>convertInvoice</code> method in the <code>server/data/LndInvoiceDataMapper</code> class. Make sure to perform proper type conversions.</p>

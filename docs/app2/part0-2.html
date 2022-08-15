@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Environment Setup - Building on Lightning</title>
+        <title>Creating an Invoice in Code - Building on Lightning</title>
 
 
         <!-- Custom HTML head -->
@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../app1/intro.html"><strong aria-hidden="true">1.</strong> Lightning Graph Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app1/part1.html"><strong aria-hidden="true">1.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app1/part2.html"><strong aria-hidden="true">1.2.</strong> Code Setup</a></li><li class="chapter-item expanded "><a href="../app1/part3.html"><strong aria-hidden="true">1.3.</strong> Building the Server</a></li><li class="chapter-item expanded "><a href="../app1/part4.html"><strong aria-hidden="true">1.4.</strong> Building the UI</a></li><li class="chapter-item expanded "><a href="../app1/part5.html"><strong aria-hidden="true">1.5.</strong> Real-Time Updates</a></li><li class="chapter-item expanded "><a href="../app1/part6.html"><strong aria-hidden="true">1.6.</strong> Exploration</a></li></ol></li><li class="chapter-item expanded "><a href="../app2/intro.html"><strong aria-hidden="true">2.</strong> Lightning Network Invoices</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app2/part1.html"><strong aria-hidden="true">2.1.</strong> Application Walk-Through</a></li><li class="chapter-item expanded "><a href="../app2/part2.html" class="active"><strong aria-hidden="true">2.2.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app2/part3.html"><strong aria-hidden="true">2.3.</strong> Invoices</a></li><li class="chapter-item expanded "><a href="../app2/part4.html"><strong aria-hidden="true">2.4.</strong> Loading Invoices</a></li><li class="chapter-item expanded "><a href="../app2/part5.html"><strong aria-hidden="true">2.5.</strong> Creating the Link Class</a></li><li class="chapter-item expanded "><a href="../app2/part6.html"><strong aria-hidden="true">2.6.</strong> Creating the LinkFactory Class</a></li><li class="chapter-item expanded "><a href="../app2/part7.html"><strong aria-hidden="true">2.7.</strong> Creating the AppController Class</a></li><li class="chapter-item expanded "><a href="../app2/part8.html"><strong aria-hidden="true">2.8.</strong> Putting It All Together</a></li><li class="chapter-item expanded "><a href="../app2/part9.html"><strong aria-hidden="true">2.9.</strong> Exploration</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../app1/intro.html"><strong aria-hidden="true">1.</strong> Lightning Graph Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app1/part1.html"><strong aria-hidden="true">1.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app1/part2.html"><strong aria-hidden="true">1.2.</strong> Code Setup</a></li><li class="chapter-item expanded "><a href="../app1/part3.html"><strong aria-hidden="true">1.3.</strong> Building the Server</a></li><li class="chapter-item expanded "><a href="../app1/part4.html"><strong aria-hidden="true">1.4.</strong> Building the UI</a></li><li class="chapter-item expanded "><a href="../app1/part5.html"><strong aria-hidden="true">1.5.</strong> Real-Time Updates</a></li><li class="chapter-item expanded "><a href="../app1/part6.html"><strong aria-hidden="true">1.6.</strong> Exploration</a></li></ol></li><li class="chapter-item expanded "><a href="../app2/intro.html"><strong aria-hidden="true">2.</strong> Lightning Network Invoices</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app2/part0-1.html"><strong aria-hidden="true">2.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app2/part0-2.html" class="active"><strong aria-hidden="true">2.2.</strong> Creating an Invoice in Code</a></li><li class="chapter-item expanded "><a href="../app2/part1-1.html"><strong aria-hidden="true">2.3.</strong> Application Walk-Through</a></li><li class="chapter-item expanded "><a href="../app2/part1-2.html"><strong aria-hidden="true">2.4.</strong> Application Algorithm</a></li><li class="chapter-item expanded "><a href="../app2/part3.html"><strong aria-hidden="true">2.5.</strong> Creating the Invoice Class</a></li><li class="chapter-item expanded "><a href="../app2/part4.html"><strong aria-hidden="true">2.6.</strong> Loading Invoices</a></li><li class="chapter-item expanded "><a href="../app2/part5.html"><strong aria-hidden="true">2.7.</strong> Creating the Link Class</a></li><li class="chapter-item expanded "><a href="../app2/part6.html"><strong aria-hidden="true">2.8.</strong> Creating the LinkFactory Class</a></li><li class="chapter-item expanded "><a href="../app2/part7.html"><strong aria-hidden="true">2.9.</strong> Creating the AppController Class</a></li><li class="chapter-item expanded "><a href="../app2/part8.html"><strong aria-hidden="true">2.10.</strong> Putting It All Together</a></li><li class="chapter-item expanded "><a href="../app2/part9.html"><strong aria-hidden="true">2.11.</strong> Exploration</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -142,49 +142,66 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="environment-setup"><a class="header" href="#environment-setup">Environment Setup</a></h1>
-<p>The application uses the same template we used in Graph exercise, so you should already be familiar with the structure. As a quick refresher. For this application we'll be focused on building logic inside the <code>server</code> sub-project.</p>
-<p>The application code is available in the <a href="https://github.com/bmancini55/building-lightning-invoices">Building on Lightning Invoices Project</a> on GitHub. You can clone this repository to begin.</p>
-<pre><code>git clone https://github.com/bmancini55/building-lightning-invoices.git
-</code></pre>
-<p>Navigate to the repository:</p>
-<pre><code>cd building-lightning-invoices
-</code></pre>
-<p>The repository uses <code>npm</code> scripts to perform common tasks. To install the dependencies, run:</p>
-<pre><code>npm install
-</code></pre>
-<p>This will install all of the dependencies for the three sub-modules in the project: <code>client</code>, <code>server</code>, and <code>style</code>. You may get some warnings, but as long as the install command has exit code 0 for all three sub-projects you should be good. If you do encounter any errors, you can try browsing to the individual sub-project and running the <code>npm install</code> command inside each directory.</p>
-<p>We'll also need a Lightning Network environment to test. You can use the existing environment you created with Polar in the first project. We'll again be building the application from the perspective of Alice using an LND node.</p>
-<h2 id="exercise-configuring-env-to-connect-to-lnd"><a class="header" href="#exercise-configuring-env-to-connect-to-lnd">Exercise: Configuring <code>.env</code> to Connect to LND</a></h2>
-<p>We'll again use the <code>dotenv</code> package to simplify environment variables.</p>
-<p>Our next exercise is adding some values to <code>.env</code> inside the <code>server</code> sub-project. We'll add three new environment variables:</p>
-<ul>
-<li><code>LND_RPC_HOST</code> is the host for LND RPC</li>
-<li><code>LND_ADMIN_MACAROON_PATH</code> is the file path to the admin Macaroon</li>
-<li><code>LND_CERT_PATH</code> is the certificate we use to securely connect with LND</li>
-</ul>
-<p>In Polar, to access Alice's node by click on Alice and then click on the <code>Connect</code> tab. You will be shown the information on how to connect to the GRPC and REST interfaces. Additionally you will be given paths to the network certificates and macaroon files that we will need in <code>.env</code>.</p>
-<p><img src="../images/ch1_polar_connect_to_alice.png" alt="Connect to Alice" /></p>
-<p>Go ahead and add the three environment variables defined above to <code>.env</code>.</p>
-<pre><code># Express configuration
-PORT=8001
+                        <h1 id="creating-an-invoice-in-code"><a class="header" href="#creating-an-invoice-in-code">Creating an Invoice in Code</a></h1>
+<p>We'll start the invoice coding journey by doing a very simple script to create the invoice. When run, our script will simply call the <a href="https://api.lightning.community/#addinvoice"><code>AddInvoice</code></a> GRPC API in LND to construct and return the invoice.</p>
+<p>The script code is located in <code>server/scripts/CreateInvoiceScript.ts</code> if you want to see the full thing. The interesting bits are below:</p>
+<pre><code class="language-typescript">async function run() {
+  // construct the options
+  const options = await Options.fromEnv();
 
-# LND configuration
-# Exercise: Provide values for Alice's node
-LND_RPC_HOST=
-LND_ADMIN_MACAROON_PATH=
-LND_CERT_PATH=
+  // create the rpc client
+  const lndRpcClient = new LndRpcClient(
+    options.lndRpcHost,
+    options.lndAdminMacaroon,
+    options.lndCert
+  );
+
+  // create the invoice
+  return lndRpcClient.addInvoice({
+    memo: &quot;Demo invoice&quot;,
+    amt: 1000,
+  });
+}
 </code></pre>
+<p>You can see this script has three parts</p>
+<ol>
+<li>Load the environment variables from the .env file we populated with Alice's node information</li>
+<li>Construct a client to securely communicate with the LND node</li>
+<li>Call the <code>AddInvoice</code> API with some info</li>
+</ol>
+<p>When the script is run it will output result from calling <code>AddInvoice</code> which includes the encoded payment request.</p>
+<h2 id="exercise-run-the-create-script"><a class="header" href="#exercise-run-the-create-script">Exercise: Run the Create Script</a></h2>
+<p>To run the script, from the root of repository, run the command:</p>
+<pre><code>npm run script:create-invoice
+</code></pre>
+<p>Dev note: We're using an NPM script to help simplify running the script. When an NPM script runs it will first output the underlying command that it is trying to execute.</p>
+<p>If you are successful you should see some output similar to:</p>
+<pre><code>$ npm run script:create-invoice
+
+&gt; building-lightning-invoices@1.0.0 script:create-invoice
+&gt; cd server; ts-node scripts/CreateInvoiceScript.ts
+
+{
+  r_hash: &lt;Buffer 8f 9b 82 eb be 48 63 46 e5 6a 06 a0 e0 cd 18 e3 70 49 76 3d a3 23 d2 79 e8 3f d9 7d 7e 26 d3 44&gt;,
+  payment_request: 'lnbcrt10u1p309sufpp537dc96a7fp35det2q6swpngcudcyja3a5v3ay70g8lvh6l3x6dzqdq5g3jk6meqd9h8vmmfvdjscqzpgsp59fj97cj6wcdlht8twr9ay3mhcm39nnfv8tp632lram4sxaylfwtq9qyyssqqll2xf39v9nwfy4pwlx8vl4wu6rxym56z80rylssu85h587kgssnleva78jwnz4lv0p9dhcka7pxgyh6hj462gzh897exa4ry4w4gfgqnzwpu8',
+  add_index: '22',
+  payment_addr: &lt;Buffer 2a 64 5f 62 5a 76 1b fb ac eb 70 cb d2 47 77 c6 e2 59 cd 2c 3a c3 a8 ab e3 ee eb 03 74 9f 4b 96&gt;
+}
+</code></pre>
+<p>You can now copy the <code>payment_request</code> value and try to pay with Bob in Polar.</p>
+<p><img src="../images/ch2_app_bob_pays.png" alt="Bob Pays Invoice" /></p>
+<p>As you can see, creating an invoice is pretty straight forward. This example relies on the node to create the preimage and the hash for the invoice. Try modifying the script to change the memo, amount, or creating a preimage.</p>
+<p>Next we'll build a more complicated application using invoices.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../app2/part1.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../app2/part0-1.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="../app2/part3.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../app2/part1-1.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -194,11 +211,11 @@ LND_CERT_PATH=
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../app2/part1.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../app2/part0-1.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="../app2/part3.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../app2/part1-1.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

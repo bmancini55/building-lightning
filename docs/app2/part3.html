@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Invoices - Building on Lightning</title>
+        <title>Creating the Invoice Class - Building on Lightning</title>
 
 
         <!-- Custom HTML head -->
@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../app1/intro.html"><strong aria-hidden="true">1.</strong> Lightning Graph Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app1/part1.html"><strong aria-hidden="true">1.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app1/part2.html"><strong aria-hidden="true">1.2.</strong> Code Setup</a></li><li class="chapter-item expanded "><a href="../app1/part3.html"><strong aria-hidden="true">1.3.</strong> Building the Server</a></li><li class="chapter-item expanded "><a href="../app1/part4.html"><strong aria-hidden="true">1.4.</strong> Building the UI</a></li><li class="chapter-item expanded "><a href="../app1/part5.html"><strong aria-hidden="true">1.5.</strong> Real-Time Updates</a></li><li class="chapter-item expanded "><a href="../app1/part6.html"><strong aria-hidden="true">1.6.</strong> Exploration</a></li></ol></li><li class="chapter-item expanded "><a href="../app2/intro.html"><strong aria-hidden="true">2.</strong> Lightning Network Invoices</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app2/part1.html"><strong aria-hidden="true">2.1.</strong> Application Walk-Through</a></li><li class="chapter-item expanded "><a href="../app2/part2.html"><strong aria-hidden="true">2.2.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app2/part3.html" class="active"><strong aria-hidden="true">2.3.</strong> Invoices</a></li><li class="chapter-item expanded "><a href="../app2/part4.html"><strong aria-hidden="true">2.4.</strong> Loading Invoices</a></li><li class="chapter-item expanded "><a href="../app2/part5.html"><strong aria-hidden="true">2.5.</strong> Creating the Link Class</a></li><li class="chapter-item expanded "><a href="../app2/part6.html"><strong aria-hidden="true">2.6.</strong> Creating the LinkFactory Class</a></li><li class="chapter-item expanded "><a href="../app2/part7.html"><strong aria-hidden="true">2.7.</strong> Creating the AppController Class</a></li><li class="chapter-item expanded "><a href="../app2/part8.html"><strong aria-hidden="true">2.8.</strong> Putting It All Together</a></li><li class="chapter-item expanded "><a href="../app2/part9.html"><strong aria-hidden="true">2.9.</strong> Exploration</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../app1/intro.html"><strong aria-hidden="true">1.</strong> Lightning Graph Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app1/part1.html"><strong aria-hidden="true">1.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app1/part2.html"><strong aria-hidden="true">1.2.</strong> Code Setup</a></li><li class="chapter-item expanded "><a href="../app1/part3.html"><strong aria-hidden="true">1.3.</strong> Building the Server</a></li><li class="chapter-item expanded "><a href="../app1/part4.html"><strong aria-hidden="true">1.4.</strong> Building the UI</a></li><li class="chapter-item expanded "><a href="../app1/part5.html"><strong aria-hidden="true">1.5.</strong> Real-Time Updates</a></li><li class="chapter-item expanded "><a href="../app1/part6.html"><strong aria-hidden="true">1.6.</strong> Exploration</a></li></ol></li><li class="chapter-item expanded "><a href="../app2/intro.html"><strong aria-hidden="true">2.</strong> Lightning Network Invoices</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app2/part0-1.html"><strong aria-hidden="true">2.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app2/part0-2.html"><strong aria-hidden="true">2.2.</strong> Creating an Invoice in Code</a></li><li class="chapter-item expanded "><a href="../app2/part1-1.html"><strong aria-hidden="true">2.3.</strong> Application Walk-Through</a></li><li class="chapter-item expanded "><a href="../app2/part1-2.html"><strong aria-hidden="true">2.4.</strong> Application Algorithm</a></li><li class="chapter-item expanded "><a href="../app2/part3.html" class="active"><strong aria-hidden="true">2.5.</strong> Creating the Invoice Class</a></li><li class="chapter-item expanded "><a href="../app2/part4.html"><strong aria-hidden="true">2.6.</strong> Loading Invoices</a></li><li class="chapter-item expanded "><a href="../app2/part5.html"><strong aria-hidden="true">2.7.</strong> Creating the Link Class</a></li><li class="chapter-item expanded "><a href="../app2/part6.html"><strong aria-hidden="true">2.8.</strong> Creating the LinkFactory Class</a></li><li class="chapter-item expanded "><a href="../app2/part7.html"><strong aria-hidden="true">2.9.</strong> Creating the AppController Class</a></li><li class="chapter-item expanded "><a href="../app2/part8.html"><strong aria-hidden="true">2.10.</strong> Putting It All Together</a></li><li class="chapter-item expanded "><a href="../app2/part9.html"><strong aria-hidden="true">2.11.</strong> Exploration</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -142,12 +142,12 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="invoices"><a class="header" href="#invoices">Invoices</a></h1>
+                        <h1 id="creating-the-invoice-class"><a class="header" href="#creating-the-invoice-class">Creating the <code>Invoice</code> Class</a></h1>
 <p>The next logical step is configuring how we'll handle invoices. For this application, we'll use LND and its invoice database to power our application. We'll be encoding some basic information into the invoice memo field so our application doesn't need to maintain or synchronize a separate database. In a production system we'd likely use a separate database system, but we've made this decision to keep the application tightly focused.</p>
 <p>This time around we'll be using the <a href="https://api.lightning.community/#lnd-grpc-api-reference">LND RPC API</a>. This is similar to the REST interface we used in the previous application but uses a binary protocol instead of HTTPS to communicate with the LND node. For the purposes of our application it will be remarkably similar and in reality, the only difference will be how we wire up the application. Which brings us to our next point.</p>
-<p>From a software engineering perspective, it's a good practice to isolate our application logic from the specifics of the underlying data persistence mechanism. This rule is often conveyed when working with relational databases systems where it would be poor form for your database tables to dictate how your application logic functions. This is no different than working with Lightning Network nodes! We break out our code so that we can tightly focus the critical application bits from the logic of how we retrieve that information. A by-product is that we could switch out from LND to c-lightning or Eclair without having to change our core application logic!</p>
-<p>To achieve this decoupling goal, instead of pinning our application to the structure of invoices in LND's database, we'll create our own <code>Invoice</code> type that is used throughout our application. This also allows us to add some methods or calculations to our <code>Invoice</code> type that are &quot;domain&quot; specific to our application.</p>
-<p>You can take a look at the <code>server/domain/Invoice</code> class. This class only has properties that the application uses such as memo, preimage, hash, value in satoshis, and settlement information.</p>
+<p>From a software engineering perspective, it's a good practice to isolate our application logic from the specifics of the underlying data persistence mechanism. This rule is often conveyed when working with relational databases systems where it would be poor form for your database tables to dictate how your application logic functions. This is no different than working with Lightning Network nodes! We break out our code so that we can tightly focus the critical application bits from the logic of how we retrieve that information. A by-product is that we could switch from LND to c-lightning or Eclair without having to change our core application logic!</p>
+<p>To achieve this decoupling, instead of pinning our application to the structure of invoices in LND's database, we'll create our own <code>Invoice</code> type that is used throughout our application. This also allows us to add some methods to our <code>Invoice</code> type that are domain specific to our application.</p>
+<p>You can take a look at the <code>server/domain/Invoice</code> class. This class only has properties that the application uses: memo, preimage, hash, value in satoshis, and settlement information.</p>
 <pre><code class="language-typescript">export class Invoice {
   constructor(
     public memo: string,
@@ -163,59 +163,52 @@
 </code></pre>
 <h2 id="exercise-implement-creatememo"><a class="header" href="#exercise-implement-creatememo">Exercise: Implement <code>createMemo</code></a></h2>
 <p>Our application is going be encoding some information into the memo field. We need to be careful about making the memo field too large but for our applications sake we'll construct the memo as such:</p>
-<pre><code>buy_{priorPreimage}_{buyerId}
+<pre><code>buy_{linkId}_{buyerId}
 </code></pre>
-<p>The <code>priorPreimage</code> is going to 32-byte value (64 hex encoded characters). The <code>buyerId</code> is the 33-byte public key (66 hex encoded characters) of the buying node.</p>
+<p>The <code>linkId</code> is going to be a 32-byte value (64 hex encoded characters). As we discussed in the last section, the linkId is the current point of the game. We use the <code>linkId</code> to help us identify which point of the game the invoice was for.</p>
+<p>The <code>buyerId</code> is the 33-byte public key (66 hex encoded characters) of the node that we are generating the invoice for. In this case, if Bob requested an invoice to pay, this value would be the public key of Bob's Lightning Network node.</p>
 <p>Go ahead and implement the <code>createMemo</code> method in <code>server/domain/Invoice</code> class according to the rule specified.</p>
-<pre><code class="language-typescript">//
-public static createMemo(priorPreimage: string, buyer: string) {
+<pre><code class="language-typescript">public static createMemo(linkId: string, buyer: string) {
     // Exercise
 }
 </code></pre>
 <p>When you are finished you can verify you successfully implemented the method with the following command:</p>
 <pre><code>npm run test:server -- --grep createMemo
 </code></pre>
-<h2 id="exercise-implement-isappinvoice"><a class="header" href="#exercise-implement-isappinvoice">Exercise: Implement <code>isAppInvoice</code>.</a></h2>
-<p>We need a way to distinguish invoices that the application cares about from other invoices that the Lightning Network node may have created for other purpose.</p>
-<p>We'll do this by implementing the <code>isAppInvoice</code> method to check whether the memo conforms to the pattern we just created in the <code>createMemo</code> method.</p>
-<p>We will only return true when a few conditions have been met:</p>
+<h2 id="helper-function-isappinvoice"><a class="header" href="#helper-function-isappinvoice">Helper Function <code>isAppInvoice</code>.</a></h2>
+<p>Now that you create invoices memos we'll need to do the inverse. We need a way to distinguish invoices that the application created from other invoices that the Lightning Network node may have created for other purpose.</p>
+<p>We do this with the <code>isAppInvoice</code> method. This method checks whether the memo conforms to the pattern we just created in the <code>createMemo</code> method. This function will only return true when a few conditions have been met:</p>
 <ol>
 <li>The invoice's memo field starts with the prefix <code>buy_</code></li>
 <li>The invoice's memo then contains 64 hex characters followed by another underscore</li>
 <li>The invoice's memo ends with 66 hex characters.</li>
 </ol>
-<p>Go ahead and implement the <code>isAppInvoice</code> in the <code>server/domain/Invoice</code> class.</p>
 <pre><code class="language-typescript">public isAppInvoice(): boolean {
-    // Exercise
+    return /^buy_[0-9a-f]{64}_[0-9a-f]{66}$/.test(this.memo);
 }
 </code></pre>
-<p>When you are finished you can verify you successfully implemented the method with the following command:</p>
-<pre><code>npm run test:server -- --grep isAppInvoice
-</code></pre>
-<h2 id="exercise-implement-priorpreimage-and-buyernodeid"><a class="header" href="#exercise-implement-priorpreimage-and-buyernodeid">Exercise Implement <code>priorPreimage</code> and <code>buyerNodeId</code></a></h2>
-<p>We have two more helper methods we need to implement surrounding the memo field. We want a quick way to extract the prior preimage and the buyer's public key. We'll do this by implementing two helper methods that grab these values from the memo field. These two methods are very similar, so feel free to be creative in how you structure your code (and possibly refactor the <code>isAppInvoice</code> method).</p>
-<p>Go ahead and implement the <code>priorPreimage</code> getter in the <code>server/domain/Invoice</code> class.</p>
-<pre><code class="language-typescript">public get priorPreimage(): string {
-    // Exercise
+<h2 id="helper-functions-linkid-and-buyernodeid"><a class="header" href="#helper-functions-linkid-and-buyernodeid">Helper Functions <code>linkId</code> and <code>buyerNodeId</code></a></h2>
+<p>We have two more helper methods that will be useful for our application. We want a quick way to extract the link identifier and the buyer's public key from the memo. We'll do this by implementing two helper methods that grab these values from the memo field. These two methods are very similar.</p>
+<pre><code class="language-typescript">public get linkId(): string {
+    return this.memo.split(&quot;_&quot;)[1];
 }
-</code></pre>
-<p>When you are finished you can verify you successfully implemented the method with the following command:</p>
-<pre><code>npm run test:server -- --grep priorPreimage
-</code></pre>
-<p>Then go ahead and implement the <code>buyerNodeId</code> getter in the <code>server/domain/Invoice</code> class.</p>
-<pre><code class="language-typescript">public get buyerNodeId(): string {
-    // Exercise
+
+public get buyerNodeId(): string {
+    return this.memo.split(&quot;_&quot;)[2];
 }
-</code></pre>
-<p>When you are finished you can verify you successfully implemented the method with the following command:</p>
-<pre><code>npm run test:server -- --grep buyerNodeId
 </code></pre>
 <h2 id="exercise-implement-createpreimage"><a class="header" href="#exercise-implement-createpreimage">Exercise: Implement <code>createPreimage</code></a></h2>
-<p>The last method we'll implement is a helper method that we will use later. If you recall that we're going to calculate the preimage as:</p>
+<p>The last method we'll need on the <code>Invoice</code> class is a helper method that allows us to construct the preimage for an invoice. If you recall that we're going to generate the preimage using three pieces of data:</p>
+<ol>
+<li>The server's signature of the current link identifier</li>
+<li>A signature of the current link identifier created by the person trying to become the leader</li>
+<li>The satoshis that they will pay to become the leader.</li>
+</ol>
+<p>We concatenate these values and use <code>sha256</code> to contain the concatenation inside 32-bytes. Our algorithm looks like:</p>
 <pre><code>sha256(alice_sig(seed) || bob_sig(seed) || satoshis)
 </code></pre>
 <p>where <code>||</code> denotes concatenation.</p>
-<p>Based on that information, go ahead and implement the <code>createPreimage</code> method in the <code>server/domain/Invoice</code> class.</p>
+<p>Based on that information, go ahead and implement the <code>createPreimage</code> method in the <code>server/domain/Invoice</code> class. Note that a <code>sha256</code> function is available for you to use.</p>
 <pre><code class="language-typescript">public static createPreimage(local: string, remote: string, sats: number) {
     // Exercise
 }
@@ -228,7 +221,7 @@ public static createMemo(priorPreimage: string, buyer: string) {
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../app2/part2.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../app2/part1-2.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
@@ -242,7 +235,7 @@ public static createMemo(priorPreimage: string, buyer: string) {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../app2/part2.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../app2/part1-2.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 

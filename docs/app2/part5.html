@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../app1/intro.html"><strong aria-hidden="true">1.</strong> Lightning Graph Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app1/part1.html"><strong aria-hidden="true">1.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app1/part2.html"><strong aria-hidden="true">1.2.</strong> Code Setup</a></li><li class="chapter-item expanded "><a href="../app1/part3.html"><strong aria-hidden="true">1.3.</strong> Building the Server</a></li><li class="chapter-item expanded "><a href="../app1/part4.html"><strong aria-hidden="true">1.4.</strong> Building the UI</a></li><li class="chapter-item expanded "><a href="../app1/part5.html"><strong aria-hidden="true">1.5.</strong> Real-Time Updates</a></li><li class="chapter-item expanded "><a href="../app1/part6.html"><strong aria-hidden="true">1.6.</strong> Exploration</a></li></ol></li><li class="chapter-item expanded "><a href="../app2/intro.html"><strong aria-hidden="true">2.</strong> Lightning Network Invoices</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app2/part1.html"><strong aria-hidden="true">2.1.</strong> Application Walk-Through</a></li><li class="chapter-item expanded "><a href="../app2/part2.html"><strong aria-hidden="true">2.2.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app2/part3.html"><strong aria-hidden="true">2.3.</strong> Invoices</a></li><li class="chapter-item expanded "><a href="../app2/part4.html"><strong aria-hidden="true">2.4.</strong> Loading Invoices</a></li><li class="chapter-item expanded "><a href="../app2/part5.html" class="active"><strong aria-hidden="true">2.5.</strong> Creating the Link Class</a></li><li class="chapter-item expanded "><a href="../app2/part6.html"><strong aria-hidden="true">2.6.</strong> Creating the LinkFactory Class</a></li><li class="chapter-item expanded "><a href="../app2/part7.html"><strong aria-hidden="true">2.7.</strong> Creating the AppController Class</a></li><li class="chapter-item expanded "><a href="../app2/part8.html"><strong aria-hidden="true">2.8.</strong> Putting It All Together</a></li><li class="chapter-item expanded "><a href="../app2/part9.html"><strong aria-hidden="true">2.9.</strong> Exploration</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../app1/intro.html"><strong aria-hidden="true">1.</strong> Lightning Graph Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app1/part1.html"><strong aria-hidden="true">1.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app1/part2.html"><strong aria-hidden="true">1.2.</strong> Code Setup</a></li><li class="chapter-item expanded "><a href="../app1/part3.html"><strong aria-hidden="true">1.3.</strong> Building the Server</a></li><li class="chapter-item expanded "><a href="../app1/part4.html"><strong aria-hidden="true">1.4.</strong> Building the UI</a></li><li class="chapter-item expanded "><a href="../app1/part5.html"><strong aria-hidden="true">1.5.</strong> Real-Time Updates</a></li><li class="chapter-item expanded "><a href="../app1/part6.html"><strong aria-hidden="true">1.6.</strong> Exploration</a></li></ol></li><li class="chapter-item expanded "><a href="../app2/intro.html"><strong aria-hidden="true">2.</strong> Lightning Network Invoices</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app2/part0-1.html"><strong aria-hidden="true">2.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app2/part0-2.html"><strong aria-hidden="true">2.2.</strong> Creating an Invoice in Code</a></li><li class="chapter-item expanded "><a href="../app2/part1-1.html"><strong aria-hidden="true">2.3.</strong> Application Walk-Through</a></li><li class="chapter-item expanded "><a href="../app2/part1-2.html"><strong aria-hidden="true">2.4.</strong> Application Algorithm</a></li><li class="chapter-item expanded "><a href="../app2/part3.html"><strong aria-hidden="true">2.5.</strong> Creating the Invoice Class</a></li><li class="chapter-item expanded "><a href="../app2/part4.html"><strong aria-hidden="true">2.6.</strong> Loading Invoices</a></li><li class="chapter-item expanded "><a href="../app2/part5.html" class="active"><strong aria-hidden="true">2.7.</strong> Creating the Link Class</a></li><li class="chapter-item expanded "><a href="../app2/part6.html"><strong aria-hidden="true">2.8.</strong> Creating the LinkFactory Class</a></li><li class="chapter-item expanded "><a href="../app2/part7.html"><strong aria-hidden="true">2.9.</strong> Creating the AppController Class</a></li><li class="chapter-item expanded "><a href="../app2/part8.html"><strong aria-hidden="true">2.10.</strong> Putting It All Together</a></li><li class="chapter-item expanded "><a href="../app2/part9.html"><strong aria-hidden="true">2.11.</strong> Exploration</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -143,16 +143,19 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="creating-the-link-class"><a class="header" href="#creating-the-link-class">Creating the <code>Link</code> Class</a></h1>
-<p>For our application, we can think of the leadership chain as links in a chain. There is always a link at the end that is &quot;open&quot; for taking over the leadership position. The last closed link in the chain is the current leader of the game. </p>
-<p>The <code>Link</code> class defines a single link in the chain of ownership and it models this behavior of ownership. A <code>Link</code> can be in one of two states: <code>unsettled</code> or <code>settled</code>.</p>
-<p>When a <code>Link</code> is unsettled, it means that no one has take ownership or closed that link. It is still open to the world and anyone can pay an invoice and take ownership.</p>
-<p>When a <code>Link</code> is settled, the payer of the invoice becomes the owner. If this is the last closed link in the chain it is considered the current leader of the game.</p>
-<p>So let's take a look at the <code>Link</code> type.</p>
+<p>For our application, we can think of the leaders in the game as links in a chain. There is always a link at the end that is &quot;open&quot; for taking over the leadership position. The last closed link in the chain is the current leader of the game.</p>
+<p>The <code>Link</code> class defines a single link in the chain of ownership. A <code>Link</code> can be in one of two states: <code>unsettled</code> or <code>settled</code>.</p>
+<p>When a <code>Link</code> is unsettled, it means that no one has take ownership or closed that link. It is still open to the world and anyone can pay an invoice and take ownership. Only the last link in the chain will ever be <code>unsettled</code>.</p>
+<p>When a <code>Link</code> is settled, it means there was an invoice that was paid to close that link. The person that paid the invoice becomes the owner of that link. The last closed link in the chain is considered the current leader of the game.</p>
+<p>Take a look at the diagram of game links again.</p>
+<p><img src="../images/ch2_diagram_01.png" alt="Link" /></p>
+<p>The preimage of a settled invoice of the <em>prior</em> link becomes the identifier of the next link.</p>
+<p>Let's take a look at the <code>Link</code> type.</p>
 <pre><code class="language-typescript">export class Link {
   public invoice: Invoice;
 
   constructor(
-    public priorPreimage: string,
+    public linkId: string,
     public localSignature: string,
     public minSats: number
   ) {}
@@ -162,14 +165,14 @@
 </code></pre>
 <p>This type has a few properties:</p>
 <ul>
-<li><code>priorPreimage</code> is the identifier. We &quot;link&quot; back to the last settled invoice by making the <code>Link</code> identifier the last settled preimage.</li>
-<li><code>localSignature</code> is our Lightning Network node's signature of the <code>priorPreimage</code>. We'll use this to construct invoices.</li>
-<li><code>minSats</code> is the minimum satoshis payment we're willing to accept payment to settle this <code>Link</code>.</li>
+<li><code>linkId</code> is the identifier of the link and will either be a seed value for the first link or the preimage of the the settling invoice of the previous link.</li>
+<li><code>localSignature</code> is our Lightning Network node's signature of the <code>linkId</code>. We'll use this to construct invoices using our <code>createPreimage</code> helper function</li>
+<li><code>minSats</code> is the minimum satoshis payment we're willing to accept payment to settle this <code>Link</code>. This value will be larger than the last link.</li>
 </ul>
-<p>You'll also notice that there is an <code>invoice</code> property. This property will be assigned a settled invoice when someone pays the <code>Invoice</code>.</p>
+<p>You'll also notice that there is an <code>invoice</code> property. This property will be assigned when a invoice when someone pays the <code>Invoice</code> that corresponds to this link.</p>
 <h2 id="exercise-implement-issettled"><a class="header" href="#exercise-implement-issettled">Exercise: Implement <code>isSettled</code></a></h2>
 <p>A <code>Link</code> is only considered settled when it has an invoice assigned and that invoice is settled.</p>
-<p>Go ahead and implement the <code>isSettled</code> getter.</p>
+<p>Go ahead and implement the <code>isSettled</code> getter which should check the <code>invoice</code> property to see if it has a value. If it does have a value it should check the invoice to see if it has been settled.</p>
 <pre><code class="language-typescript">public get isSettled(): boolean {
     // Exercise
 }
@@ -177,16 +180,16 @@
 <p>When you are finished you can verify you successfully implemented the method with the following command:</p>
 <pre><code>npm run test:server -- --grep isSettled
 </code></pre>
-<h2 id="exercise-implement-next"><a class="header" href="#exercise-implement-next">Exercise: Implement <code>next</code></a></h2>
-<p>Once a <code>Link</code> is settled, the <code>next</code> property should contain the settling invoice's preimage.</p>
+<h2 id="exercise-implement-nextlinkid"><a class="header" href="#exercise-implement-nextlinkid">Exercise: Implement <code>nextLinkId</code></a></h2>
+<p>Once a <code>Link</code> is settled, the <code>nextLinkId</code> property should contain the settling invoice's preimage.</p>
 <p>This property should only return a value when a <code>Link</code> is settled. When the <code>Link</code> is settled it should return the invoice's preimage.</p>
-<p>Go ahead and implement the <code>next</code> getter.</p>
-<pre><code class="language-typescript">public get next(): string {
+<p>Go ahead and implement the <code>nextLinkId</code> getter.</p>
+<pre><code class="language-typescript">public get nextLinkId(): string {
     // Exercise
 }
 </code></pre>
 <p>When you are finished you can verify you successfully implemented the method with the following command:</p>
-<pre><code>npm run test:server -- --grep next
+<pre><code>npm run test:server -- --grep nextLinkId
 </code></pre>
 
                     </main>
