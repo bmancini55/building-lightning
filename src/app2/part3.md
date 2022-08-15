@@ -51,67 +51,39 @@ When you are finished you can verify you successfully implemented the method wit
 npm run test:server -- --grep createMemo
 ```
 
-## Exercise: Implement `isAppInvoice`.
+## Helper Function `isAppInvoice`.
 
-We need a way to distinguish invoices that the application cares about from other invoices that the Lightning Network node may have created for other purpose.
+Now that you create invoices memos we'll need to do the inverse. We need a way to distinguish invoices that the application created from other invoices that the Lightning Network node may have created for other purpose.
 
-We'll do this by implementing the `isAppInvoice` method to check whether the memo conforms to the pattern we just created in the `createMemo` method.
-
-We will only return true when a few conditions have been met:
+We do this with the `isAppInvoice` method. This method checks whether the memo conforms to the pattern we just created in the `createMemo` method. This function will only return true when a few conditions have been met:
 
 1. The invoice's memo field starts with the prefix `buy_`
 1. The invoice's memo then contains 64 hex characters followed by another underscore
 1. The invoice's memo ends with 66 hex characters.
 
-Go ahead and implement the `isAppInvoice` in the `server/domain/Invoice` class.
-
 ```typescript
 public isAppInvoice(): boolean {
-    // Exercise
+    return /^buy_[0-9a-f]{64}_[0-9a-f]{66}$/.test(this.memo);
 }
 ```
 
-When you are finished you can verify you successfully implemented the method with the following command:
+## Helper Functions `priorPreimage` and `buyerNodeId`
 
-```
-npm run test:server -- --grep isAppInvoice
-```
-
-## Exercise Implement `priorPreimage` and `buyerNodeId`
-
-We have two more helper methods we need to implement surrounding the memo field. We want a quick way to extract the prior preimage and the buyer's public key. We'll do this by implementing two helper methods that grab these values from the memo field. These two methods are very similar, so feel free to be creative in how you structure your code (and possibly refactor the `isAppInvoice` method).
-
-Go ahead and implement the `priorPreimage` getter in the `server/domain/Invoice` class.
+We have two more helper methods that will be useful for our application. We want a quick way to extract the prior preimage and the buyer's public key. We'll do this by implementing two helper methods that grab these values from the memo field. These two methods are very similar.
 
 ```typescript
 public get priorPreimage(): string {
-    // Exercise
+    return this.memo.split("_")[1];
 }
-```
 
-When you are finished you can verify you successfully implemented the method with the following command:
-
-```
-npm run test:server -- --grep priorPreimage
-```
-
-Then go ahead and implement the `buyerNodeId` getter in the `server/domain/Invoice` class.
-
-```typescript
 public get buyerNodeId(): string {
-    // Exercise
+    return this.memo.split("_")[2];
 }
-```
-
-When you are finished you can verify you successfully implemented the method with the following command:
-
-```
-npm run test:server -- --grep buyerNodeId
 ```
 
 ## Exercise: Implement `createPreimage`
 
-The last method we'll implement on the `Invoice` class is a helper method that allows us to construct the preimage for an invoice. If you recall that we're going to generate the preimage using three pieces of data:
+The last method we'll need on the `Invoice` class is a helper method that allows us to construct the preimage for an invoice. If you recall that we're going to generate the preimage using three pieces of data:
 
 1. The server's signature of the current link identifier
 1. A signature of the current link identifier created by the person trying to become the leader
@@ -125,7 +97,7 @@ sha256(alice_sig(seed) || bob_sig(seed) || satoshis)
 
 where `||` denotes concatenation.
 
-Based on that information, go ahead and implement the `createPreimage` method in the `server/domain/Invoice` class. Not that a `sha256` function is available for you to use.
+Based on that information, go ahead and implement the `createPreimage` method in the `server/domain/Invoice` class. Note that a `sha256` function is available for you to use.
 
 ```typescript
 public static createPreimage(local: string, remote: string, sats: number) {
