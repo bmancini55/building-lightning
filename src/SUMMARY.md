@@ -1,5 +1,7 @@
 # Summary
 
+[Building on Lightning](./intro.md)
+
 - [Lightning Graph Visualizer](./app1/intro.md)
 
   - [Environment Setup](./app1/part1.md)
