@@ -10,6 +10,7 @@
   - [Exploration](./app1/part6.md)
 
 - [Lightning Network Invoices](./app2/intro.md)
+
   - [Environment Setup](./app2/part0-1.md)
   - [Creating an Invoice in Code](./app2/part0-2.md)
   - [Application Walk-Through](./app2/part1-1.md)
@@ -21,3 +22,9 @@
   - [Creating the `AppController` Class](./app2/part7.md)
   - [Putting It All Together](./app2/part8.md)
   - [Exploration](./app2/part9.md)
+
+- [Advanced Topics](./advanced/intro.md)
+  - [Environment Setup](./advanced/env_setup.md)
+  - [Hold Invoices](./advanced/hold_invoices.md)
+  - [Spontaneous Payments with Keysend](./advanced/spontanenous_keysend.md)
+  - [Circular Rebalancing](./advanced/circular_rebalance.md)
