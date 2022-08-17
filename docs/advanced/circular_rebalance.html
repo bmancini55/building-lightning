@@ -1,0 +1,454 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Circular Rebalancing - Building on Lightning</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../app1/intro.html"><strong aria-hidden="true">1.</strong> Lightning Graph Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app1/part1.html"><strong aria-hidden="true">1.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app1/part2.html"><strong aria-hidden="true">1.2.</strong> Code Setup</a></li><li class="chapter-item expanded "><a href="../app1/part3.html"><strong aria-hidden="true">1.3.</strong> Building the Server</a></li><li class="chapter-item expanded "><a href="../app1/part4.html"><strong aria-hidden="true">1.4.</strong> Building the UI</a></li><li class="chapter-item expanded "><a href="../app1/part5.html"><strong aria-hidden="true">1.5.</strong> Real-Time Updates</a></li><li class="chapter-item expanded "><a href="../app1/part6.html"><strong aria-hidden="true">1.6.</strong> Exploration</a></li></ol></li><li class="chapter-item expanded "><a href="../app2/intro.html"><strong aria-hidden="true">2.</strong> Lightning Network Invoices</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app2/part0-1.html"><strong aria-hidden="true">2.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app2/part0-2.html"><strong aria-hidden="true">2.2.</strong> Creating an Invoice in Code</a></li><li class="chapter-item expanded "><a href="../app2/part1-1.html"><strong aria-hidden="true">2.3.</strong> Application Walk-Through</a></li><li class="chapter-item expanded "><a href="../app2/part1-2.html"><strong aria-hidden="true">2.4.</strong> Application Algorithm</a></li><li class="chapter-item expanded "><a href="../app2/part3.html"><strong aria-hidden="true">2.5.</strong> Creating the Invoice Class</a></li><li class="chapter-item expanded "><a href="../app2/part4.html"><strong aria-hidden="true">2.6.</strong> Loading Invoices</a></li><li class="chapter-item expanded "><a href="../app2/part5.html"><strong aria-hidden="true">2.7.</strong> Creating the Link Class</a></li><li class="chapter-item expanded "><a href="../app2/part6.html"><strong aria-hidden="true">2.8.</strong> Creating the LinkFactory Class</a></li><li class="chapter-item expanded "><a href="../app2/part7.html"><strong aria-hidden="true">2.9.</strong> Creating the AppController Class</a></li><li class="chapter-item expanded "><a href="../app2/part8.html"><strong aria-hidden="true">2.10.</strong> Putting It All Together</a></li><li class="chapter-item expanded "><a href="../app2/part9.html"><strong aria-hidden="true">2.11.</strong> Exploration</a></li></ol></li><li class="chapter-item expanded "><a href="../advanced/intro.html"><strong aria-hidden="true">3.</strong> Advanced Topics</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../advanced/env_setup.html"><strong aria-hidden="true">3.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../advanced/hold_invoices.html"><strong aria-hidden="true">3.2.</strong> Hold Invoices</a></li><li class="chapter-item expanded "><a href="../advanced/spontanenous_keysend.html"><strong aria-hidden="true">3.3.</strong> Spontaneous Payments with Keysend</a></li><li class="chapter-item expanded "><a href="../advanced/circular_rebalance.html" class="active"><strong aria-hidden="true">3.4.</strong> Circular Rebalancing</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Building on Lightning</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="circular-rebalancing-in-the-lightning-network"><a class="header" href="#circular-rebalancing-in-the-lightning-network">Circular Rebalancing in the Lightning Network</a></h1>
+<p>Each Lighting Network channels has a total capacity. This total capacity is split between the two nodes in the channel. When a channel is initially opened (unless some amount is initially pushed to the remote node), the channel balance is 100% on one side of the person that created the channel. With this unbalance, a payment can only be sent. There is no inbound capacity. If you tried to receive a payment, it would fail.</p>
+<p>Similarly, an channel that is opened to you will only have capacity on the remote side. Initially you can receive payments from that channel, but you will be unable send payments using that channel.</p>
+<p>As you send and receive payments, the balances of your channels will shift. Ideally, you would want to maintain some split of inbound versus outbound capacity.</p>
+<p>You can accomplish this by using <strong>circular rebalancing</strong>.</p>
+<h2 id="circular-rebalancing"><a class="header" href="#circular-rebalancing">Circular Rebalancing</a></h2>
+<p>Circular Rebalancing is a technique for when you have multiple channels open and want to change the inbound/outbound ratio for your channels. The general idea is that you pay yourself (only losing some fees along the way) using a channel that has excess outbound capacity and you accept payment through the channel that has excess inbound capacity. In this regard, the payment generates a circle and the net result is that your channel balances are more evenly distributed for both sending and receiving.</p>
+<p>Create a Polar environment with three nodes: Alice, Bob, and Carol where:</p>
+<ul>
+<li>Alice opens a channel to Bob</li>
+<li>Bob opens a channel to Carol</li>
+<li>Carol opens a channel to Alice</li>
+</ul>
+<p><img src="../images/ch3_circular_rebalancing_env.png" alt="Circular Rebalancing Environment" /></p>
+<p>In this environment, Alice has full outbound capacity one channel, and full inbound capacity on a second channel.</p>
+<p>With this environment setup, lets see if we can perform a circular rebalance.</p>
+<h2 id="exercise-rebalance-capacity-script"><a class="header" href="#exercise-rebalance-capacity-script">Exercise: Rebalance Capacity Script</a></h2>
+<p>This script is located in <code>./execises/rebalancing/Run.ts</code>. This script does a few things:</p>
+<ol>
+<li>constructs an LND client using the envrionment variables</li>
+<li>accepts an amount in satoshis from the command line</li>
+<li>accepts a comma separated list of node identifiers for how payments should be routed</li>
+<li>obtains the starting balance of channels</li>
+<li>creates an invoice for the amount specified</li>
+<li>creates a circular route</li>
+<li>sends the payment along that route</li>
+<li>obtains the ending balance of channels</li>
+</ol>
+<p>The first two items are obvious so we'll skip them for now.</p>
+<h3 id="node-identifiers"><a class="header" href="#node-identifiers">Node Identifiers</a></h3>
+<p>Next we need to split up a list of node public keys and convert strings into Buffers. The code for this is straightforward but the intent is a bit more confusing.</p>
+<pre><code>// Read the hop pubkeys as hex strings and convert them to buffers
+const hop_pubkeys = process.argv[3].split(&quot;,&quot;).map(v =&gt; Buffer.from(v, &quot;hex&quot;));
+</code></pre>
+<p>What we want is a list nodes such that we start with a node we want to send to and end with our node. For example if we had outbound capacity from <code>Alice -&gt; Bob</code> and inbound capacity from <code>Carol -&gt; Alice</code> we want to send the payment using the <code>Alice -&gt; Bob</code> channel, through the <code>Bob -&gt; Carol</code> channel, then finally back to ourselves with the <code>Carol -&gt; Alice</code> channel.</p>
+<p>Our list of node identifiers would then correspond to those hops in the route: <code>pubkey(Bob),pubkey(Carol),pubkey(Alice)</code> or more concretely:</p>
+<pre><code>Alice=02a3cc61dd74a22f575b22f4ece6400f5754db9fab8a72a53b2a789ceca34a9d7e
+Bob  =0227bfa020ce5765ef852555c5fbb58bdb3edbeb44f51b2eeb5e7167e678a2771e
+Carol=0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791
+
+0227bfa020ce5765ef852555c5fbb58bdb3edbeb44f51b2eeb5e7167e678a2771e,0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791,02a3cc61dd74a22f575b22f4ece6400f5754db9fab8a72a53b2a789ceca34a9d7e
+</code></pre>
+<p>You'll notice that the final node_id is always our node.</p>
+<h3 id="creating-the-invoice"><a class="header" href="#creating-the-invoice">Creating the Invoice</a></h3>
+<p>You'll notice in the steps that we create an invoice for the specified amount in satoshis.</p>
+<pre><code class="language-typescript">const invoice = await client.addInvoice({ amt });
+</code></pre>
+<p>This step is nothing special. In theory we could use keysend or another form of spontaneous payment instead generating the invoice ahead of time, but this allows us to create a custom memo if we wanted to do so.</p>
+<h3 id="creating-the-route"><a class="header" href="#creating-the-route">Creating the Route</a></h3>
+<p>Next you'll see that we need to construct a route from our list of nodes. We do this using the <a href="https://api.lightning.community/#buildroute"><code>BuildRoute</code></a> API. This API accepts a list of pubkeys. It goes through LNDs router to help us a build a path that is likely to succeed.</p>
+<pre><code class="language-typescript">// Build a route using the hop_pubkeys
+const { route } = await client.buildRoute({
+  final_cltv_delta: 40,
+  hop_pubkeys,
+  amt_msat,
+});
+</code></pre>
+<p>The result of this call is a route that includes a series of hops that traverse channels through each of the specified nodes.</p>
+<p>We need to do one outside the box thing to make the payment successful. We need to modify the last hop to include a payment secret. This <code>payment_secret</code> was initially added to prevent probing attacks and it is used to enable <a href="https://github.com/lightning/bolts/commit/4c3d01616d8e7c1c39212f97562964eceb769c08">multipath payments</a>. LND does not currently (as of v0.12.1-beta) have this baked into the <code>BuildRoute</code> API so we'll need to add this data manually to the <code>mpp_record</code> of our last hop:</p>
+<pre><code>route.hops[route.hops.length - 1].mpp_record = {
+    payment_addr: invoice.payment_addr,
+    total_amt_msat: amt_msat,
+};
+</code></pre>
+<p>After that is said and done, we should have a route that is constructed that looks similar to this below. You can see that it has three hops: the first goes from <code>Alice -&gt; Bob</code>, the second from <code>Bob -&gt; Carol</code>, and the final goes from <code>Carol -&gt; Alice</code> and includes the <code>payment_secret</code> value that will be included in the Onion TLV of the last hop.</p>
+<pre><code class="language-json">{
+  hops: [
+    {
+      custom_records: {},
+      chan_id: '192414534926337',
+      chan_capacity: '250000',
+      amt_to_forward: '50001',
+      fee: '0',
+      expiry: 260,
+      amt_to_forward_msat: '50001050',
+      fee_msat: '501',
+      pub_key: '0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791',
+      tlv_payload: true,
+      mpp_record: null
+    },
+    {
+      custom_records: {},
+      chan_id: '185817465159681',
+      chan_capacity: '250000',
+      amt_to_forward: '50000',
+      fee: '1',
+      expiry: 220,
+      amt_to_forward_msat: '50000000',
+      fee_msat: '1050',
+      pub_key: '0227bfa020ce5765ef852555c5fbb58bdb3edbeb44f51b2eeb5e7167e678a2771e',
+      tlv_payload: true,
+      mpp_record: null
+    },
+    {
+      custom_records: {},
+      chan_id: '118747255865345',
+      chan_capacity: '250000',
+      amt_to_forward: '50000',
+      fee: '0',
+      expiry: 220,
+      amt_to_forward_msat: '50000000',
+      fee_msat: '0',
+      pub_key: '02a3cc61dd74a22f575b22f4ece6400f5754db9fab8a72a53b2a789ceca34a9d7e',
+      tlv_payload: true,
+      mpp_record: {
+        payment_addr: &lt;Buffer e8 68 fb fa e2 b4 91 0e 0a a3 9d 9a 52 e2 04 0a ef 45 ad a6 5e 9c ff 54 a9 d1 fd 6d 80 bd 4b e0&gt;,
+        total_amt_msat: '50000000'
+      }
+    }
+  ],
+  total_time_lock: 266,
+  total_fees: '1',
+  total_amt: '50001',
+  total_fees_msat: '1551',
+  total_amt_msat: '50001551'
+}
+</code></pre>
+<p>Believe it or not, we just did it the easy way. If you have multiple channels open with a peer, it is likely that you would want to manually construct your first and last hops to ensure your route pays along the preferred path.</p>
+<h3 id="sending-payment-to-the-route"><a class="header" href="#sending-payment-to-the-route">Sending Payment to the Route</a></h3>
+<p>The last fun piece of coding is sending the payment along the route using the <a href="https://api.lightning.community/#sendtoroutev2"><code>SendToRouteV2</code></a> option. This method sends a payment for the hash along the route.</p>
+<pre><code class="language-typescript">const result = await client.sendToRouteV2(invoice.r_hash, route, false);
+</code></pre>
+<p>It will return a status of <code>SUCCEEDED</code> and the route that was used for payment if it was successful.</p>
+<pre><code class="language-json">{
+  status: 'SUCCEEDED',
+  route: {
+    hops: [
+      {
+        custom_records: {},
+        chan_id: '192414534926337',
+        chan_capacity: '250000',
+        amt_to_forward: '50001',
+        fee: '0',
+        expiry: 260,
+        amt_to_forward_msat: '50001050',
+        fee_msat: '501',
+        pub_key: '0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791',
+        tlv_payload: true,
+        mpp_record: null
+      },
+      {
+        custom_records: {},
+        chan_id: '185817465159681',
+        chan_capacity: '250000',
+        amt_to_forward: '50000',
+        fee: '1',
+        expiry: 220,
+        amt_to_forward_msat: '50000000',
+        fee_msat: '1050',
+        pub_key: '0227bfa020ce5765ef852555c5fbb58bdb3edbeb44f51b2eeb5e7167e678a2771e',
+        tlv_payload: true,
+        mpp_record: null
+      },
+      {
+        custom_records: {},
+        chan_id: '118747255865345',
+        chan_capacity: '250000',
+        amt_to_forward: '50000',
+        fee: '0',
+        expiry: 220,
+        amt_to_forward_msat: '50000000',
+        fee_msat: '0',
+        pub_key: '02a3cc61dd74a22f575b22f4ece6400f5754db9fab8a72a53b2a789ceca34a9d7e',
+        tlv_payload: true,
+        mpp_record: {
+          total_amt_msat: '50000000',
+          payment_addr: &lt;Buffer e8 68 fb fa e2 b4 91 0e 0a a3 9d 9a 52 e2 04 0a ef 45 ad a6 5e 9c ff 54 a9 d1 fd 6d 80 bd 4b e0&gt;
+        }
+      }
+    ],
+    total_time_lock: 266,
+    total_fees: '1',
+    total_amt: '50001',
+    total_fees_msat: '1551',
+    total_amt_msat: '50001551'
+  },
+  attempt_time_ns: '1660757083463543000',
+  resolve_time_ns: '1660757084439054000',
+  failure: null,
+  preimage: &lt;Buffer a9 92 ad 78 42 04 f4 97 ca 96 99 8c 6f 01 67 7f 31 b6 50 38 0c 8a bb 4d 87 1b ec 9d 71 5c 5c 4e&gt;,
+  attempt_id: '2080'
+}
+</code></pre>
+<h3 id="complete-view"><a class="header" href="#complete-view">Complete View</a></h3>
+<p>You can view the complete code below:</p>
+<pre><code class="language-typescript">async function run(): Promise&lt;void&gt; {
+  // Constructs a LND client from the environment variables
+  const client = await ClientFactory.lndFromEnv();
+
+  // Read the amount from the command line
+  const amt = Number(process.argv[2]);
+
+  // Read the hop pubkeys as hex strings and convert them to buffers
+  const hop_pubkeys = process.argv[3].split(&quot;,&quot;).map(hexToBuf);
+
+  // Convert the amount to millisatoshi
+  const amt_msat = (amt * 1000).toString();
+
+  // Load channels before
+  const startChannels = await client.listChannels();
+
+  // Construct a new invoice for the amount
+  const invoice = await client.addInvoice({ amt });
+  console.log(util.inspect(invoice, false, 10, true));
+
+  // Build a route using the hop_pubkeys
+  const { route } = await client.buildRoute({
+    final_cltv_delta: 40,
+    hop_pubkeys,
+    amt_msat,
+  });
+
+  // Modify the last hop to include the payment_secret and total_amt_msat values
+  route.hops[route.hops.length - 1].mpp_record = {
+    payment_addr: invoice.payment_addr,
+    total_amt_msat: amt_msat,
+  };
+  console.log(util.inspect(route, false, 10, true));
+
+  // Send the payment for our invoice along our route
+  const result = await client.sendToRouteV2(invoice.r_hash, route, false);
+  console.log(util.inspect(result, false, 10, true));
+
+  // Give channel balances time to settle
+  await wait(1000);
+
+  // Capture end channels
+  const endChannels = await client.listChannels();
+
+  // Output balance changes
+  for (const start of startChannels.channels) {
+    const end = endChannels.channels.find((e) =&gt; e.chan_id === start.chan_id);
+    console.log(
+      &quot;channel&quot;,
+      start.initiator ? &quot;outgoing&quot; : &quot;incoming&quot;,
+      start.chan_id,
+      &quot;start_balance&quot;,
+      start.local_balance,
+      &quot;end_balance&quot;,
+      end?.local_balance
+    );
+  }
+}
+</code></pre>
+<h3 id="running-the-script"><a class="header" href="#running-the-script">Running the Script</a></h3>
+<p>To run the script:</p>
+<ol>
+<li>Gather the node_ids for Bob,Carol,Alice</li>
+<li>Use `npm start exercises/reblancing/Run.ts <satshos> &lt;comma_separated_list_of_nodes&gt;</li>
+</ol>
+<p>For example:</p>
+<pre><code>npm start exercises/rebalancing/Run.ts 10000 \
+0227bfa020ce5765ef852555c5fbb58bdb3edbeb44f51b2eeb5e7167e678a2771e,0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791,02a3cc61dd74a22f575b22f4ece6400f5754db9fab8a72a53b2a789ceca34a9d7e
+</code></pre>
+<h2 id="afterthoughts"><a class="header" href="#afterthoughts">Afterthoughts</a></h2>
+<p>Rebalancing is a complicated but necessary action for many node operators. Many tools already exist for this:</p>
+<p><strong>LND</strong>:</p>
+<ul>
+<li><a href="https://github.com/C-Otto/rebalance-lnd">Rebalance LND</a></li>
+<li><a href="https://github.com/alexbosworth/balanceofsatoshis">Balance of Satoshis</a></li>
+</ul>
+<p><strong>C-Lightning</strong>:</p>
+<ul>
+<li><a href="https://github.com/lightningd/plugins/tree/master/rebalance">Rebalance Plugin</a></li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../advanced/spontanenous_keysend.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../advanced/spontanenous_keysend.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </body>
+</html>

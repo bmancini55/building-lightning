@@ -1,0 +1,322 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Hold Invoices - Building on Lightning</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../app1/intro.html"><strong aria-hidden="true">1.</strong> Lightning Graph Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app1/part1.html"><strong aria-hidden="true">1.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app1/part2.html"><strong aria-hidden="true">1.2.</strong> Code Setup</a></li><li class="chapter-item expanded "><a href="../app1/part3.html"><strong aria-hidden="true">1.3.</strong> Building the Server</a></li><li class="chapter-item expanded "><a href="../app1/part4.html"><strong aria-hidden="true">1.4.</strong> Building the UI</a></li><li class="chapter-item expanded "><a href="../app1/part5.html"><strong aria-hidden="true">1.5.</strong> Real-Time Updates</a></li><li class="chapter-item expanded "><a href="../app1/part6.html"><strong aria-hidden="true">1.6.</strong> Exploration</a></li></ol></li><li class="chapter-item expanded "><a href="../app2/intro.html"><strong aria-hidden="true">2.</strong> Lightning Network Invoices</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../app2/part0-1.html"><strong aria-hidden="true">2.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../app2/part0-2.html"><strong aria-hidden="true">2.2.</strong> Creating an Invoice in Code</a></li><li class="chapter-item expanded "><a href="../app2/part1-1.html"><strong aria-hidden="true">2.3.</strong> Application Walk-Through</a></li><li class="chapter-item expanded "><a href="../app2/part1-2.html"><strong aria-hidden="true">2.4.</strong> Application Algorithm</a></li><li class="chapter-item expanded "><a href="../app2/part3.html"><strong aria-hidden="true">2.5.</strong> Creating the Invoice Class</a></li><li class="chapter-item expanded "><a href="../app2/part4.html"><strong aria-hidden="true">2.6.</strong> Loading Invoices</a></li><li class="chapter-item expanded "><a href="../app2/part5.html"><strong aria-hidden="true">2.7.</strong> Creating the Link Class</a></li><li class="chapter-item expanded "><a href="../app2/part6.html"><strong aria-hidden="true">2.8.</strong> Creating the LinkFactory Class</a></li><li class="chapter-item expanded "><a href="../app2/part7.html"><strong aria-hidden="true">2.9.</strong> Creating the AppController Class</a></li><li class="chapter-item expanded "><a href="../app2/part8.html"><strong aria-hidden="true">2.10.</strong> Putting It All Together</a></li><li class="chapter-item expanded "><a href="../app2/part9.html"><strong aria-hidden="true">2.11.</strong> Exploration</a></li></ol></li><li class="chapter-item expanded "><a href="../advanced/intro.html"><strong aria-hidden="true">3.</strong> Advanced Topics</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../advanced/env_setup.html"><strong aria-hidden="true">3.1.</strong> Environment Setup</a></li><li class="chapter-item expanded "><a href="../advanced/hold_invoices.html" class="active"><strong aria-hidden="true">3.2.</strong> Hold Invoices</a></li><li class="chapter-item expanded "><a href="../advanced/spontanenous_keysend.html"><strong aria-hidden="true">3.3.</strong> Spontaneous Payments with Keysend</a></li><li class="chapter-item expanded "><a href="../advanced/circular_rebalance.html"><strong aria-hidden="true">3.4.</strong> Circular Rebalancing</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Building on Lightning</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="hold-invoices"><a class="header" href="#hold-invoices">Hold Invoices</a></h1>
+<p>Hold invoices (sometimes referred to as hodl invoices) are a mechanism for delaying the settlement of an invoice. Typically upon receipt of a payment, the recipient releases the preimage to settle the incoming HTLC. With hold invoices, the release of the preimage is not automatic.</p>
+<p>Let's consider a scenario with a typical invoice. Bob is paying Alice for a book. Alice creates the invoice for the book and provides it to Bob. Bob pays the invoice and it is immediately settled when Alice's node receives payment. Alice now has the funds. Alice goes and looks for the book, but alas she is sold out. She needs to refund Bob his money. Alice has to ask Bob to create an invoice so she can refund his money then make a payment to him.</p>
+<p>This is obviously cumbersome. Additionally, Alice and Bob are likely to lose out on routing fees along the way.</p>
+<p>With a hold invoice, the merchant or service provider can validate some condition and then settle the transaction. So with our example above Alice delays settlement after she receives Bob's payment. She can verify that she has the book. If she does she settles the transaction. If she she doesn't have the book she can cancel the invoice and Bob is immediately returned his funds as if the payment failed.</p>
+<p>This brings up two points:</p>
+<ol>
+<li>Hold invoices look just like normal invoices to Bob, so if Alice cancels his payment, she must notify him that it was cancelled.</li>
+<li>Hold invoices tie up funds along the route. This is an actual attack vector on Lightning known as a griefing attack. So if you use hold invoices, it is best to settle them as soon as possible.</li>
+</ol>
+<p>Beyond refunds, hold invoices have a few other uses:</p>
+<ul>
+<li><strong>Fidelity bonds</strong> - you can think of this as a deposit on good behavior. A payment can be made to a service provider to access the service. If the user is not malicious the invoice can be cancelled. If the user misbehavior, the invoice can be settled and the funds in the bond taken by the service provider.</li>
+<li><strong>Atomic delivery</strong> - the buyer of some good generates a preimage. The buyer pays the invoice and the merchant has payment. The merchant can send the good. Upon delivery a courier/third party collects and verifies the preimage and the merchant can access the funds.</li>
+<li><strong>Swaps</strong> - Alice wants to move funds from a channel to her on-chain wallet. She creates a preimage and provides the hash to Bob. Bob runs a swap service and constructs a hold invoice using the hash. If he receives payment from Alice, he will pay an HTLC on-chain that can be resolved via Alice's preimage. Once Alice sees this HTLC, she can claim it with the preimage and she now has funds on-chain.</li>
+</ul>
+<p>These examples highlight an interesting aspect of the hold invoice: the preimage of an invoice can be unknown to the invoice creator.</p>
+<p>Now that you have a good understanding of hold invoices, we'll do a few exercises to use them via code.</p>
+<h2 id="exercise-creating-a-hold-invoice"><a class="header" href="#exercise-creating-a-hold-invoice">Exercise: Creating a Hold Invoice</a></h2>
+<p>The first exercise is creating a hold invoice using a scripts. We'll start by using the command like script at <code>/exercises/hold-invoices/Hash.ts</code> to create a preimage and its hash from some arbitrary data.</p>
+<pre><code>npm start &quot;exercises/hold-invoices/Hash.ts&quot; -- &quot;example 1&quot;
+</code></pre>
+<p>Dev note: Because we are using an <code>npm</code> script to start our file, we need to differentiate between arguments that are provided to the <code>npm</code> command and those that we want to pass to the script. This is done with the <code>--</code>. As you can see, the first argument that is provided to the script is <code>&quot;example 1&quot;</code>.</p>
+<p>Running this script will output the raw data, the 32-byte preimage for this data, and the
+hash of the preimage.</p>
+<pre><code>data:      example 1
+preimage:  8ee89711330c1ccf39a2e65ad12bbd7df4a4a2ee857f53b4823f00fecb7bd252
+hash:      964e1161e2b41cb66982453a4b7b154750e26b04c63116f9ef8e3b1adb30e71a
+</code></pre>
+<p>Take a look at the code in <code>Hash.ts</code></p>
+<pre><code class="language-typescript">// /exercises/hold-invoices/Hash.ts
+async function run() {
+  // read the command line argument, first value starts at index 2.
+  const data = process.argv[2];
+
+  // hash the raw data to make it 32-bytes
+  const preimage = sha256(data);
+
+  // hash the preimage value
+  const hash = sha256(preimage);
+
+  console.log(&quot;data:     &quot;, data);
+  console.log(&quot;preimage: &quot;, preimage.toString(&quot;hex&quot;));
+  console.log(&quot;hash:     &quot;, hash.toString(&quot;hex&quot;));
+}
+</code></pre>
+<p>This script accepts any value on the command line. This value will be used to generate the preimage. Lightning Network preimages must be 32-bytes, so we use the SHA256 hash function to turn the arbitrary value into 32-bytes.</p>
+<p>Once we have the 32-byte preimage we can convert it into the hash used in the invoice. As we previously discussed, in order to create a hold invoice only requires knowledge of the hash, so in this example, we could have received a hash from a third party and it would be ok that we have no knowledge of the actual preimage.</p>
+<p>Next we'll use the create script to build our invoice by passing in the hash value.</p>
+<pre><code>npm start &quot;exercises/hold-invoices/Create.ts&quot; -- 964e1161e2b41cb66982453a4b7b154750e26b04c63116f9ef8e3b1adb30e71a
+</code></pre>
+<p>This will return a result with the payment request information as if it was a normal invoice.</p>
+<pre><code>{
+  payment_request: 'lnbcrt10u1p3wzutmpp5je8pzc0zkswtv6vzg5ayk7c4gagwy6cyccc3d7003ca34kesuudqdqdg4ux2unrd9ek2cqzpgsp5z3qeuh5eq6dfuyemgkkk95y0r2cfek6s08cvaze0q6w28dphxmys9qyyssqgxxde9netfts3g8gkqv2hmaj8fety2vjjp67utn8vnp8u6uw6cr33c0g4fnjw029m68rmn2lumwnxgs4rvp0tj47lrkuptcwu7dz2xcp2jx3a2',
+  add_index: '0',
+  payment_addr: &lt;Buffer &gt;
+}
+</code></pre>
+<p>Take a look at the <code>run</code> function in <code>/exercises/hold-invoices/Create.ts</code> to see how to use the <code>AddHoldInvoice</code> API of LND.</p>
+<pre><code class="language-typescript">async function run(): Promise&lt;Lnd.AddHoldInvoiceResult&gt; {
+  // Expects the hash as 32-byte hex
+  const hash = Buffer.from(process.argv[2], &quot;hex&quot;);
+
+  // Constructs a LND client from the environment variables
+  const client = await ClientFactory.lndFromEnv();
+
+  // Finally construct the HOLD invoice
+  const options: Lnd.AddHoldInvoiceInput = {
+    memo: &quot;Exercise&quot;,
+    value: &quot;1000&quot;,
+    hash,
+  };
+  return await client.addHoldInvoice(options);
+}
+</code></pre>
+<p>This invoice can then be provided to Bob so that he can pay it.</p>
+<p><img src="../images/ch3_pay_hold_invoice.png" alt="Pay Hold Invoice" /></p>
+<p>Instead of completing, you'll see that the payment looks &quot;stuck&quot;. That's because the payment hasn't settled yet. Alice will either need to settle or cancel the invoice.</p>
+<h2 id="exercise-cancelling-the-hold-invoice"><a class="header" href="#exercise-cancelling-the-hold-invoice">Exercise: Cancelling the Hold Invoice</a></h2>
+<p>Next we'll see what happens if Alice wants to cancel the invoice.</p>
+<p>We use the <code>Cancel</code> script using the hash value that we generated.</p>
+<pre><code>npm start &quot;exercises/hold-invoices/Cancel.ts&quot; -- 964e1161e2b41cb66982453a4b7b154750e26b04c63116f9ef8e3b1adb30e71a
+</code></pre>
+<p>We should also see that the payment in polar has failed.</p>
+<p>Take a look at the <code>/exercises/hold-invoices/Cancel.ts</code> script to see how we call the <code>CancelInvoice</code> API of LND.</p>
+<pre><code class="language-typescript">async function run(): Promise&lt;void&gt; {
+  // Expects the hash as a 32-byte hex encoded argument
+  const hash = Buffer.from(process.argv[2], &quot;hex&quot;);
+
+  // Constructs a LND client from the environment variables
+  const client = await ClientFactory.lndFromEnv();
+
+  // Finally we can cancel the invoice.
+  return await client.cancelInvoice(hash);
+}
+</code></pre>
+<h2 id="exercise-settling-an-invoice"><a class="header" href="#exercise-settling-an-invoice">Exercise: Settling an Invoice</a></h2>
+<p>Alice cancelled the last invoice that was generated. This time we'll try settling an invoice. To do this we need to generate a new hold invoice. We start by creating a new hash/preimage pair.</p>
+<pre><code>npm start &quot;exercises/hold-invoices/Hash.ts&quot; -- &quot;example settle&quot;
+</code></pre>
+<p>This will result in output that looks like:</p>
+<pre><code>data:      example settle
+preimage:  64b64bad988b06b70973f995c80acc132ec22044984d57d799a6d09a31bec3e1
+hash:      33f35509e040e0cc653691caa22f99e4d7fcaf714f2bcdda13ce369ca844f979
+</code></pre>
+<p>With the new preimage we can create a new invoice using the <code>Create</code> script.</p>
+<pre><code> npm start &quot;exercises/hold-invoices/Create.ts&quot; -- 33f35509e040e0cc653691caa22f99e4d7fcaf714f2bcdda13ce369ca844f979
+</code></pre>
+<p>This will generate a new payment request that Bob can try to pay again.</p>
+<p><img src="../images/ch3_pay_hold_invoice2.png" alt="Pay Second Invoice" /></p>
+<p>Instead of cancelling, this time Alice is going to settle the invoice.</p>
+<p>She can settle it using the <code>Settle</code> script and providing the preimage <code>64b64bad988b06b70973f995c80acc132ec22044984d57d799a6d09a31bec3e1</code>.</p>
+<pre><code>npm start &quot;exercises/hold-invoices/Settle.ts&quot; -- 64b64bad988b06b70973f995c80acc132ec22044984d57d799a6d09a31bec3e1
+</code></pre>
+<p>This time, Bob should see the invoice successfully paid!</p>
+<p>You can check out the <code>Settle</code> script that shows how to use the <code>SettleInvoice</code> API of LND.</p>
+<pre><code class="language-typescript">async function run(): Promise&lt;void&gt; {
+  // Expects the preimage in the command line is a 32-byte hex encoded value
+  const preimage = Buffer.from(process.argv[2], &quot;hex&quot;);
+
+  // Constructs a LND client from the environment variables
+  const client = await ClientFactory.lndFromEnv();
+
+  // Settle the invoice using the 32-byte preimage
+  return await client.settleInvoice(preimage);
+}
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../advanced/env_setup.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next" href="../advanced/spontanenous_keysend.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../advanced/env_setup.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next" href="../advanced/spontanenous_keysend.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </body>
+</html>
