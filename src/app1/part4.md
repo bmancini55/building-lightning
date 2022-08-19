@@ -102,7 +102,7 @@ You can now use your browser to navigate to [http://localhost:8001](http://local
 
 Our next task is wiring up the graph API we previously created to our user interface. To make our life easier we will use an `ApiService` to house the calls to our API.
 
-In your IDE, navigate to `/client/src/services/ApiService.ts` and create a method that uses the get helper `get` to retrieve retrieve the graph.
+In your IDE, navigate to `/client/src/services/ApiService.ts` and create a method that uses the get helper `get` to retrieve the graph.
 
 ```typescript
 // client/src/services/ApiService
