@@ -194,7 +194,7 @@ app.use(graphApi(graphAdapter));
 
 This code attaches a router to the Express application.
 
-The router is defined in `server/src/api/GraphApi`. This file returns a function that accepts our `IGraphService` that we were just taking a look at. You can then see that we use the `IGraphService` inside an Express request handler where and then return the graph as JSON.
+The router is defined in `server/src/api/GraphApi`. This file returns a function that accepts our `IGraphService` that we were just taking a look at. You can then see that we use the `IGraphService` inside an Express request handler and then return the graph as JSON.
 
 ```typescript
 // server/src/api/GraphApi
