@@ -355,7 +355,7 @@ LND_CERT_PATH=
 app.use(graphApi(graphAdapter));
 </code></pre>
 <p>This code attaches a router to the Express application.</p>
-<p>The router is defined in <code>server/src/api/GraphApi</code>. This file returns a function that accepts our <code>IGraphService</code> that we were just taking a look at. You can then see that we use the <code>IGraphService</code> inside an Express request handler where and then return the graph as JSON.</p>
+<p>The router is defined in <code>server/src/api/GraphApi</code>. This file returns a function that accepts our <code>IGraphService</code> that we were just taking a look at. You can then see that we use the <code>IGraphService</code> inside an Express request handler and then return the graph as JSON.</p>
 <pre><code class="language-typescript">// server/src/api/GraphApi
 
 export function graphApi(graphService: IGraphService): express.Router {
@@ -460,7 +460,7 @@ export const LayoutScene = () =&gt; {
 <p><img src="app1/../images/ch1_app_01.png" alt="Blank Slate" /></p>
 <h2 id="exercise-loading-the-graph"><a class="header" href="#exercise-loading-the-graph">Exercise: Loading the Graph</a></h2>
 <p>Our next task is wiring up the graph API we previously created to our user interface. To make our life easier we will use an <code>ApiService</code> to house the calls to our API.</p>
-<p>In your IDE, navigate to <code>/client/src/services/ApiService.ts</code> and create a method that uses the get helper <code>get</code> to retrieve retrieve the graph.</p>
+<p>In your IDE, navigate to <code>/client/src/services/ApiService.ts</code> and create a method that uses the get helper <code>get</code> to retrieve the graph.</p>
 <pre><code class="language-typescript">// client/src/services/ApiService
 
 import { Lnd } from &quot;./ApiTypes&quot;;

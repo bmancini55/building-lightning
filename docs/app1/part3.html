@@ -275,7 +275,7 @@ LND_CERT_PATH=
 app.use(graphApi(graphAdapter));
 </code></pre>
 <p>This code attaches a router to the Express application.</p>
-<p>The router is defined in <code>server/src/api/GraphApi</code>. This file returns a function that accepts our <code>IGraphService</code> that we were just taking a look at. You can then see that we use the <code>IGraphService</code> inside an Express request handler where and then return the graph as JSON.</p>
+<p>The router is defined in <code>server/src/api/GraphApi</code>. This file returns a function that accepts our <code>IGraphService</code> that we were just taking a look at. You can then see that we use the <code>IGraphService</code> inside an Express request handler and then return the graph as JSON.</p>
 <pre><code class="language-typescript">// server/src/api/GraphApi
 
 export function graphApi(graphService: IGraphService): express.Router {
