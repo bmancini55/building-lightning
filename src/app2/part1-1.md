@@ -8,7 +8,7 @@ Let's see what our game looks like. Alice is running our application and is usin
 
 ![Initial App](../images/ch2_app_01.png)
 
-The application is prompting Bob that he needs to will need to pay 1000 satoshi. But to do this he must sign a message using high Lightning Network node. In this case, Bob needs to digital digitally sign the message `0000000000000000000000000000000000000000000000000000000000000001`.
+The application is prompting Bob that he will need to pay 1000 satoshis. But to do this he must sign a message using his Lightning Network node. In this case, Bob needs to digitally sign the message `0000000000000000000000000000000000000000000000000000000000000001`.
 ![Bob Signs](../images/ch2_app_02.png)
 
 Note: In Polar we can open a terminal by right-clicking on the node and selecting "Launch Terminal". With c-lightning, you can use the command `signmessage` to sign a message. It will return a signature in both hex and zbase32 formats. To simplify our application we'll use the zbase32 format since LND only interprets signatures in this format.
