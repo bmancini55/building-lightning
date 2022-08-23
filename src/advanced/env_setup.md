@@ -20,7 +20,7 @@ npm install
 
 Each section has scripts inside of the `exercises` directory.
 
-We'll also need a Lightning Network environment to test. You can create a new Polar environment or reuse an existing one. Some of these exercises will require
+We'll also need a Lightning Network environment to test. You can create a new Polar environment or reuse an existing one. Some of these exercises will require specific configurations of nodes and channels, so feel free to destroy and recreate environments as needed.
 
 ## Exercise: Configuring `.env` to Connect to LND
 

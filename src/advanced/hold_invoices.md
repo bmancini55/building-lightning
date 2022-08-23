@@ -6,18 +6,18 @@ Let's consider a scenario with a typical invoice. Bob is paying Alice for a book
 
 This is obviously cumbersome. Additionally, Alice and Bob are likely to lose out on routing fees along the way.
 
-With a hold invoice, the merchant or service provider can validate some condition and then settle the transaction. So with our example above Alice delays settlement after she receives Bob's payment. She can verify that she has the book. If she does she settles the transaction. If she she doesn't have the book she can cancel the invoice and Bob is immediately returned his funds as if the payment failed.
+With a hold invoice, after payment is received, the merchant can validate some condition and then settle the transaction. With our example above, Alice delays settlement after she receives Bob's payment. She can verify that she has the book. If she does have the book she settles the transaction. If she doesn't have the book she can cancel the invoice and Bob is immediately returned his funds as if the payment failed.
 
 This brings up two points:
 
 1. Hold invoices look just like normal invoices to Bob, so if Alice cancels his payment, she must notify him that it was cancelled.
-2. Hold invoices tie up funds along the route. This is an actual attack vector on Lightning known as a griefing attack. So if you use hold invoices, it is best to settle them as soon as possible.
+2. Hold invoices tie up funds along the route. This behavior is similar to an actual attack vector on Lightning known as a griefing attack. So if you use hold invoices, it is best to settle them as soon as possible.
 
 Beyond refunds, hold invoices have a few other uses:
 
 - **Fidelity bonds** - you can think of this as a deposit on good behavior. A payment can be made to a service provider to access the service. If the user is not malicious the invoice can be cancelled. If the user misbehavior, the invoice can be settled and the funds in the bond taken by the service provider.
-- **Atomic delivery** - the buyer of some good generates a preimage. The buyer pays the invoice and the merchant has payment. The merchant can send the good. Upon delivery a courier/third party collects and verifies the preimage and the merchant can access the funds.
-- **Swaps** - Alice wants to move funds from a channel to her on-chain wallet. She creates a preimage and provides the hash to Bob. Bob runs a swap service and constructs a hold invoice using the hash. If he receives payment from Alice, he will pay an HTLC on-chain that can be resolved via Alice's preimage. Once Alice sees this HTLC, she can claim it with the preimage and she now has funds on-chain.
+- **Atomic delivery** - the buyer of some good generates a preimage. The buyer pays the invoice and the merchant has payment. The merchant can send the good. Upon delivery a courier/third party collects and verifies the preimage and provides it to the merchant who can now access the funds.
+- **Swaps** - Alice wants to move funds from a channel to her on-chain wallet. She creates a preimage and provides the hash to Bob. Bob runs a swap service and constructs a hold invoice using the hash. When he receives payment from Alice he will pay an HTLC on-chain that can be resolved via the preimage. Once Alice sees this HTLC, she can claim the funds with the preimage. Alice now has the funds on-chain and Bob is able to settle the hold invoice.
 
 These examples highlight an interesting aspect of the hold invoice: the preimage of an invoice can be unknown to the invoice creator.
 
@@ -25,13 +25,13 @@ Now that you have a good understanding of hold invoices, we'll do a few exercise
 
 ## Exercise: Creating a Hold Invoice
 
-The first exercise is creating a hold invoice using a scripts. We'll start by using the command like script at `/exercises/hold-invoices/Hash.ts` to create a preimage and its hash from some arbitrary data.
+The first exercise is creating a hold invoice using a script. We'll start by using the command line script at `/exercises/hold-invoices/Hash.ts` to create a preimage and its hash from some arbitrary data.
 
 ```
 npm start "exercises/hold-invoices/Hash.ts" -- "example 1"
 ```
 
-Dev note: Because we are using an `npm` script to start our file, we need to differentiate between arguments that are provided to the `npm` command and those that we want to pass to the script. This is done with the `--`. As you can see, the first argument that is provided to the script is `"example 1"`.
+Dev note: Because we are using an `npm` script to start our file, we need to differentiate between arguments that are provided to the `npm` command and those that we want to pass to the script. This is done with `--`. As you can see, the first argument that is provided to the script is `"example 1"`.
 
 Running this script will output the raw data, the 32-byte preimage for this data, and the
 hash of the preimage.
@@ -62,9 +62,9 @@ async function run() {
 }
 ```
 
-This script accepts any value on the command line. This value will be used to generate the preimage. Lightning Network preimages must be 32-bytes, so we use the SHA256 hash function to turn the arbitrary value into 32-bytes.
+This script accepts any value on the command line. This value will be used to generate the preimage. Lightning Network preimages must be 32-bytes, so we use the SHA256 hash function to turn the arbitrary length value into 32-bytes.
 
-Once we have the 32-byte preimage we can convert it into the hash used in the invoice. As we previously discussed, in order to create a hold invoice only requires knowledge of the hash, so in this example, we could have received a hash from a third party and it would be ok that we have no knowledge of the actual preimage.
+Once we have the 32-byte preimage we can convert it into the hash used in the invoice. As we previously discussed, in order to create a hold invoice only requires knowledge of the hash, so in this example we could have received a hash from a third party and it would be ok that we have no knowledge of the actual preimage.
 
 Next we'll use the create script to build our invoice by passing in the hash value.
 

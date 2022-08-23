@@ -1,6 +1,6 @@
 # Spontaneous Payments with Keysend
 
-Spontaneous payments are a type of payment that doesn't require the recipient to generate an invoice. This type of payment is payment is initiated by the sender and the recipient may or may not be expecting the payment.
+Spontaneous payments are a type of payment that doesn't require the recipient to generate an invoice. This type of payment is initiated by the sender and the recipient may or may not be expecting the payment.
 
 Spontaneous payments are useful for a variety of scenarios:
 
@@ -13,15 +13,16 @@ The major downside to spontaneous payments is that you lose proof of payment for
 
 Keysend is defined in [BLIP 0003](https://github.com/lightning/blips/blob/master/blip-0003.md). It is an optional feature of Lightning Network nodes that enables spontaneous payments.
 
-This feature relies on upon [variable length onion packets](https://github.com/lightning/bolts/blob/bc86304b4b0af5fd5ce9d24f74e2ebbceb7e2730/04-onion-routing.md#tlv_payload-format). It works by encoding the preimage into onion data that is decrypted by the payment recipient in the last hop of the onion.
+This feature relies on upon [variable length onion packets](https://github.com/lightning/bolts/blob/bc86304b4b0af5fd5ce9d24f74e2ebbceb7e2730/04-onion-routing.md#tlv_payload-format). It works by encoding the preimage into onion data that is decrypted by the payment recipient in the last hop of the onion. Due to the onion construction this preimage is not visible to the intermediary hops until the payment is settled by the final node.
 
 In order to make a keysend payment requires:
 
 - generating a unique 32-byte preimage
 - create a sha256 hash of the preimage
-- set a custom onion record with identifier 5482373484 to the preimage
+- set a custom onion record with identifier 5482373484 to the preimage value
+- sending a payment using the hash of the preimage
 
-A receiving node that has keysend enabled will understand the custom onion record. It will then create an invoice on the fly and resolve it using the value supplied by the sender.
+A receiving node that has keysend enabled will understand the custom onion record. It will then create an invoice on the fly and resolve it using the preimage supplied by the sender.
 
 ## Keysend on C-Lightning
 
@@ -45,7 +46,7 @@ You can do this in Polar by right-clicking an LND node and selecting `Advanced O
 
 Restart your node.
 
-You can then open a terminal and send payments using the `sendpayment` CLI command by providing a destination `--dest=<nod_id>`, amount in satoshis `--amt=<value>` and the flag `--keysend`
+You can then open a terminal and send payments using the `sendpayment` CLI command by providing a destination `--dest=<node_id>`, amount in satoshis `--amt=<value>` and the flag `--keysend`
 
 For example to send 10,000 satoshi's to Carol's node that has the node identifier 0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791:
 
