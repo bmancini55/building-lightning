@@ -144,9 +144,9 @@
                     <main>
                         <h1 id="circular-rebalancing-in-the-lightning-network"><a class="header" href="#circular-rebalancing-in-the-lightning-network">Circular Rebalancing in the Lightning Network</a></h1>
 <p>Each Lighting Network channels has a total capacity. This total capacity is split between the two nodes in the channel. When a channel is initially opened (unless some amount is initially pushed to the remote node), the channel balance is 100% on one side of the person that created the channel. With this unbalance, a payment can only be sent. There is no inbound capacity. If you tried to receive a payment, it would fail.</p>
-<p>Similarly, an channel that is opened to you will only have capacity on the remote side. Initially you can receive payments from that channel, but you will be unable send payments using that channel.</p>
+<p>Similarly, a channel that is opened to you will only have capacity on the remote side. Initially you can receive payments from that channel, but you will be unable send payments using that channel.</p>
 <p>As you send and receive payments, the balances of your channels will shift. Ideally, you would want to maintain some split of inbound versus outbound capacity.</p>
-<p>You can accomplish this by using <strong>circular rebalancing</strong>.</p>
+<p>You can control this balance by performing circular rebalancing.</p>
 <h2 id="circular-rebalancing"><a class="header" href="#circular-rebalancing">Circular Rebalancing</a></h2>
 <p>Circular Rebalancing is a technique for when you have multiple channels open and want to change the inbound/outbound ratio for your channels. The general idea is that you pay yourself (only losing some fees along the way) using a channel that has excess outbound capacity and you accept payment through the channel that has excess inbound capacity. In this regard, the payment generates a circle and the net result is that your channel balances are more evenly distributed for both sending and receiving.</p>
 <p>Create a Polar environment with three nodes: Alice, Bob, and Carol where:</p>
@@ -176,7 +176,7 @@
 <pre><code>// Read the hop pubkeys as hex strings and convert them to buffers
 const hop_pubkeys = process.argv[3].split(&quot;,&quot;).map(v =&gt; Buffer.from(v, &quot;hex&quot;));
 </code></pre>
-<p>What we want is a list nodes such that we start with a node we want to send to and end with our node. For example if we had outbound capacity from <code>Alice -&gt; Bob</code> and inbound capacity from <code>Carol -&gt; Alice</code> we want to send the payment using the <code>Alice -&gt; Bob</code> channel, through the <code>Bob -&gt; Carol</code> channel, then finally back to ourselves with the <code>Carol -&gt; Alice</code> channel.</p>
+<p>What we want is a list of node identifiers such that we start with the node we are sending to and end with our node. For example if we had outbound capacity from <code>Alice -&gt; Bob</code> and inbound capacity from <code>Carol -&gt; Alice</code> we want to send the payment using the <code>Alice -&gt; Bob</code> channel, through the <code>Bob -&gt; Carol</code> channel, then finally back to ourselves with the <code>Carol -&gt; Alice</code> channel.</p>
 <p>Our list of node identifiers would then correspond to those hops in the route: <code>pubkey(Bob),pubkey(Carol),pubkey(Alice)</code> or more concretely:</p>
 <pre><code>Alice=02a3cc61dd74a22f575b22f4ece6400f5754db9fab8a72a53b2a789ceca34a9d7e
 Bob  =0227bfa020ce5765ef852555c5fbb58bdb3edbeb44f51b2eeb5e7167e678a2771e
@@ -191,7 +191,7 @@ Carol=0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791
 </code></pre>
 <p>This step is nothing special. In theory we could use keysend or another form of spontaneous payment instead generating the invoice ahead of time, but this allows us to create a custom memo if we wanted to do so.</p>
 <h3 id="creating-the-route"><a class="header" href="#creating-the-route">Creating the Route</a></h3>
-<p>Next you'll see that we need to construct a route from our list of nodes. We do this using the <a href="https://api.lightning.community/#buildroute"><code>BuildRoute</code></a> API. This API accepts a list of pubkeys. It goes through LNDs router to help us a build a path that is likely to succeed.</p>
+<p>Next you'll see that we need to construct a route from our list of nodes. We do this using the <a href="https://api.lightning.community/#buildroute"><code>BuildRoute</code></a> API. This API accepts a list of node pubkeys that we conveniently just created. This API uses LNDs router to help us a build a path that is likely to succeed.</p>
 <pre><code class="language-typescript">// Build a route using the hop_pubkeys
 const { route } = await client.buildRoute({
   final_cltv_delta: 40,
@@ -200,13 +200,13 @@ const { route } = await client.buildRoute({
 });
 </code></pre>
 <p>The result of this call is a route that includes a series of hops that traverse channels through each of the specified nodes.</p>
-<p>We need to do one outside the box thing to make the payment successful. We need to modify the last hop to include a payment secret. This <code>payment_secret</code> was initially added to prevent probing attacks and it is used to enable <a href="https://github.com/lightning/bolts/commit/4c3d01616d8e7c1c39212f97562964eceb769c08">multipath payments</a>. LND does not currently (as of v0.12.1-beta) have this baked into the <code>BuildRoute</code> API so we'll need to add this data manually to the <code>mpp_record</code> of our last hop:</p>
+<p>We need to do one not obvious thing to make the payment successful. We need to modify the last hop to include a payment secret. This <code>payment_secret</code> was initially added to prevent probing attacks and it is now used to enable <a href="https://github.com/lightning/bolts/commit/4c3d01616d8e7c1c39212f97562964eceb769c08">multipath payments</a>. LND does not currently (as of v0.12.1-beta) have this baked into the <code>BuildRoute</code> API so we'll need to add this data manually to the <code>mpp_record</code> of our last hop:</p>
 <pre><code>route.hops[route.hops.length - 1].mpp_record = {
     payment_addr: invoice.payment_addr,
     total_amt_msat: amt_msat,
 };
 </code></pre>
-<p>After that is said and done, we should have a route that is constructed that looks similar to this below. You can see that it has three hops: the first goes from <code>Alice -&gt; Bob</code>, the second from <code>Bob -&gt; Carol</code>, and the final goes from <code>Carol -&gt; Alice</code> and includes the <code>payment_secret</code> value that will be included in the Onion TLV of the last hop.</p>
+<p>After that is done, we should have a route that is constructed that looks similar to this below. You can see that it has three hops: the first goes from <code>Alice -&gt; Bob</code>, the second from <code>Bob -&gt; Carol</code>, and the final goes from <code>Carol -&gt; Alice</code> and includes the <code>payment_secret</code> value that will be included in the Onion TLV of the last hop.</p>
 <pre><code class="language-json">{
   hops: [
     {
@@ -390,14 +390,14 @@ const { route } = await client.buildRoute({
 <p>To run the script:</p>
 <ol>
 <li>Gather the node_ids for Bob,Carol,Alice</li>
-<li>Use `npm start exercises/reblancing/Run.ts <satshos> &lt;comma_separated_list_of_nodes&gt;</li>
+<li>Use <code>npm start exercises/reblancing/Run.ts &lt;satashis&gt; &lt;comma_separated_list_of_nodes&gt;</code></li>
 </ol>
 <p>For example:</p>
 <pre><code>npm start exercises/rebalancing/Run.ts 10000 \
 0227bfa020ce5765ef852555c5fbb58bdb3edbeb44f51b2eeb5e7167e678a2771e,0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791,02a3cc61dd74a22f575b22f4ece6400f5754db9fab8a72a53b2a789ceca34a9d7e
 </code></pre>
 <h2 id="afterthoughts"><a class="header" href="#afterthoughts">Afterthoughts</a></h2>
-<p>Rebalancing is a complicated but necessary action for many node operators. Many tools already exist for this:</p>
+<p>Rebalancing is a complicated but necessary action for many node operators. Many tools already exist to help you:</p>
 <p><strong>LND</strong>:</p>
 <ul>
 <li><a href="https://github.com/C-Otto/rebalance-lnd">Rebalance LND</a></li>

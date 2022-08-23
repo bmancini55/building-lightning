@@ -1347,7 +1347,7 @@ appController.listener = (links: Link[]) =&gt;
 <pre><code>npm install
 </code></pre>
 <p>Each section has scripts inside of the <code>exercises</code> directory.</p>
-<p>We'll also need a Lightning Network environment to test. You can create a new Polar environment or reuse an existing one. Some of these exercises will require</p>
+<p>We'll also need a Lightning Network environment to test. You can create a new Polar environment or reuse an existing one. Some of these exercises will require specific configurations of nodes and channels, so feel free to destroy and recreate environments as needed.</p>
 <h2 id="exercise-configuring-env-to-connect-to-lnd-2"><a class="header" href="#exercise-configuring-env-to-connect-to-lnd-2">Exercise: Configuring <code>.env</code> to Connect to LND</a></h2>
 <p>We'll again use the <code>dotenv</code> package to simplify environment variables.</p>
 <p>You'll need to add some values to the <code>.env</code> inside the repository root. Specifically we'll set values for the following:</p>
@@ -1368,25 +1368,25 @@ LND_CERT_PATH=
 <p>Hold invoices (sometimes referred to as hodl invoices) are a mechanism for delaying the settlement of an invoice. Typically upon receipt of a payment, the recipient releases the preimage to settle the incoming HTLC. With hold invoices, the release of the preimage is not automatic.</p>
 <p>Let's consider a scenario with a typical invoice. Bob is paying Alice for a book. Alice creates the invoice for the book and provides it to Bob. Bob pays the invoice and it is immediately settled when Alice's node receives payment. Alice now has the funds. Alice goes and looks for the book, but alas she is sold out. She needs to refund Bob his money. Alice has to ask Bob to create an invoice so she can refund his money then make a payment to him.</p>
 <p>This is obviously cumbersome. Additionally, Alice and Bob are likely to lose out on routing fees along the way.</p>
-<p>With a hold invoice, the merchant or service provider can validate some condition and then settle the transaction. So with our example above Alice delays settlement after she receives Bob's payment. She can verify that she has the book. If she does she settles the transaction. If she she doesn't have the book she can cancel the invoice and Bob is immediately returned his funds as if the payment failed.</p>
+<p>With a hold invoice, after payment is received, the merchant can validate some condition and then settle the transaction. With our example above, Alice delays settlement after she receives Bob's payment. She can verify that she has the book. If she does have the book she settles the transaction. If she doesn't have the book she can cancel the invoice and Bob is immediately returned his funds as if the payment failed.</p>
 <p>This brings up two points:</p>
 <ol>
 <li>Hold invoices look just like normal invoices to Bob, so if Alice cancels his payment, she must notify him that it was cancelled.</li>
-<li>Hold invoices tie up funds along the route. This is an actual attack vector on Lightning known as a griefing attack. So if you use hold invoices, it is best to settle them as soon as possible.</li>
+<li>Hold invoices tie up funds along the route. This behavior is similar to an actual attack vector on Lightning known as a griefing attack. So if you use hold invoices, it is best to settle them as soon as possible.</li>
 </ol>
 <p>Beyond refunds, hold invoices have a few other uses:</p>
 <ul>
 <li><strong>Fidelity bonds</strong> - you can think of this as a deposit on good behavior. A payment can be made to a service provider to access the service. If the user is not malicious the invoice can be cancelled. If the user misbehavior, the invoice can be settled and the funds in the bond taken by the service provider.</li>
-<li><strong>Atomic delivery</strong> - the buyer of some good generates a preimage. The buyer pays the invoice and the merchant has payment. The merchant can send the good. Upon delivery a courier/third party collects and verifies the preimage and the merchant can access the funds.</li>
-<li><strong>Swaps</strong> - Alice wants to move funds from a channel to her on-chain wallet. She creates a preimage and provides the hash to Bob. Bob runs a swap service and constructs a hold invoice using the hash. If he receives payment from Alice, he will pay an HTLC on-chain that can be resolved via Alice's preimage. Once Alice sees this HTLC, she can claim it with the preimage and she now has funds on-chain.</li>
+<li><strong>Atomic delivery</strong> - the buyer of some good generates a preimage. The buyer pays the invoice and the merchant has payment. The merchant can send the good. Upon delivery a courier/third party collects and verifies the preimage and provides it to the merchant who can now access the funds.</li>
+<li><strong>Swaps</strong> - Alice wants to move funds from a channel to her on-chain wallet. She creates a preimage and provides the hash to Bob. Bob runs a swap service and constructs a hold invoice using the hash. When he receives payment from Alice he will pay an HTLC on-chain that can be resolved via the preimage. Once Alice sees this HTLC, she can claim the funds with the preimage. Alice now has the funds on-chain and Bob is able to settle the hold invoice.</li>
 </ul>
 <p>These examples highlight an interesting aspect of the hold invoice: the preimage of an invoice can be unknown to the invoice creator.</p>
 <p>Now that you have a good understanding of hold invoices, we'll do a few exercises to use them via code.</p>
 <h2 id="exercise-creating-a-hold-invoice"><a class="header" href="#exercise-creating-a-hold-invoice">Exercise: Creating a Hold Invoice</a></h2>
-<p>The first exercise is creating a hold invoice using a scripts. We'll start by using the command like script at <code>/exercises/hold-invoices/Hash.ts</code> to create a preimage and its hash from some arbitrary data.</p>
+<p>The first exercise is creating a hold invoice using a script. We'll start by using the command line script at <code>/exercises/hold-invoices/Hash.ts</code> to create a preimage and its hash from some arbitrary data.</p>
 <pre><code>npm start &quot;exercises/hold-invoices/Hash.ts&quot; -- &quot;example 1&quot;
 </code></pre>
-<p>Dev note: Because we are using an <code>npm</code> script to start our file, we need to differentiate between arguments that are provided to the <code>npm</code> command and those that we want to pass to the script. This is done with the <code>--</code>. As you can see, the first argument that is provided to the script is <code>&quot;example 1&quot;</code>.</p>
+<p>Dev note: Because we are using an <code>npm</code> script to start our file, we need to differentiate between arguments that are provided to the <code>npm</code> command and those that we want to pass to the script. This is done with <code>--</code>. As you can see, the first argument that is provided to the script is <code>&quot;example 1&quot;</code>.</p>
 <p>Running this script will output the raw data, the 32-byte preimage for this data, and the
 hash of the preimage.</p>
 <pre><code>data:      example 1
@@ -1410,8 +1410,8 @@ async function run() {
   console.log(&quot;hash:     &quot;, hash.toString(&quot;hex&quot;));
 }
 </code></pre>
-<p>This script accepts any value on the command line. This value will be used to generate the preimage. Lightning Network preimages must be 32-bytes, so we use the SHA256 hash function to turn the arbitrary value into 32-bytes.</p>
-<p>Once we have the 32-byte preimage we can convert it into the hash used in the invoice. As we previously discussed, in order to create a hold invoice only requires knowledge of the hash, so in this example, we could have received a hash from a third party and it would be ok that we have no knowledge of the actual preimage.</p>
+<p>This script accepts any value on the command line. This value will be used to generate the preimage. Lightning Network preimages must be 32-bytes, so we use the SHA256 hash function to turn the arbitrary length value into 32-bytes.</p>
+<p>Once we have the 32-byte preimage we can convert it into the hash used in the invoice. As we previously discussed, in order to create a hold invoice only requires knowledge of the hash, so in this example we could have received a hash from a third party and it would be ok that we have no knowledge of the actual preimage.</p>
 <p>Next we'll use the create script to build our invoice by passing in the hash value.</p>
 <pre><code>npm start &quot;exercises/hold-invoices/Create.ts&quot; -- 964e1161e2b41cb66982453a4b7b154750e26b04c63116f9ef8e3b1adb30e71a
 </code></pre>
@@ -1492,7 +1492,7 @@ hash:      33f35509e040e0cc653691caa22f99e4d7fcaf714f2bcdda13ce369ca844f979
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="spontaneous-payments-with-keysend"><a class="header" href="#spontaneous-payments-with-keysend">Spontaneous Payments with Keysend</a></h1>
-<p>Spontaneous payments are a type of payment that doesn't require the recipient to generate an invoice. This type of payment is payment is initiated by the sender and the recipient may or may not be expecting the payment.</p>
+<p>Spontaneous payments are a type of payment that doesn't require the recipient to generate an invoice. This type of payment is initiated by the sender and the recipient may or may not be expecting the payment.</p>
 <p>Spontaneous payments are useful for a variety of scenarios:</p>
 <ul>
 <li>Partial refunds - a merchant can issue a refund for an item they are unable to fulfill.</li>
@@ -1501,14 +1501,15 @@ hash:      33f35509e040e0cc653691caa22f99e4d7fcaf714f2bcdda13ce369ca844f979
 <p>The major downside to spontaneous payments is that you lose proof of payment for a specific invoice since the preimage is generated by the payment sender.</p>
 <h1 id="keysend"><a class="header" href="#keysend">Keysend</a></h1>
 <p>Keysend is defined in <a href="https://github.com/lightning/blips/blob/master/blip-0003.md">BLIP 0003</a>. It is an optional feature of Lightning Network nodes that enables spontaneous payments.</p>
-<p>This feature relies on upon <a href="https://github.com/lightning/bolts/blob/bc86304b4b0af5fd5ce9d24f74e2ebbceb7e2730/04-onion-routing.md#tlv_payload-format">variable length onion packets</a>. It works by encoding the preimage into onion data that is decrypted by the payment recipient in the last hop of the onion.</p>
+<p>This feature relies on upon <a href="https://github.com/lightning/bolts/blob/bc86304b4b0af5fd5ce9d24f74e2ebbceb7e2730/04-onion-routing.md#tlv_payload-format">variable length onion packets</a>. It works by encoding the preimage into onion data that is decrypted by the payment recipient in the last hop of the onion. Due to the onion construction this preimage is not visible to the intermediary hops until the payment is settled by the final node.</p>
 <p>In order to make a keysend payment requires:</p>
 <ul>
 <li>generating a unique 32-byte preimage</li>
 <li>create a sha256 hash of the preimage</li>
-<li>set a custom onion record with identifier 5482373484 to the preimage</li>
+<li>set a custom onion record with identifier 5482373484 to the preimage value</li>
+<li>sending a payment using the hash of the preimage</li>
 </ul>
-<p>A receiving node that has keysend enabled will understand the custom onion record. It will then create an invoice on the fly and resolve it using the value supplied by the sender.</p>
+<p>A receiving node that has keysend enabled will understand the custom onion record. It will then create an invoice on the fly and resolve it using the preimage supplied by the sender.</p>
 <h2 id="keysend-on-c-lightning"><a class="header" href="#keysend-on-c-lightning">Keysend on C-Lightning</a></h2>
 <p>Keysend is enabled by default on C-Lightning. Keysend payments can be sent using the <a href="https://lightning.readthedocs.io/lightning-keysend.7.html"><code>keysend</code> CLI command</a></p>
 <p>For example if Carol is running a C-Lightning node and wants to send payment 50,000 satoshis to Bob who has a node identifier of 0227bfa020ce5765ef852555c5fbb58bdb3edbeb44f51b2eeb5e7167e678a2771e. She would use the command</p>
@@ -1520,7 +1521,7 @@ hash:      33f35509e040e0cc653691caa22f99e4d7fcaf714f2bcdda13ce369ca844f979
 <p>You can do this in Polar by right-clicking an LND node and selecting <code>Advanced Options</code>. Under advanced options, click the &quot;Pre-fill with the default command&quot; button, then add the <code>--accept-keysend</code> flag.</p>
 <p><img src="advanced/../images/ch3_keysend_enable_lnd.png" alt="Enable Keysend on LND" /></p>
 <p>Restart your node.</p>
-<p>You can then open a terminal and send payments using the <code>sendpayment</code> CLI command by providing a destination <code>--dest=&lt;nod_id&gt;</code>, amount in satoshis <code>--amt=&lt;value&gt;</code> and the flag <code>--keysend</code></p>
+<p>You can then open a terminal and send payments using the <code>sendpayment</code> CLI command by providing a destination <code>--dest=&lt;node_id&gt;</code>, amount in satoshis <code>--amt=&lt;value&gt;</code> and the flag <code>--keysend</code></p>
 <p>For example to send 10,000 satoshi's to Carol's node that has the node identifier 0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791:</p>
 <pre><code>lncli sendpayment --dest=0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791 --amt=10000 --keysend
 </code></pre>
@@ -1573,9 +1574,9 @@ hash:      33f35509e040e0cc653691caa22f99e4d7fcaf714f2bcdda13ce369ca844f979
 <p>When it completes successfully you should see a payment status with the <code>status=SUCCEEDED</code> output to the console.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="circular-rebalancing-in-the-lightning-network"><a class="header" href="#circular-rebalancing-in-the-lightning-network">Circular Rebalancing in the Lightning Network</a></h1>
 <p>Each Lighting Network channels has a total capacity. This total capacity is split between the two nodes in the channel. When a channel is initially opened (unless some amount is initially pushed to the remote node), the channel balance is 100% on one side of the person that created the channel. With this unbalance, a payment can only be sent. There is no inbound capacity. If you tried to receive a payment, it would fail.</p>
-<p>Similarly, an channel that is opened to you will only have capacity on the remote side. Initially you can receive payments from that channel, but you will be unable send payments using that channel.</p>
+<p>Similarly, a channel that is opened to you will only have capacity on the remote side. Initially you can receive payments from that channel, but you will be unable send payments using that channel.</p>
 <p>As you send and receive payments, the balances of your channels will shift. Ideally, you would want to maintain some split of inbound versus outbound capacity.</p>
-<p>You can accomplish this by using <strong>circular rebalancing</strong>.</p>
+<p>You can control this balance by performing circular rebalancing.</p>
 <h2 id="circular-rebalancing"><a class="header" href="#circular-rebalancing">Circular Rebalancing</a></h2>
 <p>Circular Rebalancing is a technique for when you have multiple channels open and want to change the inbound/outbound ratio for your channels. The general idea is that you pay yourself (only losing some fees along the way) using a channel that has excess outbound capacity and you accept payment through the channel that has excess inbound capacity. In this regard, the payment generates a circle and the net result is that your channel balances are more evenly distributed for both sending and receiving.</p>
 <p>Create a Polar environment with three nodes: Alice, Bob, and Carol where:</p>
@@ -1605,7 +1606,7 @@ hash:      33f35509e040e0cc653691caa22f99e4d7fcaf714f2bcdda13ce369ca844f979
 <pre><code>// Read the hop pubkeys as hex strings and convert them to buffers
 const hop_pubkeys = process.argv[3].split(&quot;,&quot;).map(v =&gt; Buffer.from(v, &quot;hex&quot;));
 </code></pre>
-<p>What we want is a list nodes such that we start with a node we want to send to and end with our node. For example if we had outbound capacity from <code>Alice -&gt; Bob</code> and inbound capacity from <code>Carol -&gt; Alice</code> we want to send the payment using the <code>Alice -&gt; Bob</code> channel, through the <code>Bob -&gt; Carol</code> channel, then finally back to ourselves with the <code>Carol -&gt; Alice</code> channel.</p>
+<p>What we want is a list of node identifiers such that we start with the node we are sending to and end with our node. For example if we had outbound capacity from <code>Alice -&gt; Bob</code> and inbound capacity from <code>Carol -&gt; Alice</code> we want to send the payment using the <code>Alice -&gt; Bob</code> channel, through the <code>Bob -&gt; Carol</code> channel, then finally back to ourselves with the <code>Carol -&gt; Alice</code> channel.</p>
 <p>Our list of node identifiers would then correspond to those hops in the route: <code>pubkey(Bob),pubkey(Carol),pubkey(Alice)</code> or more concretely:</p>
 <pre><code>Alice=02a3cc61dd74a22f575b22f4ece6400f5754db9fab8a72a53b2a789ceca34a9d7e
 Bob  =0227bfa020ce5765ef852555c5fbb58bdb3edbeb44f51b2eeb5e7167e678a2771e
@@ -1620,7 +1621,7 @@ Carol=0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791
 </code></pre>
 <p>This step is nothing special. In theory we could use keysend or another form of spontaneous payment instead generating the invoice ahead of time, but this allows us to create a custom memo if we wanted to do so.</p>
 <h3 id="creating-the-route"><a class="header" href="#creating-the-route">Creating the Route</a></h3>
-<p>Next you'll see that we need to construct a route from our list of nodes. We do this using the <a href="https://api.lightning.community/#buildroute"><code>BuildRoute</code></a> API. This API accepts a list of pubkeys. It goes through LNDs router to help us a build a path that is likely to succeed.</p>
+<p>Next you'll see that we need to construct a route from our list of nodes. We do this using the <a href="https://api.lightning.community/#buildroute"><code>BuildRoute</code></a> API. This API accepts a list of node pubkeys that we conveniently just created. This API uses LNDs router to help us a build a path that is likely to succeed.</p>
 <pre><code class="language-typescript">// Build a route using the hop_pubkeys
 const { route } = await client.buildRoute({
   final_cltv_delta: 40,
@@ -1629,13 +1630,13 @@ const { route } = await client.buildRoute({
 });
 </code></pre>
 <p>The result of this call is a route that includes a series of hops that traverse channels through each of the specified nodes.</p>
-<p>We need to do one outside the box thing to make the payment successful. We need to modify the last hop to include a payment secret. This <code>payment_secret</code> was initially added to prevent probing attacks and it is used to enable <a href="https://github.com/lightning/bolts/commit/4c3d01616d8e7c1c39212f97562964eceb769c08">multipath payments</a>. LND does not currently (as of v0.12.1-beta) have this baked into the <code>BuildRoute</code> API so we'll need to add this data manually to the <code>mpp_record</code> of our last hop:</p>
+<p>We need to do one not obvious thing to make the payment successful. We need to modify the last hop to include a payment secret. This <code>payment_secret</code> was initially added to prevent probing attacks and it is now used to enable <a href="https://github.com/lightning/bolts/commit/4c3d01616d8e7c1c39212f97562964eceb769c08">multipath payments</a>. LND does not currently (as of v0.12.1-beta) have this baked into the <code>BuildRoute</code> API so we'll need to add this data manually to the <code>mpp_record</code> of our last hop:</p>
 <pre><code>route.hops[route.hops.length - 1].mpp_record = {
     payment_addr: invoice.payment_addr,
     total_amt_msat: amt_msat,
 };
 </code></pre>
-<p>After that is said and done, we should have a route that is constructed that looks similar to this below. You can see that it has three hops: the first goes from <code>Alice -&gt; Bob</code>, the second from <code>Bob -&gt; Carol</code>, and the final goes from <code>Carol -&gt; Alice</code> and includes the <code>payment_secret</code> value that will be included in the Onion TLV of the last hop.</p>
+<p>After that is done, we should have a route that is constructed that looks similar to this below. You can see that it has three hops: the first goes from <code>Alice -&gt; Bob</code>, the second from <code>Bob -&gt; Carol</code>, and the final goes from <code>Carol -&gt; Alice</code> and includes the <code>payment_secret</code> value that will be included in the Onion TLV of the last hop.</p>
 <pre><code class="language-json">{
   hops: [
     {
@@ -1819,14 +1820,14 @@ const { route } = await client.buildRoute({
 <p>To run the script:</p>
 <ol>
 <li>Gather the node_ids for Bob,Carol,Alice</li>
-<li>Use `npm start exercises/reblancing/Run.ts <satshos> &lt;comma_separated_list_of_nodes&gt;</li>
+<li>Use <code>npm start exercises/reblancing/Run.ts &lt;satashis&gt; &lt;comma_separated_list_of_nodes&gt;</code></li>
 </ol>
 <p>For example:</p>
 <pre><code>npm start exercises/rebalancing/Run.ts 10000 \
 0227bfa020ce5765ef852555c5fbb58bdb3edbeb44f51b2eeb5e7167e678a2771e,0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791,02a3cc61dd74a22f575b22f4ece6400f5754db9fab8a72a53b2a789ceca34a9d7e
 </code></pre>
 <h2 id="afterthoughts"><a class="header" href="#afterthoughts">Afterthoughts</a></h2>
-<p>Rebalancing is a complicated but necessary action for many node operators. Many tools already exist for this:</p>
+<p>Rebalancing is a complicated but necessary action for many node operators. Many tools already exist to help you:</p>
 <p><strong>LND</strong>:</p>
 <ul>
 <li><a href="https://github.com/C-Otto/rebalance-lnd">Rebalance LND</a></li>
