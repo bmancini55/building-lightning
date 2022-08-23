@@ -2,11 +2,11 @@
 
 Each Lighting Network channels has a total capacity. This total capacity is split between the two nodes in the channel. When a channel is initially opened (unless some amount is initially pushed to the remote node), the channel balance is 100% on one side of the person that created the channel. With this unbalance, a payment can only be sent. There is no inbound capacity. If you tried to receive a payment, it would fail.
 
-Similarly, an channel that is opened to you will only have capacity on the remote side. Initially you can receive payments from that channel, but you will be unable send payments using that channel.
+Similarly, a channel that is opened to you will only have capacity on the remote side. Initially you can receive payments from that channel, but you will be unable send payments using that channel.
 
 As you send and receive payments, the balances of your channels will shift. Ideally, you would want to maintain some split of inbound versus outbound capacity.
 
-You can accomplish this by using **circular rebalancing**.
+You can control this balance by performing circular rebalancing.
 
 ## Circular Rebalancing
 
@@ -48,7 +48,7 @@ Next we need to split up a list of node public keys and convert strings into Buf
 const hop_pubkeys = process.argv[3].split(",").map(v => Buffer.from(v, "hex"));
 ```
 
-What we want is a list nodes such that we start with a node we want to send to and end with our node. For example if we had outbound capacity from `Alice -> Bob` and inbound capacity from `Carol -> Alice` we want to send the payment using the `Alice -> Bob` channel, through the `Bob -> Carol` channel, then finally back to ourselves with the `Carol -> Alice` channel.
+What we want is a list of node identifiers such that we start with the node we are sending to and end with our node. For example if we had outbound capacity from `Alice -> Bob` and inbound capacity from `Carol -> Alice` we want to send the payment using the `Alice -> Bob` channel, through the `Bob -> Carol` channel, then finally back to ourselves with the `Carol -> Alice` channel.
 
 Our list of node identifiers would then correspond to those hops in the route: `pubkey(Bob),pubkey(Carol),pubkey(Alice)` or more concretely:
 
@@ -74,7 +74,7 @@ This step is nothing special. In theory we could use keysend or another form of 
 
 ### Creating the Route
 
-Next you'll see that we need to construct a route from our list of nodes. We do this using the [`BuildRoute`](https://api.lightning.community/#buildroute) API. This API accepts a list of pubkeys. It goes through LNDs router to help us a build a path that is likely to succeed.
+Next you'll see that we need to construct a route from our list of nodes. We do this using the [`BuildRoute`](https://api.lightning.community/#buildroute) API. This API accepts a list of node pubkeys that we conveniently just created. This API uses LNDs router to help us a build a path that is likely to succeed.
 
 ```typescript
 // Build a route using the hop_pubkeys
@@ -87,7 +87,7 @@ const { route } = await client.buildRoute({
 
 The result of this call is a route that includes a series of hops that traverse channels through each of the specified nodes.
 
-We need to do one outside the box thing to make the payment successful. We need to modify the last hop to include a payment secret. This `payment_secret` was initially added to prevent probing attacks and it is used to enable [multipath payments](https://github.com/lightning/bolts/commit/4c3d01616d8e7c1c39212f97562964eceb769c08). LND does not currently (as of v0.12.1-beta) have this baked into the `BuildRoute` API so we'll need to add this data manually to the `mpp_record` of our last hop:
+We need to do one not obvious thing to make the payment successful. We need to modify the last hop to include a payment secret. This `payment_secret` was initially added to prevent probing attacks and it is now used to enable [multipath payments](https://github.com/lightning/bolts/commit/4c3d01616d8e7c1c39212f97562964eceb769c08). LND does not currently (as of v0.12.1-beta) have this baked into the `BuildRoute` API so we'll need to add this data manually to the `mpp_record` of our last hop:
 
 ```
 route.hops[route.hops.length - 1].mpp_record = {
@@ -96,7 +96,7 @@ route.hops[route.hops.length - 1].mpp_record = {
 };
 ```
 
-After that is said and done, we should have a route that is constructed that looks similar to this below. You can see that it has three hops: the first goes from `Alice -> Bob`, the second from `Bob -> Carol`, and the final goes from `Carol -> Alice` and includes the `payment_secret` value that will be included in the Onion TLV of the last hop.
+After that is done, we should have a route that is constructed that looks similar to this below. You can see that it has three hops: the first goes from `Alice -> Bob`, the second from `Bob -> Carol`, and the final goes from `Carol -> Alice` and includes the `payment_secret` value that will be included in the Onion TLV of the last hop.
 
 ```json
 {
@@ -296,7 +296,7 @@ async function run(): Promise<void> {
 To run the script:
 
 1. Gather the node_ids for Bob,Carol,Alice
-1. Use `npm start exercises/reblancing/Run.ts <satshos> <comma_separated_list_of_nodes>
+1. Use `npm start exercises/reblancing/Run.ts <satashis> <comma_separated_list_of_nodes>`
 
 For example:
 
@@ -307,7 +307,7 @@ npm start exercises/rebalancing/Run.ts 10000 \
 
 ## Afterthoughts
 
-Rebalancing is a complicated but necessary action for many node operators. Many tools already exist for this:
+Rebalancing is a complicated but necessary action for many node operators. Many tools already exist to help you:
 
 **LND**:
 
