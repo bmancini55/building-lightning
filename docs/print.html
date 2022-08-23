@@ -772,21 +772,27 @@ export const GraphScene = () =&gt; {
 <p>You'll need to add some values to the <code>.env</code> inside the <code>server</code> sub-project. Specifically we'll set values for the following:</p>
 <ul>
 <li><code>LND_RPC_HOST</code> is the host for LND RPC</li>
-<li><code>LND_HOST</code> is the host for LND RPC</li>
 <li><code>LND_ADMIN_MACAROON_PATH</code> is the file path to the admin Macaroon</li>
+<li><code>LND_INVOICE_MACAROON_PATH</code> is the file path to the invoice Macaroon</li>
+<li><code>LND_READONLY_MACAROON_PATH</code> is the file path to the &quot;readonly&quot; Macaroon</li>
 <li><code>LND_CERT_PATH</code> is the certificate we use to securely connect with LND</li>
 </ul>
+<p>Optionally, you can also set the <code>LND_REST_HOST</code> value.
+It's not necessary for this tutorial, but if you want to experiment with the REST API via the <code>building-lightning-invoices</code> repo, you will need it.</p>
 <p>To populate these values navigate to Polar. To access Alice's node by clicking on Alice and then click on the <code>Connect</code> tab. You will be shown the information on how to connect to the GRPC and REST interfaces. Additionally you will be given paths to the network certificates and macaroon files that we will need in <code>.env</code>.</p>
 <p><img src="app2/../images/ch1_polar_connect_to_alice.png" alt="Connect to Alice" /></p>
-<p>Go ahead and add the three environment variables defined above to <code>.env</code>.</p>
+<p>Go ahead and add the environment variables defined above to <code>.env</code>.</p>
 <pre><code># Express configuration
 PORT=8001
 
 # LND configuration
 # Exercise: Provide values for Alice's node
+LND_REST_HOST=
 LND_RPC_HOST=
-LND_ADMIN_MACAROON_PATH=
 LND_CERT_PATH=
+LND_ADMIN_MACAROON_PATH=
+LND_INVOICE_MACAROON_PATH=
+LND_READONLY_MACAROON_PATH=
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="creating-an-invoice-in-code"><a class="header" href="#creating-an-invoice-in-code">Creating an Invoice in Code</a></h1>
 <p>We'll start the invoice coding journey by doing a very simple script to create the invoice. When run, our script will simply call the <a href="https://api.lightning.community/#addinvoice"><code>AddInvoice</code></a> GRPC API in LND to construct and return the invoice.</p>
@@ -843,7 +849,7 @@ LND_CERT_PATH=
 <p>For our application we're going to use the Lightning Network and invoices to create a virtual game of <a href="https://en.wikipedia.org/wiki/King_of_the_Hill_(game)">king of the hill</a>. To play the game, someone becomes the leader by paying an invoice. Someone else can become the leader by paying a new invoice for more than the last leader. The neat thing is that any leader along the way can cryptographically prove they were the leader. In a sense, this application will act as a simple provenance chain for a &quot;digital right&quot; using Lightning Network invoices.</p>
 <p>Let's see what our game looks like. Alice is running our application and is using LND as the backend. Bob is also running a network node and accesses Alice's website. Bob wants to become the first leader in the game.</p>
 <p><img src="app2/../images/ch2_app_01.png" alt="Initial App" /></p>
-<p>The application is prompting Bob that he needs to will need to pay 1000 satoshi. But to do this he must sign a message using high Lightning Network node. In this case, Bob needs to digital digitally sign the message <code>0000000000000000000000000000000000000000000000000000000000000001</code>.
+<p>The application is prompting Bob that he will need to pay 1000 satoshis. But to do this he must sign a message using his Lightning Network node. In this case, Bob needs to digitally sign the message <code>0000000000000000000000000000000000000000000000000000000000000001</code>.
 <img src="app2/../images/ch2_app_02.png" alt="Bob Signs" /></p>
 <p>Note: In Polar we can open a terminal by right-clicking on the node and selecting &quot;Launch Terminal&quot;. With c-lightning, you can use the command <code>signmessage</code> to sign a message. It will return a signature in both hex and zbase32 formats. To simplify our application we'll use the zbase32 format since LND only interprets signatures in this format.</p>
 <p>Now that Bob has a signature for the message, he provides the signature to the application's user interface. The server creates an invoice using Alice's Lightning Network node. This invoice is specific to Bob since he provided the signature. Alice's server returns the invoice to Bob via the user interface.</p>

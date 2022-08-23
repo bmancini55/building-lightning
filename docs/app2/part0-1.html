@@ -161,21 +161,27 @@
 <p>You'll need to add some values to the <code>.env</code> inside the <code>server</code> sub-project. Specifically we'll set values for the following:</p>
 <ul>
 <li><code>LND_RPC_HOST</code> is the host for LND RPC</li>
-<li><code>LND_HOST</code> is the host for LND RPC</li>
 <li><code>LND_ADMIN_MACAROON_PATH</code> is the file path to the admin Macaroon</li>
+<li><code>LND_INVOICE_MACAROON_PATH</code> is the file path to the invoice Macaroon</li>
+<li><code>LND_READONLY_MACAROON_PATH</code> is the file path to the &quot;readonly&quot; Macaroon</li>
 <li><code>LND_CERT_PATH</code> is the certificate we use to securely connect with LND</li>
 </ul>
+<p>Optionally, you can also set the <code>LND_REST_HOST</code> value.
+It's not necessary for this tutorial, but if you want to experiment with the REST API via the <code>building-lightning-invoices</code> repo, you will need it.</p>
 <p>To populate these values navigate to Polar. To access Alice's node by clicking on Alice and then click on the <code>Connect</code> tab. You will be shown the information on how to connect to the GRPC and REST interfaces. Additionally you will be given paths to the network certificates and macaroon files that we will need in <code>.env</code>.</p>
 <p><img src="../images/ch1_polar_connect_to_alice.png" alt="Connect to Alice" /></p>
-<p>Go ahead and add the three environment variables defined above to <code>.env</code>.</p>
+<p>Go ahead and add the environment variables defined above to <code>.env</code>.</p>
 <pre><code># Express configuration
 PORT=8001
 
 # LND configuration
 # Exercise: Provide values for Alice's node
+LND_REST_HOST=
 LND_RPC_HOST=
-LND_ADMIN_MACAROON_PATH=
 LND_CERT_PATH=
+LND_ADMIN_MACAROON_PATH=
+LND_INVOICE_MACAROON_PATH=
+LND_READONLY_MACAROON_PATH=
 </code></pre>
 
                     </main>
