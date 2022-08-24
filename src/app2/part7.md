@@ -71,6 +71,13 @@ public async start(seed: string, startSats: number) {
 }
 ```
 
+Dev Tip: One of the trickier aspects of JavaScript is scoping of `this`. Since the `handleInvoice` method will be used as a callback but it belongs to the `AppController` class, special care must be made to ensure that it does not lose scope when it is called by the `sync` method. You will have an issue if you provide it directly as an argument to the `sync` method: `await this.invoiceDataMapper.sync(this.handleInvoice);`. Doing this treats the `handleInvoice` method as an unbound function, which means any use of `this` inside of that function will be scoped to the caller instead of the `AppController` class instance.
+
+You can retain scope of the `AppController` class instance in two ways:
+
+1. use [`bind`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind) to bind the function to the desired scope. Eg: bind it to the current instance of the class `await this.invoiceDataMapper.sync(this.handleInvoice.bind(this))`.
+1. use [`arrow functions`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions) which retain the scoping of the caller. Eg: `await this.invoiceDataMapper.sync(invoice => this.handleInvoice(invoice))`.
+
 When you are finished you can verify you successfully implemented the method with the following command:
 
 ```
