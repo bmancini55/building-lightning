@@ -23,8 +23,19 @@ mdbook serve --open
 
 ## Deploying a New Version
 
+Using make
+
+1. git checkout gh-pages
+1. make
+1. git commit 'vx.x.x'
+1. git push origin gh-pages
+
+Manually:
+
 1. Checkout the gh-pages branch
+1. git merge main
 1. git rm docs
 1. mdbook build
 1. mv book docs
-1. commit and push to gh-pages
+1. git commit 'vx.x.x'
+1. git push origin gh-pages
