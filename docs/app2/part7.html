@@ -194,6 +194,12 @@
     // Exercise
 }
 </code></pre>
+<p>Dev Tip: One of the trickier aspects of JavaScript is scoping of <code>this</code>. Since the <code>handleInvoice</code> method will be used as a callback but it belongs to the <code>AppController</code> class, special care must be made to ensure that it does not lose scope when it is called by the <code>sync</code> method. You will have an issue if you provide it directly as an argument to the <code>sync</code> method: <code>await this.invoiceDataMapper.sync(this.handleInvoice);</code>. Doing this treats the <code>handleInvoice</code> method as an unbound function, which means any use of <code>this</code> inside of that function will be scoped to the caller instead of the <code>AppController</code> class instance.</p>
+<p>You can retain scope of the <code>AppController</code> class instance in two ways:</p>
+<ol>
+<li>use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind"><code>bind</code></a> to bind the function to the desired scope. Eg: bind it to the current instance of the class <code>await this.invoiceDataMapper.sync(this.handleInvoice.bind(this))</code>.</li>
+<li>use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions"><code>arrow functions</code></a> which retain the scoping of the caller. Eg: <code>await this.invoiceDataMapper.sync(invoice =&gt; this.handleInvoice(invoice))</code>.</li>
+</ol>
 <p>When you are finished you can verify you successfully implemented the method with the following command:</p>
 <pre><code>npm run test:server -- --grep AppController.*start
 </code></pre>
