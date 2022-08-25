@@ -8,7 +8,7 @@ ifneq ($(gitbranch), gh-pages)
 	exit 1
 endif
 	git merge main
-        rm -rf docs
+	rm -rf docs
 	mdbook build
 	mv book docs
 
