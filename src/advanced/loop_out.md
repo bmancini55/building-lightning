@@ -12,16 +12,18 @@ Each loop-out will generate at least one on-chain transaction, so we need to be 
 
 So here are the steps for a loop-out between Alice and Bob. Bob runs a loop-out service and Alice wants to migrate some funds on-chain.
 
-1. Alice generates a hash preimage that only she knows
-1. Alice provides the hash, a payment address, and the amount to Bob
-1. Bob generates a hold invoice and provides the payment request and his payment address to Alice
-1. Alice pays the invoice
-1. Bob, upon acceptance of the payment, broadcasts an on-chain HTLC that pays Alice if she provides the preimage or it pays him after some timeout period
-1. Alice claims the HTLC by spending it using the preimage (Alice now has her funds offline)
-1. Bob extracts the preimage from the Alice's claim transaction
-1. Bob settles the inbound Lightning payment (Bob now has funds in his LN channel)
+![Loop-Out Sequence](../images/loop_out_sequence.jpg)
 
-Astute readers will recognize that the on-chain HTLC aspect is remarkably similar to how Lightning Network channels make claims against HTLCs when a channel goes on-chain. Typically, when a channel is dropped on-chain it means that the current state of the channel as represented by the commitment transaction is broadcast on-chain. The outputs of this transaction are split between the two participants and any HTLCs that are pending. In order to settle the HTLC outputs one of two things happens:
+1. Alice generates a hash preimage that only she knows and provides the hash, a payment address, and the amount to Bob
+1. Bob generates a hold invoice and provides the payment request and his refund address to Alice
+1. Alice pays the invoice using her Lightning Network node
+1. Bob gets receipt of the payment,
+1. Bob broadcasts an on-chain HTLC that pays Alice if she provides the preimage or it pays him after some timeout period
+1. Alice settles the on-chain HTLC by spending it using the preimage (Alice now has her funds on-chain)
+1. Bob extracts the preimage from the Alice's settlement transaction on-chain
+1. Bob settles the inbound hold invoice (Bob now has funds in his LN channel)
+
+Astute readers will recognize that the on-chain HTLC aspect is remarkably similar to how Lightning Network channels make claims against HTLCs when a channel goes on-chain. In order to settle the HTLC outputs one of two things happens:
 
 1. the offerer of an HTLC has access to reclaim the funds after some timeout period
 1. the recipient of an HTLC can claim the funds using the preimage
@@ -33,6 +35,12 @@ One final note is that just like off-chain payments, to ensure there are no fund
 ## Building a Loop-Out Client
 
 The first step is going to be building a client for Alice. To make our lives easier this client will connect to the service over HTTP to exchange necessary information.
+
+Once the client has an invoice it will:
+
+1. pay the invoice
+1. watch the blockchain for the HTLC
+1. spend the HTLC using the preimage that it knows
 
 The code for our client application can be found in [`exercises/loop-out/client/Client.ts`](https://github.com/bmancini55/building-lightning-advanced/blob/main/exercises/loop-out/client/Client.ts). The start of this file contains a few boilerplate things that must be setup:
 
@@ -201,11 +209,16 @@ Next we'll take a look at the service.
 
 ## Building a Loop-Out Service
 
-The service piece is a bit more complicated.
+The service piece is a bit more complicated. As discussed, our service needs to do a few things:
 
-Our [entrypoint](https://github.com/bmancini55/building-lightning-advanced/blob/main/exercises/loop-out/service/Service.ts) of the service includes some boilerplate to connect to our LND node, conenct to bitcoind, and start an API.
+1. Receive requests and create a hold invoice
+1. Upon receipt of a hold invoice payment, construct an on-chain HTLC
+1. Watch the HTLC for settlement
+1. Extract the preimage from the on-chain settlement and resolve the incoming hold invoice
 
-Another thing that happens at the entry point is that our service adds funds to our wallet using the [`fundTestWallet`](https://github.com/bmancini55/building-lightning-advanced/blob/9529d8b39f2d4591d09d717d5d410d76255b7c85/exercises/loop-out/Wallet.ts#L36) method. These funds will be be spent to the on-chain HTLC that the service will create after we receive an incoming hold invoice.
+The [entrypoint](https://github.com/bmancini55/building-lightning-advanced/blob/main/exercises/loop-out/service/Service.ts) of the service includes some boilerplate to connect to our LND node, connect to bitcoind, and start an HTTP API to listen for requests.
+
+Another thing that happens at the entry point is that our service adds funds to our wallet using the [`fundTestWallet`](https://github.com/bmancini55/building-lightning-advanced/blob/9529d8b39f2d4591d09d717d5d410d76255b7c85/exercises/loop-out/Wallet.ts#L36) method. Our wallet implementation runs on regtest which allows us to generate funds and blocks as we need them. The funds in our wallet will be spent to the on-chain HTLC that the service creates after we receive payment of an incoming hold invoice.
 
 Once we have some funds ready to go we can start our [API](https://github.com/bmancini55/building-lightning-advanced/blob/main/exercises/loop-out/service/Api.ts) and listen for requests. The API simply translates those requests from JSON and supplies the resulting request object into the [`RequestManager`](https://github.com/bmancini55/building-lightning-advanced/blob/main/exercises/loop-out/service/RequestManager.ts) which is responsible for translating events into changes for a request.
 
