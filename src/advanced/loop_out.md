@@ -4,7 +4,7 @@ In this section we'll discuss loop-out of funds from a Lightning Network channel
 
 An obvious use case for this is a merchant that a receives a large inflow of payments. At a certain point the merchant channel's inbound capacity will be exhausted and the merchant will have a large amount of outbound capacity. A loop-out allows the merchant to simultaneously change the balance of their channel so that they once again have inbound capacity and move the funds to an on-chain address for safe keeping!
 
-This article is going to show how to build a simple loop-out service. There are a lot of moving pieces and we need to have on-chain wallet capabilities. In order to keep this article somewhat brief we'll forgo building a fully complete and secure loop-out service and instead work through the mechanics.
+This article is going to show how to build a simple loop-out service. There are a lot of moving pieces and we need to have on-chain wallet capabilities. In order to keep this article somewhat brief we'll forgo building a fully complete and secure loop-out service and instead work through the mechanics. The full working code can be found [here](https://github.com/bmancini55/building-lightning-advanced/tree/main/exercises/loop-out).
 
 ## Mechanics of Loop-Out
 
