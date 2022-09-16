@@ -4,15 +4,13 @@ In this section we'll discuss loop-out of funds from a Lightning Network channel
 
 An obvious use case for this is a merchant that a receives a large inflow of payments. At a certain point the merchant channel's inbound capacity will be exhausted and the merchant will have a large amount of outbound capacity. A loop-out allows the merchant to simultaneously change the balance of their channel so that they once again have inbound capacity and move the funds to an on-chain address for safe keeping!
 
-This article is going to show to build a simple loop-out service. There are a lot of moving pieces and we need to have on-chain wallet capabilities. In order to keep this article somewhat brief we'll forgo building a fully complete and secure loop-out service and instead work through the mechanics.
+This article is going to show how to build a simple loop-out service. There are a lot of moving pieces and we need to have on-chain wallet capabilities. In order to keep this article somewhat brief we'll forgo building a fully complete and secure loop-out service and instead work through the mechanics.
 
 ## Mechanics of Loop-Out
 
-Each loop-out will generate at least one on-chain transaction, so we need to be mindful of its usage. Performing a loop-out require a service that bridges off-chain Lightning Network payments to on-chain transaction. Functionally the service will broadcast an on-chain HTLC that can be claimed with the hash preimage by the person requesting the loop-out.
+Each loop-out will generate at least two on-chain transaction: one on-chain HTLC and one claim transaction to resolve the HTLC. Performing a loop-out require a service that bridges off-chain Lightning Network payments to on-chain transaction. Functionally the service will broadcast an on-chain HTLC that can be claimed with the hash preimage by the person requesting the loop-out.
 
 So here are the steps for a loop-out between Alice and Bob. Bob runs a loop-out service and Alice wants to migrate some funds on-chain.
-
-![Loop-Out Sequence](../images/loop_out_sequence.jpg)
 
 1. Alice generates a hash preimage that only she knows and provides the hash, a payment address, and the amount to Bob
 1. Bob generates a hold invoice and provides the payment request and his refund address to Alice
@@ -22,6 +20,8 @@ So here are the steps for a loop-out between Alice and Bob. Bob runs a loop-out 
 1. Alice settles the on-chain HTLC by spending it using the preimage (Alice now has her funds on-chain)
 1. Bob extracts the preimage from the Alice's settlement transaction on-chain
 1. Bob settles the inbound hold invoice (Bob now has funds in his LN channel)
+
+![Loop-Out Sequence](../images/loop_out_sequence.jpg)
 
 Astute readers will recognize that the on-chain HTLC aspect is remarkably similar to how Lightning Network channels make claims against HTLCs when a channel goes on-chain. In order to settle the HTLC outputs one of two things happens:
 
