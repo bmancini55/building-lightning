@@ -216,6 +216,12 @@ The service piece is a bit more complicated. As discussed, our service needs to 
 1. Watch the HTLC for settlement
 1. Extract the preimage from the on-chain settlement and resolve the incoming hold invoice
 
+I like to think of a request in its various states and we can model this as such:
+
+![Request States](../images/loop_out_server_states.jpg)
+
+For the sake of simplicity, we'll be ignore the timeout paths (dotted lines). As a result our states will traverse through a linear progression of events.
+
 The [entrypoint](https://github.com/bmancini55/building-lightning-advanced/blob/main/exercises/loop-out/service/Service.ts) of the service includes some boilerplate to connect to our LND node, connect to bitcoind, and start an HTTP API to listen for requests.
 
 Another thing that happens at the entry point is that our service adds funds to our wallet using the [`fundTestWallet`](https://github.com/bmancini55/building-lightning-advanced/blob/9529d8b39f2d4591d09d717d5d410d76255b7c85/exercises/loop-out/Wallet.ts#L36) method. Our wallet implementation runs on regtest which allows us to generate funds and blocks as we need them. The funds in our wallet will be spent to the on-chain HTLC that the service creates after we receive payment of an incoming hold invoice.
