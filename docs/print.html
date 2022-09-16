@@ -2015,6 +2015,9 @@ OP_CHECKSIG
 <li>Watch the HTLC for settlement</li>
 <li>Extract the preimage from the on-chain settlement and resolve the incoming hold invoice</li>
 </ol>
+<p>I like to think of a request in its various states and we can model this as such:</p>
+<p><img src="advanced/../images/loop_out_server_states.jpg" alt="Request States" /></p>
+<p>For the sake of simplicity, we'll be ignore the timeout paths (dotted lines). As a result our states will traverse through a linear progression of events.</p>
 <p>The <a href="https://github.com/bmancini55/building-lightning-advanced/blob/main/exercises/loop-out/service/Service.ts">entrypoint</a> of the service includes some boilerplate to connect to our LND node, connect to bitcoind, and start an HTTP API to listen for requests.</p>
 <p>Another thing that happens at the entry point is that our service adds funds to our wallet using the <a href="https://github.com/bmancini55/building-lightning-advanced/blob/9529d8b39f2d4591d09d717d5d410d76255b7c85/exercises/loop-out/Wallet.ts#L36"><code>fundTestWallet</code></a> method. Our wallet implementation runs on regtest which allows us to generate funds and blocks as we need them. The funds in our wallet will be spent to the on-chain HTLC that the service creates after we receive payment of an incoming hold invoice.</p>
 <p>Once we have some funds ready to go we can start our <a href="https://github.com/bmancini55/building-lightning-advanced/blob/main/exercises/loop-out/service/Api.ts">API</a> and listen for requests. The API simply translates those requests from JSON and supplies the resulting request object into the <a href="https://github.com/bmancini55/building-lightning-advanced/blob/main/exercises/loop-out/service/RequestManager.ts"><code>RequestManager</code></a> which is responsible for translating events into changes for a request.</p>
