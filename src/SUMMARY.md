@@ -30,4 +30,4 @@
   - [Hold Invoices](./advanced/hold_invoices.md)
   - [Spontaneous Payments with Keysend](./advanced/spontanenous_keysend.md)
   - [Circular Rebalancing](./advanced/circular_rebalance.md)
-  - [Loop-Out Service](./advanced/loop_out.md)
+  - [Swap-Out Service](./advanced/swap_out.md)
