@@ -81,7 +81,7 @@ You can retain scope of the `AppController` class instance in two ways:
 When you are finished you can verify you successfully implemented the method with the following command:
 
 ```
-npm run test:server -- --grep AppController.*start
+npm run test:server -- --grep "AppController.*start"
 ```
 
 ## Exercise: Implement `handleInvoice`
@@ -118,7 +118,7 @@ public async handleInvoice(invoice: Invoice) {
 When you are finished you can verify you successfully implemented the method with the following command:
 
 ```
-npm run test:server -- --grep AppController.*handleInvoice
+npm run test:server -- --grep "AppController.*handleInvoice"
 ```
 
 ## Exercise: `createInvoice`
@@ -174,5 +174,5 @@ public async createInvoice(
 When you are finished you can verify you successfully implemented the method with the following command:
 
 ```
-npm run test:server -- --grep AppController.*createInvoice
+npm run test:server -- --grep "AppController.*createInvoice"
 ```
