@@ -1223,7 +1223,7 @@ export type InvoiceHandler = (invoice: Invoice) =&gt; Promise&lt;void&gt;;
 <li>use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions"><code>arrow functions</code></a> which retain the scoping of the caller. Eg: <code>await this.invoiceDataMapper.sync(invoice =&gt; this.handleInvoice(invoice))</code>.</li>
 </ol>
 <p>When you are finished you can verify you successfully implemented the method with the following command:</p>
-<pre><code>npm run test:server -- --grep AppController.*start
+<pre><code>npm run test:server -- --grep &quot;AppController.*start&quot;
 </code></pre>
 <h2 id="exercise-implement-handleinvoice"><a class="header" href="#exercise-implement-handleinvoice">Exercise: Implement <code>handleInvoice</code></a></h2>
 <p>Next on the docket, we need to process invoices we receive from our Lightning Network node. The <code>handleInvoice</code> is called every time an invoice is found, created, or fulfilled by our Lightning Network node. This method does a few things to correctly process an invoice:</p>
@@ -1253,7 +1253,7 @@ export type InvoiceHandler = (invoice: Invoice) =&gt; Promise&lt;void&gt;;
 }
 </code></pre>
 <p>When you are finished you can verify you successfully implemented the method with the following command:</p>
-<pre><code>npm run test:server -- --grep AppController.*handleInvoice
+<pre><code>npm run test:server -- --grep &quot;AppController.*handleInvoice&quot;
 </code></pre>
 <h2 id="exercise-createinvoice"><a class="header" href="#exercise-createinvoice">Exercise: <code>createInvoice</code></a></h2>
 <p>The last bit of code <code>AppController</code> is responsible for is creating invoices. This method is responsible for interacting with the Lightning Network node's message signature verification through the <code>IMessageSigner</code> interface. It will also interact with the Lightning Network node to create the invoice via the <code>IInvoiceDataMapper</code>.</p>
@@ -1300,7 +1300,7 @@ export type InvoiceHandler = (invoice: Invoice) =&gt; Promise&lt;void&gt;;
 
 </code></pre>
 <p>When you are finished you can verify you successfully implemented the method with the following command:</p>
-<pre><code>npm run test:server -- --grep AppController.*createInvoice
+<pre><code>npm run test:server -- --grep &quot;AppController.*createInvoice&quot;
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="putting-it-all-together"><a class="header" href="#putting-it-all-together">Putting It All Together</a></h1>
 <p>We have now completed all of the application's core logic. The only code that we have not discussed is the glue that holds it all together. As with our previous application, this one is bootstrapped inside of <code>server/Server.ts</code>. We're going to skip going into the heavy details of this class but you should take a look to see how things are wired up.</p>
