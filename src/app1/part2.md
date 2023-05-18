@@ -8,7 +8,25 @@ For web applications, I like to use [Visual Studio Code](https://code.visualstud
 
 ## Runtime Setup
 
-You will need to install [Node.js 16](https://nodejs.org/en/) by following the instructions for your operating system.
+You will need to install the current version of [Node.js](https://nodejs.org/en/) by following the instructions for your operating system or using a tool like [NVM](https://github.com/nvm-sh/nvm#installing-and-updating).
+
+If using NVM you can install the latest version with
+
+```
+nvm install node
+```
+
+Verify that your version of Node.js is at least 18+.
+
+```
+node --version
+```
+
+When you are in a project, if node or npm are not available, you may need to tell nvm which version of node to use in that directory. You can do that with with this command:
+
+```
+nvm use node
+```
 
 ## Repository Setup
 
