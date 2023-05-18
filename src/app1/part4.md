@@ -168,6 +168,8 @@ Dev Note: The `useEffect` hook has two arguments: a callback function and an arr
 
 Dev Note: [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) are a mechanism for working with asynchronous operations. When a promise completes, the results are passed as an argument to the `then` function. This will look something like `api.fetchGraph().then(graph => { /* do something here */ })`.
 
+Dev Note: In order to avoid the `cors` error, you should use the same base url for frontend and backend of the project. Since the frontend calls the backend on `127.0.0.1` you should also open the frontend by navigating to `http://127.0.0.1:8001`. Using a url like `http://localhost:8001` will result in a `cors` error.
+
 When you refresh your browser, you should now see a graph!
 
 ![Graph](../images/ch1_app_03.png)
