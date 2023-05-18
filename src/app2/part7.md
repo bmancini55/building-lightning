@@ -62,7 +62,7 @@ Now that we understand that, let's do an exercise and implement our `start` meth
 
 To implement the `start` method requires us to perform two tasks:
 
-1. Use the `linkFactory` to create the first `Link` from the seed argument
+1. Use the `linkFactory` to create the first `Link` from the seed and add it to the `chain`
 1. Once the first link is created, initiate the synchronization of invoices using the `IInvoiceDataMapper` (as mentioned, provide the `AppController.handleInvoice` method as the handler).
 
 ```typescript

@@ -97,7 +97,9 @@ sha256(alice_sig(seed) || bob_sig(seed) || satoshis)
 
 where `||` denotes concatenation.
 
-Based on that information, go ahead and implement the `createPreimage` method in the `server/domain/Invoice` class. Note that a `sha256` function is available for you to use.
+Based on that information, go ahead and implement the `createPreimage` method in the `server/domain/Invoice` class.
+
+Dev Tip: A `sha256` function is available for you to use, you may need to case `sats` to a string using `toString()` and you may need to convert the concatenated value into a Buffer using `Buffer.from` in order to use the `sha256` function.
 
 ```typescript
 public static createPreimage(local: string, remote: string, sats: number) {
