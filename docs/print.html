@@ -523,6 +523,7 @@ export const GraphScene = () =&gt; {
 </code></pre>
 <p>Dev Note: The <code>useEffect</code> hook has two arguments: a callback function and an array of variables that when changed will trigger the callback function. Providing an empty array means our callback function will only be called when the component mounts, which is the functionality we are looking for.</p>
 <p>Dev Note: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promises</a> are a mechanism for working with asynchronous operations. When a promise completes, the results are passed as an argument to the <code>then</code> function. This will look something like <code>api.fetchGraph().then(graph =&gt; { /* do something here */ })</code>.</p>
+<p>Dev Note: In order to avoid the <code>cors</code> error, you should use the same base url for frontend and backend of the project. Since the frontend calls the backend on <code>127.0.0.1</code> you should also open the frontend by navigating to <code>http://127.0.0.1:8001</code>. Using a url like <code>http://localhost:8001</code> will result in a <code>cors</code> error.</p>
 <p>When you refresh your browser, you should now see a graph!</p>
 <p><img src="app1/../images/ch1_app_03.png" alt="Graph" /></p>
 <h2 id="graph-component-overview"><a class="header" href="#graph-component-overview">Graph Component Overview</a></h2>
@@ -916,7 +917,8 @@ public get buyerNodeId(): string {
 <pre><code>sha256(alice_sig(seed) || bob_sig(seed) || satoshis)
 </code></pre>
 <p>where <code>||</code> denotes concatenation.</p>
-<p>Based on that information, go ahead and implement the <code>createPreimage</code> method in the <code>server/domain/Invoice</code> class. Note that a <code>sha256</code> function is available for you to use.</p>
+<p>Based on that information, go ahead and implement the <code>createPreimage</code> method in the <code>server/domain/Invoice</code> class.</p>
+<p>Dev Tip: A <code>sha256</code> function is available for you to use, you may need to case <code>sats</code> to a string using <code>toString()</code> and you may need to convert the concatenated value into a Buffer using <code>Buffer.from</code> in order to use the <code>sha256</code> function.</p>
 <pre><code class="language-typescript">public static createPreimage(local: string, remote: string, sats: number) {
     // Exercise
 }
@@ -979,7 +981,8 @@ export type InvoiceHandler = (invoice: Invoice) =&gt; Promise&lt;void&gt;;
 <p>But, before we call the handler we need to convert the invoice from LND's invoice to our application's <code>Invoice</code> type.</p>
 <h2 id="exercise-implement-convertinvoice"><a class="header" href="#exercise-implement-convertinvoice">Exercise: Implement <code>convertInvoice</code></a></h2>
 <p>This function is a mapping function that converts LND's invoice type into our application domain's <code>Invoice</code> class.</p>
-<p>Go ahead and implement the <code>convertInvoice</code> method in the <code>server/data/LndInvoiceDataMapper</code> class. Make sure to perform proper type conversions.</p>
+<p>Go ahead and implement the <code>convertInvoice</code> method in the <code>server/data/LndInvoiceDataMapper</code> class.</p>
+<p>Dev Tip: You need will use the <code>memo</code>, <code>r_preimage</code>, <code>r_hash</code>, <code>value</code>, <code>settled</code>, and <code>settled_date</code> properties of the LND Invoice. Make sure to perform proper type conversions for Buffers (try <code>.toString(&quot;hex&quot;)</code>) and casting the <code>settled_date</code> value into a number (try <code>Number(some_string)</code>).</p>
 <pre><code class="language-typescript">public convertInvoice(invoice: Lnd.Invoice): Invoice {
     // Exercise
 }
@@ -1030,6 +1033,7 @@ export type InvoiceHandler = (invoice: Invoice) =&gt; Promise&lt;void&gt;;
 <p>Once a <code>Link</code> is settled, the <code>nextLinkId</code> property should contain the settling invoice's preimage.</p>
 <p>This property should only return a value when a <code>Link</code> is settled. When the <code>Link</code> is settled it should return the invoice's preimage.</p>
 <p>Go ahead and implement the <code>nextLinkId</code> getter.</p>
+<p>Dev Tip: You can return <code>undefined</code> when you don't want the function to return a value.</p>
 <pre><code class="language-typescript">public get nextLinkId(): string {
     // Exercise
 }
@@ -1066,10 +1070,11 @@ export type InvoiceHandler = (invoice: Invoice) =&gt; Promise&lt;void&gt;;
 <p>As we previously discussed, a <code>Link</code> starts out in the <code>unsettled</code> state, which means that no one has taken ownership of it. Logically, the application starts off without any ownership and in an <code>unsettled</code> state. Since we don't have any prior links, we'll simply create a link from some seed value.</p>
 <p>In order to create a link we do two things:</p>
 <ol>
-<li>Sign the seed value using our Lightning Network node using the <code>IMessageSigner</code> instance</li>
+<li>Sign the seed value using our Lightning Network node using the <code>IMessageSigner</code> instance.</li>
 <li>Construct a new <code>Link</code> and supply the seed as the <code>linkId</code>, the signature our application server made for the seed, and the starting satoshis value required for the first owner.</li>
 </ol>
 <p>Go ahead and implement the <code>createFromSeed</code> method.</p>
+<p>Tip: The <code>sign</code> method is a asynchronous so be sure to use it with <code>await</code>, for example: <code>const sig = await this.signer.sign(some_msg)</code></p>
 <pre><code class="language-typescript">public async createFromSeed(seed: string, startSats: number): Promise&lt;Link&gt; {
     // Exercise
 }
@@ -1088,6 +1093,7 @@ export type InvoiceHandler = (invoice: Invoice) =&gt; Promise&lt;void&gt;;
 <li>Construct the new <code>unsettled</code> <code>Link</code></li>
 </ol>
 <p>Go ahead and implement the <code>createFromSettled</code> method.</p>
+<p>Dev Tip: You will need to look at the settling invoice satoshi value to determine the next increment. This value is a string, so be sure to cast it to a number with <code>Number(some_string)</code>.</p>
 <pre><code class="language-typescript">public async createFromSettled(settled: Link): Promise&lt;Link&gt; {
     // Exercise
 }
@@ -1140,7 +1146,7 @@ export type InvoiceHandler = (invoice: Invoice) =&gt; Promise&lt;void&gt;;
 <h2 id="exercise-implement-start"><a class="header" href="#exercise-implement-start">Exercise: Implement <code>start</code></a></h2>
 <p>To implement the <code>start</code> method requires us to perform two tasks:</p>
 <ol>
-<li>Use the <code>linkFactory</code> to create the first <code>Link</code> from the seed argument</li>
+<li>Use the <code>linkFactory</code> to create the first <code>Link</code> from the seed and add it to the <code>chain</code></li>
 <li>Once the first link is created, initiate the synchronization of invoices using the <code>IInvoiceDataMapper</code> (as mentioned, provide the <code>AppController.handleInvoice</code> method as the handler).</li>
 </ol>
 <pre><code class="language-typescript">public async start(seed: string, startSats: number) {
@@ -1168,8 +1174,6 @@ export type InvoiceHandler = (invoice: Invoice) =&gt; Promise&lt;void&gt;;
 <p>This method is partially implemented for you. Complete the method by settling the current link and constructing the next link from the settled link.</p>
 <pre><code class="language-typescript">public async handleInvoice(invoice: Invoice) {
     if (invoice.settles(this.chainTip)) {
-        const current = this.chainTip;
-
         // settle the current chain tip
 
         // create a new unsettled Link
@@ -1191,7 +1195,7 @@ export type InvoiceHandler = (invoice: Invoice) =&gt; Promise&lt;void&gt;;
 <p>Recall that when someone wants to take ownership of the current link they'll need to send a digital signature of the current <code>linkId</code>.</p>
 <p>Our method does a few things:</p>
 <ol>
-<li>Verifies the signature is for the current <code>linkId</code>. If not, it returns a failure.</li>
+<li>Verifies the signature is for the current <code>linkId</code>. If invalid, it returns a failure.</li>
 <li>Constructs the preimage for the invoice. Recall that we implemented the <code>createPreimage</code> method on <code>Invoice</code> previously.</li>
 <li>Constructs the memo for the invoice. Recall that we implemented the <code>createMemo</code> method on <code>Invoice</code> previously.</li>
 <li>Creates the invoice using the <code>IInvoiceDataMapper.add</code> method.</li>
@@ -1252,7 +1256,7 @@ appController.listener = (links: Link[]) =&gt;
 <p>Lastly we have two API's that Express mounts: <code>server/api/LinkApi</code> and <code>server/api/InvoiceApi</code>. Both of these APIs parse requests and call methods in our <code>AppController</code> to retrieve the list of <code>Link</code> or create a new invoice for a user.</p>
 <p>With that, your application is ready to fire up and test!</p>
 <h2 id="exercise-run-the-application"><a class="header" href="#exercise-run-the-application">Exercise: Run the Application!</a></h2>
-<p>You should be able to run the <code>npm start</code> from the command line to start the application!</p>
+<p>You should be able to run the <code>npm run watch</code> from the root of the application to start it. You can now browse to http://192.168.0.1:8001 and try out the game!</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="further-exploration-1"><a class="header" href="#further-exploration-1">Further Exploration</a></h1>
 <p>I hope you have enjoyed building this application and learned a bit more about building Lightning Applications with invoices. This application is ripe for extending in interesting ways. Astute readers may have already recognized a few issues with this approach already. A few thoughts to leave you with:</p>
 <ul>

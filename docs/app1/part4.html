@@ -274,6 +274,7 @@ export const GraphScene = () =&gt; {
 </code></pre>
 <p>Dev Note: The <code>useEffect</code> hook has two arguments: a callback function and an array of variables that when changed will trigger the callback function. Providing an empty array means our callback function will only be called when the component mounts, which is the functionality we are looking for.</p>
 <p>Dev Note: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promises</a> are a mechanism for working with asynchronous operations. When a promise completes, the results are passed as an argument to the <code>then</code> function. This will look something like <code>api.fetchGraph().then(graph =&gt; { /* do something here */ })</code>.</p>
+<p>Dev Note: In order to avoid the <code>cors</code> error, you should use the same base url for frontend and backend of the project. Since the frontend calls the backend on <code>127.0.0.1</code> you should also open the frontend by navigating to <code>http://127.0.0.1:8001</code>. Using a url like <code>http://localhost:8001</code> will result in a <code>cors</code> error.</p>
 <p>When you refresh your browser, you should now see a graph!</p>
 <p><img src="../images/ch1_app_03.png" alt="Graph" /></p>
 <h2 id="graph-component-overview"><a class="header" href="#graph-component-overview">Graph Component Overview</a></h2>

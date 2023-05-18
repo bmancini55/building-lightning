@@ -184,6 +184,7 @@
 <p>Once a <code>Link</code> is settled, the <code>nextLinkId</code> property should contain the settling invoice's preimage.</p>
 <p>This property should only return a value when a <code>Link</code> is settled. When the <code>Link</code> is settled it should return the invoice's preimage.</p>
 <p>Go ahead and implement the <code>nextLinkId</code> getter.</p>
+<p>Dev Tip: You can return <code>undefined</code> when you don't want the function to return a value.</p>
 <pre><code class="language-typescript">public get nextLinkId(): string {
     // Exercise
 }

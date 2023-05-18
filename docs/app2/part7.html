@@ -187,7 +187,7 @@
 <h2 id="exercise-implement-start"><a class="header" href="#exercise-implement-start">Exercise: Implement <code>start</code></a></h2>
 <p>To implement the <code>start</code> method requires us to perform two tasks:</p>
 <ol>
-<li>Use the <code>linkFactory</code> to create the first <code>Link</code> from the seed argument</li>
+<li>Use the <code>linkFactory</code> to create the first <code>Link</code> from the seed and add it to the <code>chain</code></li>
 <li>Once the first link is created, initiate the synchronization of invoices using the <code>IInvoiceDataMapper</code> (as mentioned, provide the <code>AppController.handleInvoice</code> method as the handler).</li>
 </ol>
 <pre><code class="language-typescript">public async start(seed: string, startSats: number) {
@@ -215,8 +215,6 @@
 <p>This method is partially implemented for you. Complete the method by settling the current link and constructing the next link from the settled link.</p>
 <pre><code class="language-typescript">public async handleInvoice(invoice: Invoice) {
     if (invoice.settles(this.chainTip)) {
-        const current = this.chainTip;
-
         // settle the current chain tip
 
         // create a new unsettled Link
@@ -238,7 +236,7 @@
 <p>Recall that when someone wants to take ownership of the current link they'll need to send a digital signature of the current <code>linkId</code>.</p>
 <p>Our method does a few things:</p>
 <ol>
-<li>Verifies the signature is for the current <code>linkId</code>. If not, it returns a failure.</li>
+<li>Verifies the signature is for the current <code>linkId</code>. If invalid, it returns a failure.</li>
 <li>Constructs the preimage for the invoice. Recall that we implemented the <code>createPreimage</code> method on <code>Invoice</code> previously.</li>
 <li>Constructs the memo for the invoice. Recall that we implemented the <code>createMemo</code> method on <code>Invoice</code> previously.</li>
 <li>Creates the invoice using the <code>IInvoiceDataMapper.add</code> method.</li>

@@ -197,7 +197,8 @@ export type InvoiceHandler = (invoice: Invoice) =&gt; Promise&lt;void&gt;;
 <p>But, before we call the handler we need to convert the invoice from LND's invoice to our application's <code>Invoice</code> type.</p>
 <h2 id="exercise-implement-convertinvoice"><a class="header" href="#exercise-implement-convertinvoice">Exercise: Implement <code>convertInvoice</code></a></h2>
 <p>This function is a mapping function that converts LND's invoice type into our application domain's <code>Invoice</code> class.</p>
-<p>Go ahead and implement the <code>convertInvoice</code> method in the <code>server/data/LndInvoiceDataMapper</code> class. Make sure to perform proper type conversions.</p>
+<p>Go ahead and implement the <code>convertInvoice</code> method in the <code>server/data/LndInvoiceDataMapper</code> class.</p>
+<p>Dev Tip: You need will use the <code>memo</code>, <code>r_preimage</code>, <code>r_hash</code>, <code>value</code>, <code>settled</code>, and <code>settled_date</code> properties of the LND Invoice. Make sure to perform proper type conversions for Buffers (try <code>.toString(&quot;hex&quot;)</code>) and casting the <code>settled_date</code> value into a number (try <code>Number(some_string)</code>).</p>
 <pre><code class="language-typescript">public convertInvoice(invoice: Lnd.Invoice): Invoice {
     // Exercise
 }

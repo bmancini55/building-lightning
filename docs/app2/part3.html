@@ -208,7 +208,8 @@ public get buyerNodeId(): string {
 <pre><code>sha256(alice_sig(seed) || bob_sig(seed) || satoshis)
 </code></pre>
 <p>where <code>||</code> denotes concatenation.</p>
-<p>Based on that information, go ahead and implement the <code>createPreimage</code> method in the <code>server/domain/Invoice</code> class. Note that a <code>sha256</code> function is available for you to use.</p>
+<p>Based on that information, go ahead and implement the <code>createPreimage</code> method in the <code>server/domain/Invoice</code> class.</p>
+<p>Dev Tip: A <code>sha256</code> function is available for you to use, you may need to case <code>sats</code> to a string using <code>toString()</code> and you may need to convert the concatenated value into a Buffer using <code>Buffer.from</code> in order to use the <code>sha256</code> function.</p>
 <pre><code class="language-typescript">public static createPreimage(local: string, remote: string, sats: number) {
     // Exercise
 }

@@ -171,10 +171,11 @@
 <p>As we previously discussed, a <code>Link</code> starts out in the <code>unsettled</code> state, which means that no one has taken ownership of it. Logically, the application starts off without any ownership and in an <code>unsettled</code> state. Since we don't have any prior links, we'll simply create a link from some seed value.</p>
 <p>In order to create a link we do two things:</p>
 <ol>
-<li>Sign the seed value using our Lightning Network node using the <code>IMessageSigner</code> instance</li>
+<li>Sign the seed value using our Lightning Network node using the <code>IMessageSigner</code> instance.</li>
 <li>Construct a new <code>Link</code> and supply the seed as the <code>linkId</code>, the signature our application server made for the seed, and the starting satoshis value required for the first owner.</li>
 </ol>
 <p>Go ahead and implement the <code>createFromSeed</code> method.</p>
+<p>Tip: The <code>sign</code> method is a asynchronous so be sure to use it with <code>await</code>, for example: <code>const sig = await this.signer.sign(some_msg)</code></p>
 <pre><code class="language-typescript">public async createFromSeed(seed: string, startSats: number): Promise&lt;Link&gt; {
     // Exercise
 }
@@ -193,6 +194,7 @@
 <li>Construct the new <code>unsettled</code> <code>Link</code></li>
 </ol>
 <p>Go ahead and implement the <code>createFromSettled</code> method.</p>
+<p>Dev Tip: You will need to look at the settling invoice satoshi value to determine the next increment. This value is a string, so be sure to cast it to a number with <code>Number(some_string)</code>.</p>
 <pre><code class="language-typescript">public async createFromSettled(settled: Link): Promise&lt;Link&gt; {
     // Exercise
 }
