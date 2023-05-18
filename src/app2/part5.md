@@ -64,6 +64,8 @@ This property should only return a value when a `Link` is settled. When the `Lin
 
 Go ahead and implement the `nextLinkId` getter.
 
+Dev Tip: You can return `undefined` when you don't want the function to return a value.
+
 ```typescript
 public get nextLinkId(): string {
     // Exercise

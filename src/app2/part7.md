@@ -62,7 +62,7 @@ Now that we understand that, let's do an exercise and implement our `start` meth
 
 To implement the `start` method requires us to perform two tasks:
 
-1. Use the `linkFactory` to create the first `Link` from the seed argument
+1. Use the `linkFactory` to create the first `Link` from the seed and add it to the `chain`
 1. Once the first link is created, initiate the synchronization of invoices using the `IInvoiceDataMapper` (as mentioned, provide the `AppController.handleInvoice` method as the handler).
 
 ```typescript
@@ -99,8 +99,6 @@ This method is partially implemented for you. Complete the method by settling th
 ```typescript
 public async handleInvoice(invoice: Invoice) {
     if (invoice.settles(this.chainTip)) {
-        const current = this.chainTip;
-
         // settle the current chain tip
 
         // create a new unsettled Link
@@ -129,7 +127,7 @@ Recall that when someone wants to take ownership of the current link they'll nee
 
 Our method does a few things:
 
-1. Verifies the signature is for the current `linkId`. If not, it returns a failure.
+1. Verifies the signature is for the current `linkId`. If invalid, it returns a failure.
 1. Constructs the preimage for the invoice. Recall that we implemented the `createPreimage` method on `Invoice` previously.
 1. Constructs the memo for the invoice. Recall that we implemented the `createMemo` method on `Invoice` previously.
 1. Creates the invoice using the `IInvoiceDataMapper.add` method.

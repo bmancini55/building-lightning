@@ -67,7 +67,9 @@ But, before we call the handler we need to convert the invoice from LND's invoic
 
 This function is a mapping function that converts LND's invoice type into our application domain's `Invoice` class.
 
-Go ahead and implement the `convertInvoice` method in the `server/data/LndInvoiceDataMapper` class. Make sure to perform proper type conversions.
+Go ahead and implement the `convertInvoice` method in the `server/data/LndInvoiceDataMapper` class.
+
+Dev Tip: You need will use the `memo`, `r_preimage`, `r_hash`, `value`, `settled`, and `settled_date` properties of the LND Invoice. Make sure to perform proper type conversions for Buffers (try `.toString("hex")`) and casting the `settled_date` value into a number (try `Number(some_string)`).
 
 ```typescript
 public convertInvoice(invoice: Lnd.Invoice): Invoice {

@@ -34,10 +34,12 @@ As we previously discussed, a `Link` starts out in the `unsettled` state, which 
 
 In order to create a link we do two things:
 
-1. Sign the seed value using our Lightning Network node using the `IMessageSigner` instance
+1. Sign the seed value using our Lightning Network node using the `IMessageSigner` instance.
 1. Construct a new `Link` and supply the seed as the `linkId`, the signature our application server made for the seed, and the starting satoshis value required for the first owner.
 
 Go ahead and implement the `createFromSeed` method.
+
+Tip: The `sign` method is a asynchronous so be sure to use it with `await`, for example: `const sig = await this.signer.sign(some_msg)`
 
 ```typescript
 public async createFromSeed(seed: string, startSats: number): Promise<Link> {
@@ -66,6 +68,8 @@ The `createFromSettled` method will need to do three things:
 1. Construct the new `unsettled` `Link`
 
 Go ahead and implement the `createFromSettled` method.
+
+Dev Tip: You will need to look at the settling invoice satoshi value to determine the next increment. This value is a string, so be sure to cast it to a number with `Number(some_string)`.
 
 ```typescript
 public async createFromSettled(settled: Link): Promise<Link> {
