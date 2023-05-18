@@ -18,7 +18,7 @@ The code to start the `SocketServer` lives inside `Server`. At the end of the `r
 async function run() {
     // OTHER CODE IS HERE...
 
-  // start the server on the port
+    // start the server on the port
     const server = app.listen(Number(options.port), () => {
         console.log(`server listening on ${options.port}`);
     });
@@ -34,16 +34,21 @@ All of this is ready to go, all we need to do is subscribe to updates from LND a
 
 ## Exercise: Subscribe to Updates
 
-Back in our server code's `LndGraphService` is a method `subscribeGraph` that we need to implement. This method subscribes to graph updates from LND using it's `subscribeGraph` method. The requirement for this function is that it needs to emit these updates as events.
+Back in our server code's `LndGraphService` is a method `subscribeGraph` that we need to implement. This method subscribes to graph updates from LND using it's `subscribeGraph` method. For each update, we will emit an event named `update` and supply the update value we received from LND.
+
+Dev Note: This class is an [EventEmitter](https://nodejs.dev/learn/the-nodejs-event-emitter). EventEmitters can use the `emit` method to tell other classes that something has happened. For example: `this.emit("my_event", "something happened")`. The value(s) passed as arguments to the `emit` method will be supplied to each of the observers. These other classes are "observers" and can listen using the `on` method for the named event such as "my_event". Using EventEmitters allows us to keep code decoupled and avoid messy callback nesting.
 
 ```typescript
+// server/src/domain/lnd/LndGraphService
+
   public async subscribeGraph(): Promise<void> {
-    // Exercise: subscribe to the Lnd graph updates using `this.lnd.subscribeGraph`
-    // and emit a "update" event each time the handler is called.
+      // Exercise: subscribe to the Lnd graph updates using `this.lnd.subscribeGraph`
+      // and emit a "update" event each time the handler is called using `this.emit`
+      return this.lnd.subscribeGraph((update: Lnd.GraphUpdate) => {
+          // Todo
+      });
   }
 ```
-
-Dev Note: This class is an [EventEmitter](https://nodejs.dev/learn/the-nodejs-event-emitter). EventEmitters can use the `emit` method to tell other classes that something has happened. These other classes are "observers" and can listen using the `on` method. Using EventEmitters allows us to keep code decoupled and avoid messy callback nesting.
 
 ## Exploring WebSocket Broadcasting
 
@@ -87,6 +92,8 @@ Now that our WebSocket server is sending updates, we need to wire these updates 
 The application already has some code to help us. We use React's context to establish a long-lived WebSocket that can be used by any component in the component hierarchy. This code lives in `client/src/context/SocketContext`.
 
 To integrate this context into our components we can use a custom hook: `useSocket` that lives in `client/src/hooks/UseSocket`. This hook allows us to retrieve the websocket and subscribe to events for a any channel.
+
+For example:
 
 ```typescript
 export const SomeComponent = () => {
@@ -159,58 +166,11 @@ export const GraphScene = () => {
 };
 ```
 
-## Exercise: Update the Graph
-
-We are almost done! The final step is completing the `updateGraph` method. This method converts our `Lnd.GraphUpdate` object into `D3Node` and `D3Link` objects.
-
-The `Lnd.GraphUpdate` object we receive from the server is defined in `server/src/domain/lnd/LndRestTypes`. It consists of four pieces of data that we care about:
+Calling the `updateGraph` method converts the `Lnd.GraphUpdate` object into `D3Node` and `D3Link` objects. The `Lnd.GraphUpdate` object we receive from the server is defined in `server/src/domain/lnd/LndRestTypes`. It consists of four pieces of data that we care about:
 
 1. new nodes that are don't yet have in the graph
 1. existing nodes that need to have their title and alias updated
 1. new channels that we need to add to the graph
 1. closed channels that we need to remove from the graph
-
-The `updateGraph` method is partially implemented for the first three conditions. Your last task is to remove a channel from the links if it has been closed.
-
-```typescript
-// client/src/scenes/graph/components/Graph
-
-  updateGraph(update: Lnd.GraphUpdate) {
-      // Updates existing nodes or adds new ones if they don't already
-      // exist in the graph
-      for (const nodeUpdate of update.result.node_updates) {
-          const node = this.nodes.find(p => p.id === nodeUpdate.identity_key);
-          if (node) {
-              node.title = nodeUpdate.alias;
-              node.color = nodeUpdate.color;
-          } else {
-              this.nodes.push({
-                  id: nodeUpdate.identity_key,
-                  color: nodeUpdate.color,
-                  title: nodeUpdate.alias,
-              });
-          }
-      }
-
-      // Adds new channels to the graph. Note that for the purposes of
-      // our visualization we only care that a link exists. We will end
-      // up receiving two updates, one from each node and we just add
-      // the first one.
-      for (const channelUpdate of update.result.channel_updates) {
-          const channel = this.links.find(p => p.id === channelUpdate.chan_id);
-          if (!channel) {
-              this.links.push({
-                  source: channelUpdate.advertising_node,
-                  target: channelUpdate.connecting_node,
-                  id: channelUpdate.chan_id,
-              });
-          }
-      }
-
-      // Exercise: Remove closed channels from `this.links`.
-
-      this.draw();
-  }
-```
 
 After completing this exercise we will have everything needed for our graph to be functional. Try adding or removing a channel, you should see our graph application automatically update with the changes! Keep in mind that it may take a moment for changes to propagate throughout your network.

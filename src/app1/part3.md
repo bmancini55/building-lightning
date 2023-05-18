@@ -6,7 +6,7 @@ Our first coding task is going to be creating a REST API of our own to provide g
 
 We've chosen to connect to LND for this application but we could just as easily use c-lightning or Eclair.
 
-LND also a [Builder's Guide](https://docs.lightning.engineering/) that you may want to explore to learn more about commonly performed tasks.
+LND also has a [Builder's Guide](https://docs.lightning.engineering/) that you can explore to learn about common tasks.
 
 LND has two ways we can interact with it from code: a [REST API](https://api.lightning.community/#lnd-rest-api-reference) and a [gRPC API](https://api.lightning.community/#lnd-grpc-api-reference). gRPC is a high performance RPC framework. With gRPC, the wire protocol is defined in a protocol definition file. This file is used by a code generators to construct a client in the programming language of your choice. gRPC is a fantastic mechanism for efficient network communication, but it comes with a bit of setup cost. The REST API requires less effort to get started but is less efficient over the wire. For applications with a large amount of interactivity, you would want to use gRPC connectivity. For this application we'll be using the REST API because it is highly relatable for web developers.
 
@@ -20,7 +20,7 @@ With that said, point your IDE at the `server/src/domain/lnd/LndRestTypes.ts` fi
 
 ## Exercise : Defining the `Graph` Type
 
-In `LndRestTypes` you'll see our first exercise. It requires us to define the resulting object obtained by calling LND's [`/v1/graph`](https://api.lightning.community/#v1-graph) API. You will need to add two properties to the `Graph` interface. To help you, the `LightningNode` and `ChannelEdge` types are already defined. In TypeScript, you can define an array as such
+In `LndRestTypes` you'll see our first exercise. It requires us to define the resulting object obtained by calling LND's [`/v1/graph`](https://api.lightning.community/#v1-graph) API. You will need to add two properties to the `Graph` interface, one called `nodes` that is of type `LightningNode[]` and one called `edges` that of type `ChannelEdge[]`. The `LightningNode` and `ChannelEdge` types are already defined for you.
 
 ```typescript
 // server/src/domain/lnd/LndRestTypes
@@ -51,7 +51,7 @@ export class LndRestClient {
 
 This class also has a `get` method that is a helper for making HTTP GET requests to LND. This helper method applies the macaroon and ensures the connection is made using the TLS certificate.
 
-Your next exercise is to implement the `getGraph` method in `server/src/domain/lnd/LndRestClient.ts`. Use the `get` helper method to call the [`/v1/graph`](https://api.lightning.community/#v1-graph) API and return the results.
+Your next exercise is to implement the `getGraph` method in `server/src/domain/lnd/LndRestClient.ts`. Use the `get` helper method to call the [`/v1/graph`](https://api.lightning.community/#v1-graph) API and return the results. Hint: You can access `get` with `this.get`.
 
 ```typescript
 // server/src/domain/lnd/LndRestClient
@@ -68,7 +68,7 @@ After this is complete, we should have a functional API client. In order to test
 
 In this application we use the `dotenv` package to simplify environment variables. We can populate a `.env` file with key value pairs and the application will treat these as environment variables.
 
-Remember that environment variables can be read in Node.js from the `process.env` object. So if we have an environment variable `PORT`:
+Environment variables can be read in Node.js from the `process.env` object. So if we have an environment variable `PORT`:
 
 ```
 $ export PORT=8000
@@ -112,7 +112,7 @@ Now that our environment variables are in our configuration file, we need to get
 
 The class contains a factory method `fromEnv` that allows us to construct our options from environment variables. We're going to modify the `Options` class to read our newly defined environment variables.
 
-This method is partially implemented, but your next exercise is to finish the method by reading the cert file into a Buffer.
+This method is partially implemented, but your next exercise is to finish the method by reading the cert file into a Buffer. You can use the `fs.readFile` method to read the path provided in the environment `LND_CERT_PATH` environment variable. Note: Don't forget to use `await` since `fs.readFile` is an asynchronous operation.
 
 ```typescript
 // server/src/Options
@@ -130,13 +130,11 @@ This method is partially implemented, but your next exercise is to finish the me
   }
 ```
 
-Note: In this example we use TypeScript's [Parameter Properties](https://www.typescriptlang.org/docs/handbook/2/classes.html#parameter-properties) feature. This feature creates class properties from `readonly` parameters. I like it because it saves a few keystrokes by removing the boilerplate of defining the property in the class, then assigning its value in the constructor. There are pros and cons to this approach, so feel free to construct your objects how think is best and in a way that is likely to reduce errors.
-
 ## Exercise: Create the LND client
 
 The last step before we can see if our application can connect to LND is that we need to create the LND client! We will do this in the entrypoint of our server code `server/src/Server`.
 
-In this exercise, construct an instance of the `LndRestClient` type and supply it with the options found in the `options` variable.
+In this exercise, construct an instance of the `LndRestClient` type and supply it with the options found in the `options` variable. Note: You can create a new instance of a type with the `new` keyword followed by the type and a parameters, eg: `new SomeClass(param1, param2)`
 
 ```typescript
 // server/src/Server
