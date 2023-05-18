@@ -30,4 +30,4 @@ With that, your application is ready to fire up and test!
 
 ## Exercise: Run the Application!
 
-You should be able to run the `npm start` from the command line to start the application!
+You should be able to run the `npm run watch` from the root of the application to start it. You can now browse to http://192.168.0.1:8001 and try out the game!
