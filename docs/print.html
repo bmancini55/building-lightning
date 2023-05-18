@@ -201,7 +201,16 @@
 <h2 id="ide-setup"><a class="header" href="#ide-setup">IDE Setup</a></h2>
 <p>For web applications, I like to use <a href="https://code.visualstudio.com/">Visual Studio Code</a> as my IDE. It has excellent tooling for TypeScript and web development. I install the ESLint and Prettier plugins to give me real time feedback of any problems that my application may have.</p>
 <h2 id="runtime-setup"><a class="header" href="#runtime-setup">Runtime Setup</a></h2>
-<p>You will need to install <a href="https://nodejs.org/en/">Node.js 16</a> by following the instructions for your operating system.</p>
+<p>You will need to install the current version of <a href="https://nodejs.org/en/">Node.js</a> by following the instructions for your operating system or using a tool like <a href="https://github.com/nvm-sh/nvm#installing-and-updating">NVM</a>.</p>
+<p>If using NVM you can install the latest version with</p>
+<pre><code>nvm install node
+</code></pre>
+<p>Verify that your version of Node.js is at least 18+.</p>
+<pre><code>node --version
+</code></pre>
+<p>When you are in a project, if node or npm are not available, you may need to tell nvm which version of node to use in that directory. You can do that with with this command:</p>
+<pre><code>nvm use node
+</code></pre>
 <h2 id="repository-setup"><a class="header" href="#repository-setup">Repository Setup</a></h2>
 <p>With general prerequisites setup, we can now clone the repository:</p>
 <p>Clone the repository:</p>
@@ -226,14 +235,14 @@
 <p>Our first coding task is going to be creating a REST API of our own to provide graph information to our application. We'll start by getting our server connected to Alice's LND node.</p>
 <h2 id="connecting-to-alices-node"><a class="header" href="#connecting-to-alices-node">Connecting to Alice's node</a></h2>
 <p>We've chosen to connect to LND for this application but we could just as easily use c-lightning or Eclair.</p>
-<p>LND also a <a href="https://docs.lightning.engineering/">Builder's Guide</a> that you may want to explore to learn more about commonly performed tasks.</p>
+<p>LND also has a <a href="https://docs.lightning.engineering/">Builder's Guide</a> that you can explore to learn about common tasks.</p>
 <p>LND has two ways we can interact with it from code: a <a href="https://api.lightning.community/#lnd-rest-api-reference">REST API</a> and a <a href="https://api.lightning.community/#lnd-grpc-api-reference">gRPC API</a>. gRPC is a high performance RPC framework. With gRPC, the wire protocol is defined in a protocol definition file. This file is used by a code generators to construct a client in the programming language of your choice. gRPC is a fantastic mechanism for efficient network communication, but it comes with a bit of setup cost. The REST API requires less effort to get started but is less efficient over the wire. For applications with a large amount of interactivity, you would want to use gRPC connectivity. For this application we'll be using the REST API because it is highly relatable for web developers.</p>
 <h2 id="lnd-api-client"><a class="header" href="#lnd-api-client">LND API Client</a></h2>
 <p>Inside our <code>server</code> sub-project is the start of code to connect to LND's REST API. We'll add to this for our application.</p>
 <p>Why are we not leveraging an existing library from NPM? The first reason is that it is a nice exercise to help demonstrate how we can build connectivity. Lightning Network is still a nascent technology and developers need to be comfortable building tools to help them interact with Bitcoin and Lightning Network nodes. The second and arguably more important reason is that as developers in the Bitcoin ecosystem, we need to be extremely wary of outside packages that we pull into our projects, especially if they are cryptocurrency related. Outside dependencies pose a security risk that could compromise our application. As such, my general rule is that runtime dependencies should generally be built unless it is burdensome to do so and maintain.</p>
 <p>With that said, point your IDE at the <code>server/src/domain/lnd/LndRestTypes.ts</code> file. This file contains a subset of TypeScript type definitions from the <a href="https://api.lightning.community/#lnd-rest-api-reference">REST API</a> documentation. We are only building a subset of the API that we'll need for understanding the graph.</p>
 <h2 id="exercise--defining-the-graph-type"><a class="header" href="#exercise--defining-the-graph-type">Exercise : Defining the <code>Graph</code> Type</a></h2>
-<p>In <code>LndRestTypes</code> you'll see our first exercise. It requires us to define the resulting object obtained by calling LND's <a href="https://api.lightning.community/#v1-graph"><code>/v1/graph</code></a> API. You will need to add two properties to the <code>Graph</code> interface. To help you, the <code>LightningNode</code> and <code>ChannelEdge</code> types are already defined. In TypeScript, you can define an array as such</p>
+<p>In <code>LndRestTypes</code> you'll see our first exercise. It requires us to define the resulting object obtained by calling LND's <a href="https://api.lightning.community/#v1-graph"><code>/v1/graph</code></a> API. You will need to add two properties to the <code>Graph</code> interface, one called <code>nodes</code> that is of type <code>LightningNode[]</code> and one called <code>edges</code> that of type <code>ChannelEdge[]</code>. The <code>LightningNode</code> and <code>ChannelEdge</code> types are already defined for you.</p>
 <pre><code class="language-typescript">// server/src/domain/lnd/LndRestTypes
 
 export interface Graph {
@@ -255,7 +264,7 @@ export class LndRestClient {
 }
 </code></pre>
 <p>This class also has a <code>get</code> method that is a helper for making HTTP GET requests to LND. This helper method applies the macaroon and ensures the connection is made using the TLS certificate.</p>
-<p>Your next exercise is to implement the <code>getGraph</code> method in <code>server/src/domain/lnd/LndRestClient.ts</code>. Use the <code>get</code> helper method to call the <a href="https://api.lightning.community/#v1-graph"><code>/v1/graph</code></a> API and return the results.</p>
+<p>Your next exercise is to implement the <code>getGraph</code> method in <code>server/src/domain/lnd/LndRestClient.ts</code>. Use the <code>get</code> helper method to call the <a href="https://api.lightning.community/#v1-graph"><code>/v1/graph</code></a> API and return the results. Hint: You can access <code>get</code> with <code>this.get</code>.</p>
 <pre><code class="language-typescript">// server/src/domain/lnd/LndRestClient
 
   public async getGraph(): Promise&lt;Lnd.Graph&gt; {
@@ -266,7 +275,7 @@ export class LndRestClient {
 <p>After this is complete, we should have a functional API client. In order to test this we will need to provide the macaroon and certificate.</p>
 <h2 id="exercise-configuring-env-to-connect-to-lnd"><a class="header" href="#exercise-configuring-env-to-connect-to-lnd">Exercise: Configuring <code>.env</code> to Connect to LND</a></h2>
 <p>In this application we use the <code>dotenv</code> package to simplify environment variables. We can populate a <code>.env</code> file with key value pairs and the application will treat these as environment variables.</p>
-<p>Remember that environment variables can be read in Node.js from the <code>process.env</code> object. So if we have an environment variable <code>PORT</code>:</p>
+<p>Environment variables can be read in Node.js from the <code>process.env</code> object. So if we have an environment variable <code>PORT</code>:</p>
 <pre><code>$ export PORT=8000
 $ node app.js
 </code></pre>
@@ -295,7 +304,7 @@ LND_CERT_PATH=
 <h2 id="exercise-reading-the-options"><a class="header" href="#exercise-reading-the-options">Exercise: Reading the Options</a></h2>
 <p>Now that our environment variables are in our configuration file, we need to get them into the application. The server project uses <code>server/src/Options</code> to read and store application options.</p>
 <p>The class contains a factory method <code>fromEnv</code> that allows us to construct our options from environment variables. We're going to modify the <code>Options</code> class to read our newly defined environment variables.</p>
-<p>This method is partially implemented, but your next exercise is to finish the method by reading the cert file into a Buffer.</p>
+<p>This method is partially implemented, but your next exercise is to finish the method by reading the cert file into a Buffer. You can use the <code>fs.readFile</code> method to read the path provided in the environment <code>LND_CERT_PATH</code> environment variable. Note: Don't forget to use <code>await</code> since <code>fs.readFile</code> is an asynchronous operation.</p>
 <pre><code class="language-typescript">// server/src/Options
 
   public static async fromEnv(): Promise&lt;Options&gt; {
@@ -310,10 +319,9 @@ LND_CERT_PATH=
     return new Options(port, host, macaroon, cert);
   }
 </code></pre>
-<p>Note: In this example we use TypeScript's <a href="https://www.typescriptlang.org/docs/handbook/2/classes.html#parameter-properties">Parameter Properties</a> feature. This feature creates class properties from <code>readonly</code> parameters. I like it because it saves a few keystrokes by removing the boilerplate of defining the property in the class, then assigning its value in the constructor. There are pros and cons to this approach, so feel free to construct your objects how think is best and in a way that is likely to reduce errors.</p>
 <h2 id="exercise-create-the-lnd-client"><a class="header" href="#exercise-create-the-lnd-client">Exercise: Create the LND client</a></h2>
 <p>The last step before we can see if our application can connect to LND is that we need to create the LND client! We will do this in the entrypoint of our server code <code>server/src/Server</code>.</p>
-<p>In this exercise, construct an instance of the <code>LndRestClient</code> type and supply it with the options found in the <code>options</code> variable.</p>
+<p>In this exercise, construct an instance of the <code>LndRestClient</code> type and supply it with the options found in the <code>options</code> variable. Note: You can create a new instance of a type with the <code>new</code> keyword followed by the type and a parameters, eg: <code>new SomeClass(param1, param2)</code></p>
 <pre><code class="language-typescript">// server/src/Server
 
   async function run() {
@@ -480,10 +488,10 @@ export class ApiService {
   }
 }
 </code></pre>
-<p>This class is conveniently accessible by using the <code>useApi</code> hook located in the <code>hooks</code> folder. By adding our <code>fetchGraph</code> method to the <code>ApiService</code>, we can gain access to it with the <code>useApi</code> hook inside any component! Feel free to take a look at the <code>useApi</code> hook code and if you're confused read up on React hooks.</p>
+<p>This class is conveniently accessible by using the <code>useApi</code> hook located in the <code>hooks</code> folder. By adding our <code>fetchGraph</code> method to the <code>ApiService</code>, we can gain access to it with the <code>useApi</code> hook inside any component which we will do in a moment! Feel free to take a look at the <code>useApi</code> hook code and if you're confused read up on React hooks.</p>
 <h2 id="exercise-wire-up-the-api-call"><a class="header" href="#exercise-wire-up-the-api-call">Exercise: Wire up the API Call</a></h2>
-<p>Next let's point our IDE at the <code>GraphScene</code> component in <code>client/src/scenes/graph</code> and see if we can wire up the API to a component.</p>
-<p>For this exercise, inside the <code>useEffect</code> hook, call the api's <code>fetchGraph</code> method. Be mindful that this method returns a promise, which you will need to retrieve the results from. To test your code, simply log the results to the console.</p>
+<p>Next let's point our IDE at the <code>GraphScene</code> component in <code>client/src/scenes/graph</code> so we can wire up the API to a component.</p>
+<p>For this exercise, inside the <code>useEffect</code> hook, call the <code>api.fetchGraph</code> method. Be mindful that this method returns a promise, which you will need to retrieve the results from and call <code>graphRef.current.createGraph</code> method to start the rendering process. The <code>console.log</code> will output the graph object into the browser's console window.</p>
 <pre><code class="language-typescript">// client/src/scenes/graph/GraphScene
 
 import React, { useEffect, useRef } from &quot;react&quot;;
@@ -497,7 +505,11 @@ export const GraphScene = () =&gt; {
   useEffect(() =&gt; {
     // Exercise: Using the api, call the fetchGraph method. Since this returns a promise,
     // we need to use the `then` method to retrieve the results. With the results, call
-    // `graphRef.current.createGraph` and add a console.log statement so you see the graph.
+    // `graphRef.current.createGraph`
+    api.fetchGraph().then((graph: Lnd.Graph) =&gt; {
+      console.log(graph);
+      // Todo
+    });
   }, []);
 
   return (
@@ -510,59 +522,14 @@ export const GraphScene = () =&gt; {
 };
 </code></pre>
 <p>Dev Note: The <code>useEffect</code> hook has two arguments: a callback function and an array of variables that when changed will trigger the callback function. Providing an empty array means our callback function will only be called when the component mounts, which is the functionality we are looking for.</p>
-<p>Dev Note: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promises</a> are a mechanism for working with asynchronous operations. When a promise completes, the results are available in the <code>then</code> method.</p>
-<p>When you refresh your browser, the background will now be gray but you won't yet see the graph yet. If you open your developer tools, you will see the graph output that you wrote with console.log!</p>
-<p><img src="app1/../images/ch1_app_02.png" alt="Console with Graph" /></p>
+<p>Dev Note: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promises</a> are a mechanism for working with asynchronous operations. When a promise completes, the results are passed as an argument to the <code>then</code> function. This will look something like <code>api.fetchGraph().then(graph =&gt; { /* do something here */ })</code>.</p>
+<p>When you refresh your browser, you should now see a graph!</p>
+<p><img src="app1/../images/ch1_app_03.png" alt="Graph" /></p>
 <h2 id="graph-component-overview"><a class="header" href="#graph-component-overview">Graph Component Overview</a></h2>
 <p>The <code>Graph</code> component, <code>client/src/scenes/graph/components/Graph</code>, is a bit different from a normal React component because it is encapsulating D3. Typically React is in charge of rendering the DOM. For this component, React will only control the SVG element. D3 will take control of the SVG element and render elements into it.</p>
 <p>React interfaces with D3 via two methods on the component: <code>createGraph</code> and <code>updateGraph</code>. Each method takes information from our domain and converts it into objects that D3 can control and render.</p>
 <p>For those familiar with React this may be a bit weird since we are transitioning from the declarative style of programming used by React and using imperative code to call these functions. If that's a little confusing, take a gander at <code>GraphScene</code> and <code>Graph</code>. Notice that <code>GraphScene</code> renders <code>Graph</code> as a child, but we use the <code>createGraph</code> method to push information into D3.</p>
-<h2 id="exercise-creating-the-graph"><a class="header" href="#exercise-creating-the-graph">Exercise: Creating the Graph</a></h2>
-<p>After loading the page, we don't yet see the graph because we haven't fully implemented the <code>createGraph</code> method in the <code>Graph</code> component. <code>createGraph</code> is responsible for converting our <code>Lnd.Graph</code> object into objects that can be used by D3.</p>
-<p>As defined in <code>server/src/domain/lnd/LndRestTypes</code>, our <code>Lnd.Graph</code> object has two arrays: <code>nodes</code> and <code>edges</code>.</p>
-<p>Each <code>Lnd.LightningNode</code> object has three properties that we will use:</p>
-<ul>
-<li><code>pub_key</code> - a string that is the unique identifier for the node</li>
-<li><code>color</code> - the color of the node that is specified by the node operator</li>
-<li><code>alias</code> - the friendly name of the node that is specified by the node operator</li>
-</ul>
-<p>Each <code>Lnd.ChannelEdge</code> object has three properties that we will use:</p>
-<ul>
-<li><code>channel_id</code> - the unique identifier for the channel</li>
-<li><code>node1_pub</code> - the identifier for the first node, when sorted, of the channel</li>
-<li><code>node2_pub</code> - the identifier for the second node, when sorted, of the channel</li>
-</ul>
-<p>Using this information we need to construct new objects that can be controlled by D3. We need to do this because D3 will store rendering state on the objects. We don't want D3 to mutate the original objects so we'll construct new ones that D3 can control.</p>
-<p>This gets us to our next exercise. We need to modify the <code>Graph</code> component's <code>createGraph</code> method to convert our Lightning graph objects into D3 controlled objects. To do this we create two arrays:</p>
-<ul>
-<li>one array for the graph's nodes created from our <code>Lnd.LightningNode</code>. We map <code>pub_key</code> to <code>id</code>, map <code>color</code> to <code>color</code>, and map <code>alias</code> to <code>title</code>.
-<pre><code class="language-typescript">interface D3Node {
-  id: string;
-  color: string;
-  title: string;
-}
-</code></pre>
-</li>
-<li>one array for the graph's links created from our <code>Lnd.ChannelEdge</code>. We map <code>channel_id</code> to <code>id</code>, <code>node1_pub</code> to <code>source</code> and <code>node2_pub</code> to <code>target</code>.
-<pre><code class="language-typescript">interface D3Link {
-  id: string;
-  source: string;
-  target: string;
-}
-</code></pre>
-</li>
-</ul>
-<pre><code class="language-typescript">// client/src/scenes/graph/components/Graph
-
-    createGraph(graph: LightningGraph) {
-        // map the graph's nodes into d3 nodes
-        this.nodes = [];
-
-        // map the graph's channels into d3 links
-        this.links = [];
-</code></pre>
-<p>Once we have created these maps we can refresh our browser and we should see the current graph!</p>
-<p><img src="app1/../images/ch1_app_03.png" alt="Graph" /></p>
+<p><code>createGraph</code> is responsible for converting our <code>Lnd.Graph</code> object into objects that can be understood by D3.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="real-time-server-updates"><a class="header" href="#real-time-server-updates">Real Time Server Updates</a></h1>
 <p>At this point we've successfully connected our user interface to a REST server! However what happens if a new channel is created or a new node creates a channel? Our Lightning Network nodes will have new graph information but we would need to manually refresh the page.</p>
 <p>Go ahead and give it a try by creating a channel between Bob and Carol. When we refresh the browser we should see a new link between Bob and Carol.</p>
@@ -575,7 +542,7 @@ export const GraphScene = () =&gt; {
 async function run() {
     // OTHER CODE IS HERE...
 
-  // start the server on the port
+    // start the server on the port
     const server = app.listen(Number(options.port), () =&gt; {
         console.log(`server listening on ${options.port}`);
     });
@@ -588,13 +555,18 @@ async function run() {
 </code></pre>
 <p>All of this is ready to go, all we need to do is subscribe to updates from LND and do something with them.</p>
 <h2 id="exercise-subscribe-to-updates"><a class="header" href="#exercise-subscribe-to-updates">Exercise: Subscribe to Updates</a></h2>
-<p>Back in our server code's <code>LndGraphService</code> is a method <code>subscribeGraph</code> that we need to implement. This method subscribes to graph updates from LND using it's <code>subscribeGraph</code> method. The requirement for this function is that it needs to emit these updates as events.</p>
-<pre><code class="language-typescript">  public async subscribeGraph(): Promise&lt;void&gt; {
-    // Exercise: subscribe to the Lnd graph updates using `this.lnd.subscribeGraph`
-    // and emit a &quot;update&quot; event each time the handler is called.
+<p>Back in our server code's <code>LndGraphService</code> is a method <code>subscribeGraph</code> that we need to implement. This method subscribes to graph updates from LND using it's <code>subscribeGraph</code> method. For each update, we will emit an event named <code>update</code> and supply the update value we received from LND.</p>
+<p>Dev Note: This class is an <a href="https://nodejs.dev/learn/the-nodejs-event-emitter">EventEmitter</a>. EventEmitters can use the <code>emit</code> method to tell other classes that something has happened. For example: <code>this.emit(&quot;my_event&quot;, &quot;something happened&quot;)</code>. The value(s) passed as arguments to the <code>emit</code> method will be supplied to each of the observers. These other classes are &quot;observers&quot; and can listen using the <code>on</code> method for the named event such as &quot;my_event&quot;. Using EventEmitters allows us to keep code decoupled and avoid messy callback nesting.</p>
+<pre><code class="language-typescript">// server/src/domain/lnd/LndGraphService
+
+  public async subscribeGraph(): Promise&lt;void&gt; {
+      // Exercise: subscribe to the Lnd graph updates using `this.lnd.subscribeGraph`
+      // and emit a &quot;update&quot; event each time the handler is called using `this.emit`
+      return this.lnd.subscribeGraph((update: Lnd.GraphUpdate) =&gt; {
+          // Todo
+      });
   }
 </code></pre>
-<p>Dev Note: This class is an <a href="https://nodejs.dev/learn/the-nodejs-event-emitter">EventEmitter</a>. EventEmitters can use the <code>emit</code> method to tell other classes that something has happened. These other classes are &quot;observers&quot; and can listen using the <code>on</code> method. Using EventEmitters allows us to keep code decoupled and avoid messy callback nesting.</p>
 <h2 id="exploring-websocket-broadcasting"><a class="header" href="#exploring-websocket-broadcasting">Exploring WebSocket Broadcasting</a></h2>
 <p>The next logical step is consuming the <code>update</code> event that we just created and sending the update to the client over a WebSocket. If you navigate back to the trusty <code>Server</code> you will find some interesting code at the bottom of the <code>run</code> function.</p>
 <pre><code class="language-typescript">// server/src/Server
@@ -626,6 +598,7 @@ async function run() {
 <h2 id="exploring-socket-connectivity"><a class="header" href="#exploring-socket-connectivity">Exploring Socket Connectivity</a></h2>
 <p>The application already has some code to help us. We use React's context to establish a long-lived WebSocket that can be used by any component in the component hierarchy. This code lives in <code>client/src/context/SocketContext</code>.</p>
 <p>To integrate this context into our components we can use a custom hook: <code>useSocket</code> that lives in <code>client/src/hooks/UseSocket</code>. This hook allows us to retrieve the websocket and subscribe to events for a any channel.</p>
+<p>For example:</p>
 <pre><code class="language-typescript">export const SomeComponent = () =&gt; {
   const socket = useSocket(&quot;some_channel&quot;, (data) =&gt; {
     // do something with data
@@ -686,55 +659,13 @@ export const GraphScene = () =&gt; {
   );
 };
 </code></pre>
-<h2 id="exercise-update-the-graph"><a class="header" href="#exercise-update-the-graph">Exercise: Update the Graph</a></h2>
-<p>We are almost done! The final step is completing the <code>updateGraph</code> method. This method converts our <code>Lnd.GraphUpdate</code> object into <code>D3Node</code> and <code>D3Link</code> objects.</p>
-<p>The <code>Lnd.GraphUpdate</code> object we receive from the server is defined in <code>server/src/domain/lnd/LndRestTypes</code>. It consists of four pieces of data that we care about:</p>
+<p>Calling the <code>updateGraph</code> method converts the <code>Lnd.GraphUpdate</code> object into <code>D3Node</code> and <code>D3Link</code> objects. The <code>Lnd.GraphUpdate</code> object we receive from the server is defined in <code>server/src/domain/lnd/LndRestTypes</code>. It consists of four pieces of data that we care about:</p>
 <ol>
 <li>new nodes that are don't yet have in the graph</li>
 <li>existing nodes that need to have their title and alias updated</li>
 <li>new channels that we need to add to the graph</li>
 <li>closed channels that we need to remove from the graph</li>
 </ol>
-<p>The <code>updateGraph</code> method is partially implemented for the first three conditions. Your last task is to remove a channel from the links if it has been closed.</p>
-<pre><code class="language-typescript">// client/src/scenes/graph/components/Graph
-
-  updateGraph(update: Lnd.GraphUpdate) {
-      // Updates existing nodes or adds new ones if they don't already
-      // exist in the graph
-      for (const nodeUpdate of update.result.node_updates) {
-          const node = this.nodes.find(p =&gt; p.id === nodeUpdate.identity_key);
-          if (node) {
-              node.title = nodeUpdate.alias;
-              node.color = nodeUpdate.color;
-          } else {
-              this.nodes.push({
-                  id: nodeUpdate.identity_key,
-                  color: nodeUpdate.color,
-                  title: nodeUpdate.alias,
-              });
-          }
-      }
-
-      // Adds new channels to the graph. Note that for the purposes of
-      // our visualization we only care that a link exists. We will end
-      // up receiving two updates, one from each node and we just add
-      // the first one.
-      for (const channelUpdate of update.result.channel_updates) {
-          const channel = this.links.find(p =&gt; p.id === channelUpdate.chan_id);
-          if (!channel) {
-              this.links.push({
-                  source: channelUpdate.advertising_node,
-                  target: channelUpdate.connecting_node,
-                  id: channelUpdate.chan_id,
-              });
-          }
-      }
-
-      // Exercise: Remove closed channels from `this.links`.
-
-      this.draw();
-  }
-</code></pre>
 <p>After completing this exercise we will have everything needed for our graph to be functional. Try adding or removing a channel, you should see our graph application automatically update with the changes! Keep in mind that it may take a moment for changes to propagate throughout your network.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="further-exploration"><a class="header" href="#further-exploration">Further Exploration</a></h1>
 <p>This is just the beginning of interesting things we can do to help us visualize the Lightning Network. Hopefully this tutorial provided you with an overview of how we can interface with a Lightning Network node to retrieve information and receive real time updates.</p>
@@ -1890,7 +1821,7 @@ const htlcClaimAddress = htlcClaimPubKey.toP2wpkhAddress();
 logger.info(&quot;generated claim address&quot;, htlcClaimAddress);
 </code></pre>
 <p><em>Note</em>: Why are we using a P2WPKH address instead of a 33-byte public key directly? We could send a 33-byte compressed pubkey, a 20-byte pubkeyhash, or a Bitcoin address (an encoded pubkeyhash). Since we'll be sharing these values over HTTP JSON addresses provide the least ambiguity as to the meaning of the data.</p>
-<p>Net we'll create a random preimage and the hash defined as <code>sha256(preimage)</code>. The hash will be used in the invoice and the HTLC construction.</p>
+<p>Now we'll create a random preimage and the hash defined as <code>sha256(preimage)</code>. The hash will be used in the invoice and the HTLC construction.</p>
 <pre><code class="language-typescript">const preimage = crypto.randomBytes(32);
 logger.info(&quot;generated preimage&quot;, preimage.toString(&quot;hex&quot;));
 

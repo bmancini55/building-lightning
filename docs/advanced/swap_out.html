@@ -189,7 +189,7 @@ const htlcClaimAddress = htlcClaimPubKey.toP2wpkhAddress();
 logger.info(&quot;generated claim address&quot;, htlcClaimAddress);
 </code></pre>
 <p><em>Note</em>: Why are we using a P2WPKH address instead of a 33-byte public key directly? We could send a 33-byte compressed pubkey, a 20-byte pubkeyhash, or a Bitcoin address (an encoded pubkeyhash). Since we'll be sharing these values over HTTP JSON addresses provide the least ambiguity as to the meaning of the data.</p>
-<p>Net we'll create a random preimage and the hash defined as <code>sha256(preimage)</code>. The hash will be used in the invoice and the HTLC construction.</p>
+<p>Now we'll create a random preimage and the hash defined as <code>sha256(preimage)</code>. The hash will be used in the invoice and the HTLC construction.</p>
 <pre><code class="language-typescript">const preimage = crypto.randomBytes(32);
 logger.info(&quot;generated preimage&quot;, preimage.toString(&quot;hex&quot;));
 

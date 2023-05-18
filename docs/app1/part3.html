@@ -146,14 +146,14 @@
 <p>Our first coding task is going to be creating a REST API of our own to provide graph information to our application. We'll start by getting our server connected to Alice's LND node.</p>
 <h2 id="connecting-to-alices-node"><a class="header" href="#connecting-to-alices-node">Connecting to Alice's node</a></h2>
 <p>We've chosen to connect to LND for this application but we could just as easily use c-lightning or Eclair.</p>
-<p>LND also a <a href="https://docs.lightning.engineering/">Builder's Guide</a> that you may want to explore to learn more about commonly performed tasks.</p>
+<p>LND also has a <a href="https://docs.lightning.engineering/">Builder's Guide</a> that you can explore to learn about common tasks.</p>
 <p>LND has two ways we can interact with it from code: a <a href="https://api.lightning.community/#lnd-rest-api-reference">REST API</a> and a <a href="https://api.lightning.community/#lnd-grpc-api-reference">gRPC API</a>. gRPC is a high performance RPC framework. With gRPC, the wire protocol is defined in a protocol definition file. This file is used by a code generators to construct a client in the programming language of your choice. gRPC is a fantastic mechanism for efficient network communication, but it comes with a bit of setup cost. The REST API requires less effort to get started but is less efficient over the wire. For applications with a large amount of interactivity, you would want to use gRPC connectivity. For this application we'll be using the REST API because it is highly relatable for web developers.</p>
 <h2 id="lnd-api-client"><a class="header" href="#lnd-api-client">LND API Client</a></h2>
 <p>Inside our <code>server</code> sub-project is the start of code to connect to LND's REST API. We'll add to this for our application.</p>
 <p>Why are we not leveraging an existing library from NPM? The first reason is that it is a nice exercise to help demonstrate how we can build connectivity. Lightning Network is still a nascent technology and developers need to be comfortable building tools to help them interact with Bitcoin and Lightning Network nodes. The second and arguably more important reason is that as developers in the Bitcoin ecosystem, we need to be extremely wary of outside packages that we pull into our projects, especially if they are cryptocurrency related. Outside dependencies pose a security risk that could compromise our application. As such, my general rule is that runtime dependencies should generally be built unless it is burdensome to do so and maintain.</p>
 <p>With that said, point your IDE at the <code>server/src/domain/lnd/LndRestTypes.ts</code> file. This file contains a subset of TypeScript type definitions from the <a href="https://api.lightning.community/#lnd-rest-api-reference">REST API</a> documentation. We are only building a subset of the API that we'll need for understanding the graph.</p>
 <h2 id="exercise--defining-the-graph-type"><a class="header" href="#exercise--defining-the-graph-type">Exercise : Defining the <code>Graph</code> Type</a></h2>
-<p>In <code>LndRestTypes</code> you'll see our first exercise. It requires us to define the resulting object obtained by calling LND's <a href="https://api.lightning.community/#v1-graph"><code>/v1/graph</code></a> API. You will need to add two properties to the <code>Graph</code> interface. To help you, the <code>LightningNode</code> and <code>ChannelEdge</code> types are already defined. In TypeScript, you can define an array as such</p>
+<p>In <code>LndRestTypes</code> you'll see our first exercise. It requires us to define the resulting object obtained by calling LND's <a href="https://api.lightning.community/#v1-graph"><code>/v1/graph</code></a> API. You will need to add two properties to the <code>Graph</code> interface, one called <code>nodes</code> that is of type <code>LightningNode[]</code> and one called <code>edges</code> that of type <code>ChannelEdge[]</code>. The <code>LightningNode</code> and <code>ChannelEdge</code> types are already defined for you.</p>
 <pre><code class="language-typescript">// server/src/domain/lnd/LndRestTypes
 
 export interface Graph {
@@ -175,7 +175,7 @@ export class LndRestClient {
 }
 </code></pre>
 <p>This class also has a <code>get</code> method that is a helper for making HTTP GET requests to LND. This helper method applies the macaroon and ensures the connection is made using the TLS certificate.</p>
-<p>Your next exercise is to implement the <code>getGraph</code> method in <code>server/src/domain/lnd/LndRestClient.ts</code>. Use the <code>get</code> helper method to call the <a href="https://api.lightning.community/#v1-graph"><code>/v1/graph</code></a> API and return the results.</p>
+<p>Your next exercise is to implement the <code>getGraph</code> method in <code>server/src/domain/lnd/LndRestClient.ts</code>. Use the <code>get</code> helper method to call the <a href="https://api.lightning.community/#v1-graph"><code>/v1/graph</code></a> API and return the results. Hint: You can access <code>get</code> with <code>this.get</code>.</p>
 <pre><code class="language-typescript">// server/src/domain/lnd/LndRestClient
 
   public async getGraph(): Promise&lt;Lnd.Graph&gt; {
@@ -186,7 +186,7 @@ export class LndRestClient {
 <p>After this is complete, we should have a functional API client. In order to test this we will need to provide the macaroon and certificate.</p>
 <h2 id="exercise-configuring-env-to-connect-to-lnd"><a class="header" href="#exercise-configuring-env-to-connect-to-lnd">Exercise: Configuring <code>.env</code> to Connect to LND</a></h2>
 <p>In this application we use the <code>dotenv</code> package to simplify environment variables. We can populate a <code>.env</code> file with key value pairs and the application will treat these as environment variables.</p>
-<p>Remember that environment variables can be read in Node.js from the <code>process.env</code> object. So if we have an environment variable <code>PORT</code>:</p>
+<p>Environment variables can be read in Node.js from the <code>process.env</code> object. So if we have an environment variable <code>PORT</code>:</p>
 <pre><code>$ export PORT=8000
 $ node app.js
 </code></pre>
@@ -215,7 +215,7 @@ LND_CERT_PATH=
 <h2 id="exercise-reading-the-options"><a class="header" href="#exercise-reading-the-options">Exercise: Reading the Options</a></h2>
 <p>Now that our environment variables are in our configuration file, we need to get them into the application. The server project uses <code>server/src/Options</code> to read and store application options.</p>
 <p>The class contains a factory method <code>fromEnv</code> that allows us to construct our options from environment variables. We're going to modify the <code>Options</code> class to read our newly defined environment variables.</p>
-<p>This method is partially implemented, but your next exercise is to finish the method by reading the cert file into a Buffer.</p>
+<p>This method is partially implemented, but your next exercise is to finish the method by reading the cert file into a Buffer. You can use the <code>fs.readFile</code> method to read the path provided in the environment <code>LND_CERT_PATH</code> environment variable. Note: Don't forget to use <code>await</code> since <code>fs.readFile</code> is an asynchronous operation.</p>
 <pre><code class="language-typescript">// server/src/Options
 
   public static async fromEnv(): Promise&lt;Options&gt; {
@@ -230,10 +230,9 @@ LND_CERT_PATH=
     return new Options(port, host, macaroon, cert);
   }
 </code></pre>
-<p>Note: In this example we use TypeScript's <a href="https://www.typescriptlang.org/docs/handbook/2/classes.html#parameter-properties">Parameter Properties</a> feature. This feature creates class properties from <code>readonly</code> parameters. I like it because it saves a few keystrokes by removing the boilerplate of defining the property in the class, then assigning its value in the constructor. There are pros and cons to this approach, so feel free to construct your objects how think is best and in a way that is likely to reduce errors.</p>
 <h2 id="exercise-create-the-lnd-client"><a class="header" href="#exercise-create-the-lnd-client">Exercise: Create the LND client</a></h2>
 <p>The last step before we can see if our application can connect to LND is that we need to create the LND client! We will do this in the entrypoint of our server code <code>server/src/Server</code>.</p>
-<p>In this exercise, construct an instance of the <code>LndRestClient</code> type and supply it with the options found in the <code>options</code> variable.</p>
+<p>In this exercise, construct an instance of the <code>LndRestClient</code> type and supply it with the options found in the <code>options</code> variable. Note: You can create a new instance of a type with the <code>new</code> keyword followed by the type and a parameters, eg: <code>new SomeClass(param1, param2)</code></p>
 <pre><code class="language-typescript">// server/src/Server
 
   async function run() {

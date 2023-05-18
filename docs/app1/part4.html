@@ -239,10 +239,10 @@ export class ApiService {
   }
 }
 </code></pre>
-<p>This class is conveniently accessible by using the <code>useApi</code> hook located in the <code>hooks</code> folder. By adding our <code>fetchGraph</code> method to the <code>ApiService</code>, we can gain access to it with the <code>useApi</code> hook inside any component! Feel free to take a look at the <code>useApi</code> hook code and if you're confused read up on React hooks.</p>
+<p>This class is conveniently accessible by using the <code>useApi</code> hook located in the <code>hooks</code> folder. By adding our <code>fetchGraph</code> method to the <code>ApiService</code>, we can gain access to it with the <code>useApi</code> hook inside any component which we will do in a moment! Feel free to take a look at the <code>useApi</code> hook code and if you're confused read up on React hooks.</p>
 <h2 id="exercise-wire-up-the-api-call"><a class="header" href="#exercise-wire-up-the-api-call">Exercise: Wire up the API Call</a></h2>
-<p>Next let's point our IDE at the <code>GraphScene</code> component in <code>client/src/scenes/graph</code> and see if we can wire up the API to a component.</p>
-<p>For this exercise, inside the <code>useEffect</code> hook, call the api's <code>fetchGraph</code> method. Be mindful that this method returns a promise, which you will need to retrieve the results from. To test your code, simply log the results to the console.</p>
+<p>Next let's point our IDE at the <code>GraphScene</code> component in <code>client/src/scenes/graph</code> so we can wire up the API to a component.</p>
+<p>For this exercise, inside the <code>useEffect</code> hook, call the <code>api.fetchGraph</code> method. Be mindful that this method returns a promise, which you will need to retrieve the results from and call <code>graphRef.current.createGraph</code> method to start the rendering process. The <code>console.log</code> will output the graph object into the browser's console window.</p>
 <pre><code class="language-typescript">// client/src/scenes/graph/GraphScene
 
 import React, { useEffect, useRef } from &quot;react&quot;;
@@ -256,7 +256,11 @@ export const GraphScene = () =&gt; {
   useEffect(() =&gt; {
     // Exercise: Using the api, call the fetchGraph method. Since this returns a promise,
     // we need to use the `then` method to retrieve the results. With the results, call
-    // `graphRef.current.createGraph` and add a console.log statement so you see the graph.
+    // `graphRef.current.createGraph`
+    api.fetchGraph().then((graph: Lnd.Graph) =&gt; {
+      console.log(graph);
+      // Todo
+    });
   }, []);
 
   return (
@@ -269,59 +273,14 @@ export const GraphScene = () =&gt; {
 };
 </code></pre>
 <p>Dev Note: The <code>useEffect</code> hook has two arguments: a callback function and an array of variables that when changed will trigger the callback function. Providing an empty array means our callback function will only be called when the component mounts, which is the functionality we are looking for.</p>
-<p>Dev Note: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promises</a> are a mechanism for working with asynchronous operations. When a promise completes, the results are available in the <code>then</code> method.</p>
-<p>When you refresh your browser, the background will now be gray but you won't yet see the graph yet. If you open your developer tools, you will see the graph output that you wrote with console.log!</p>
-<p><img src="../images/ch1_app_02.png" alt="Console with Graph" /></p>
+<p>Dev Note: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promises</a> are a mechanism for working with asynchronous operations. When a promise completes, the results are passed as an argument to the <code>then</code> function. This will look something like <code>api.fetchGraph().then(graph =&gt; { /* do something here */ })</code>.</p>
+<p>When you refresh your browser, you should now see a graph!</p>
+<p><img src="../images/ch1_app_03.png" alt="Graph" /></p>
 <h2 id="graph-component-overview"><a class="header" href="#graph-component-overview">Graph Component Overview</a></h2>
 <p>The <code>Graph</code> component, <code>client/src/scenes/graph/components/Graph</code>, is a bit different from a normal React component because it is encapsulating D3. Typically React is in charge of rendering the DOM. For this component, React will only control the SVG element. D3 will take control of the SVG element and render elements into it.</p>
 <p>React interfaces with D3 via two methods on the component: <code>createGraph</code> and <code>updateGraph</code>. Each method takes information from our domain and converts it into objects that D3 can control and render.</p>
 <p>For those familiar with React this may be a bit weird since we are transitioning from the declarative style of programming used by React and using imperative code to call these functions. If that's a little confusing, take a gander at <code>GraphScene</code> and <code>Graph</code>. Notice that <code>GraphScene</code> renders <code>Graph</code> as a child, but we use the <code>createGraph</code> method to push information into D3.</p>
-<h2 id="exercise-creating-the-graph"><a class="header" href="#exercise-creating-the-graph">Exercise: Creating the Graph</a></h2>
-<p>After loading the page, we don't yet see the graph because we haven't fully implemented the <code>createGraph</code> method in the <code>Graph</code> component. <code>createGraph</code> is responsible for converting our <code>Lnd.Graph</code> object into objects that can be used by D3.</p>
-<p>As defined in <code>server/src/domain/lnd/LndRestTypes</code>, our <code>Lnd.Graph</code> object has two arrays: <code>nodes</code> and <code>edges</code>.</p>
-<p>Each <code>Lnd.LightningNode</code> object has three properties that we will use:</p>
-<ul>
-<li><code>pub_key</code> - a string that is the unique identifier for the node</li>
-<li><code>color</code> - the color of the node that is specified by the node operator</li>
-<li><code>alias</code> - the friendly name of the node that is specified by the node operator</li>
-</ul>
-<p>Each <code>Lnd.ChannelEdge</code> object has three properties that we will use:</p>
-<ul>
-<li><code>channel_id</code> - the unique identifier for the channel</li>
-<li><code>node1_pub</code> - the identifier for the first node, when sorted, of the channel</li>
-<li><code>node2_pub</code> - the identifier for the second node, when sorted, of the channel</li>
-</ul>
-<p>Using this information we need to construct new objects that can be controlled by D3. We need to do this because D3 will store rendering state on the objects. We don't want D3 to mutate the original objects so we'll construct new ones that D3 can control.</p>
-<p>This gets us to our next exercise. We need to modify the <code>Graph</code> component's <code>createGraph</code> method to convert our Lightning graph objects into D3 controlled objects. To do this we create two arrays:</p>
-<ul>
-<li>one array for the graph's nodes created from our <code>Lnd.LightningNode</code>. We map <code>pub_key</code> to <code>id</code>, map <code>color</code> to <code>color</code>, and map <code>alias</code> to <code>title</code>.
-<pre><code class="language-typescript">interface D3Node {
-  id: string;
-  color: string;
-  title: string;
-}
-</code></pre>
-</li>
-<li>one array for the graph's links created from our <code>Lnd.ChannelEdge</code>. We map <code>channel_id</code> to <code>id</code>, <code>node1_pub</code> to <code>source</code> and <code>node2_pub</code> to <code>target</code>.
-<pre><code class="language-typescript">interface D3Link {
-  id: string;
-  source: string;
-  target: string;
-}
-</code></pre>
-</li>
-</ul>
-<pre><code class="language-typescript">// client/src/scenes/graph/components/Graph
-
-    createGraph(graph: LightningGraph) {
-        // map the graph's nodes into d3 nodes
-        this.nodes = [];
-
-        // map the graph's channels into d3 links
-        this.links = [];
-</code></pre>
-<p>Once we have created these maps we can refresh our browser and we should see the current graph!</p>
-<p><img src="../images/ch1_app_03.png" alt="Graph" /></p>
+<p><code>createGraph</code> is responsible for converting our <code>Lnd.Graph</code> object into objects that can be understood by D3.</p>
 
                     </main>
 

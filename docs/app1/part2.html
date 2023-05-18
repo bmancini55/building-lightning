@@ -147,7 +147,16 @@
 <h2 id="ide-setup"><a class="header" href="#ide-setup">IDE Setup</a></h2>
 <p>For web applications, I like to use <a href="https://code.visualstudio.com/">Visual Studio Code</a> as my IDE. It has excellent tooling for TypeScript and web development. I install the ESLint and Prettier plugins to give me real time feedback of any problems that my application may have.</p>
 <h2 id="runtime-setup"><a class="header" href="#runtime-setup">Runtime Setup</a></h2>
-<p>You will need to install <a href="https://nodejs.org/en/">Node.js 16</a> by following the instructions for your operating system.</p>
+<p>You will need to install the current version of <a href="https://nodejs.org/en/">Node.js</a> by following the instructions for your operating system or using a tool like <a href="https://github.com/nvm-sh/nvm#installing-and-updating">NVM</a>.</p>
+<p>If using NVM you can install the latest version with</p>
+<pre><code>nvm install node
+</code></pre>
+<p>Verify that your version of Node.js is at least 18+.</p>
+<pre><code>node --version
+</code></pre>
+<p>When you are in a project, if node or npm are not available, you may need to tell nvm which version of node to use in that directory. You can do that with with this command:</p>
+<pre><code>nvm use node
+</code></pre>
 <h2 id="repository-setup"><a class="header" href="#repository-setup">Repository Setup</a></h2>
 <p>With general prerequisites setup, we can now clone the repository:</p>
 <p>Clone the repository:</p>
