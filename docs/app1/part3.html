@@ -298,7 +298,7 @@ export function graphApi(graphService: IGraphService): express.Router {
   return router;
 }
 </code></pre>
-<p>Dev Note: Express does not natively understanding <code>async</code> code but we can easily retrofit it. To do this we define the handler with a lambda function that has arguments for the <code>Request</code>, <code>Response</code>, and <code>next</code> arguments (has the type <code>(req, res, next) =&gt; void</code>). Inside that lambda, we then call our async code and attach the <code>catch(next)</code> to that function call. This way if our <code>async</code> function has an error, it will get passed to Express' error handler!</p>
+<p>Dev Note: Express does not natively understand <code>async</code> code but we can easily retrofit it. To do this we define the handler with a lambda function that has arguments for the <code>Request</code>, <code>Response</code>, and <code>next</code> arguments (has the type <code>(req, res, next) =&gt; void</code>). Inside that lambda, we then call our async code and attach the <code>catch(next)</code> to that function call. This way if our <code>async</code> function has an error, it will get passed to Express' error handler!</p>
 <p>We can now run <code>npm run watch</code> at the root of our application and our server should start up and connect to LND without issue.</p>
 <p>If you're getting errors, check your work by making sure Polar is running, the environment variables are correct, and you've correctly wired the code together.</p>
 <p>You can now access <a href="http://localhost:8001/api/graph">http://localhost:8001/api/graph</a> in your browser and you'll see information about the network as understood by Alice!</p>
