@@ -1,8 +1,8 @@
 # Putting It All Together
 
-We have now completed all of the application's core logic. The only code that we have not discussed is the glue that holds it all together. As with our previous application, this one is bootstrapped inside of `server/Server.ts`. We're going to skip going into the heavy details of this class but you should take a look to see how things are wired up.
+We have now completed all of the application's core logic. The only code that we have not discussed is the glue that holds it all together. As with our previous application, this one is bootstrapped inside of `server/src/Server.ts`. We're going to skip going into the heavy details of this class but you should take a look to see how things are wired up.
 
-If you take take a look at `server/Server.ts` you can see that we construct an instance of `AppController` and call the `start` method.
+If you take a look at `server/src/Server.ts` you can see that we construct an instance of `AppController` and call the `start` method.
 
 ```typescript
 // start the application logic
@@ -30,4 +30,4 @@ With that, your application is ready to fire up and test!
 
 ## Exercise: Run the Application!
 
-You should be able to run the `npm run watch` from the root of the application to start it. You can now browse to http://192.168.0.1:8001 and try out the game!
+You should be able to run the `npm run watch` from the root of the application to start it. You can now browse to http://127.0.0.1:8001 and try out the game!

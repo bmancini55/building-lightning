@@ -26,7 +26,7 @@ export interface IInvoiceDataMapper {
 export type InvoiceHandler = (invoice: Invoice) => Promise<void>;
 ```
 
-With the `IInvoiceDataMapper` defined, we need to implement a concrete version of it that works with LND. The `LndInvoiceDataMapper` class does just that. It is located in the `server/data/lnd` folder. The constructor of this class accepts the interface `ILndClient`. There are two classes that implement `ILndClient`: `LndRestClient` and `LndRpcClient` that connect to LND over REST and GRPC respectively. We'll be using the latter to connect to LND over the GRPC API. With this code structure, our application could switch to other types of Lightning Network nodes by implementing a new `IInvoiceDataMapper`. Or if we wanted to switch between the LNDs REST or GRPC client we can supply a different `ILndClient` to the `LndInvoiceDataMapper`.
+With the `IInvoiceDataMapper` defined, we need to implement a concrete version of it that works with LND. The `LndInvoiceDataMapper` class does just that. It is located in the `server/src/data/lnd` folder. The constructor of this class accepts the interface `ILndClient`. There are two classes that implement `ILndClient`: `LndRestClient` and `LndRpcClient` that connect to LND over REST and GRPC respectively. We'll be using the latter to connect to LND over the GRPC API. With this code structure, our application could switch to other types of Lightning Network nodes by implementing a new `IInvoiceDataMapper`. Or if we wanted to switch between the LNDs REST or GRPC client we can supply a different `ILndClient` to the `LndInvoiceDataMapper`.
 
 We'll now explore the methods on the `LndInvoiceDataMapper`. For loading invoices we're concerned with the `sync` method.
 
@@ -67,7 +67,7 @@ But, before we call the handler we need to convert the invoice from LND's invoic
 
 This function is a mapping function that converts LND's invoice type into our application domain's `Invoice` class.
 
-Go ahead and implement the `convertInvoice` method in the `server/data/LndInvoiceDataMapper` class.
+Go ahead and implement the `convertInvoice` method in the `server/src/data/LndInvoiceDataMapper` class.
 
 Dev Tip: You need will use the `memo`, `r_preimage`, `r_hash`, `value`, `settled`, and `settled_date` properties of the LND Invoice. Make sure to perform proper type conversions for Buffers (try `.toString("hex")`) and casting the `settled_date` value into a number (try `Number(some_string)`).
 
