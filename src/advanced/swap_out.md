@@ -38,9 +38,9 @@ The first step is going to be building a client for Alice. To make our lives eas
 
 Once the client has an invoice it will:
 
-1. pay the invoice
-1. watch the blockchain for the HTLC
-1. spend the HTLC using the preimage that it knows
+1. Pay the invoice
+1. Watch the blockchain for the HTLC
+1. Spend the HTLC using the preimage that it knows
 
 The code for our client application can be found in [`exercises/swap-out/client/Client.ts`](https://github.com/bmancini55/building-lightning-advanced/blob/main/exercises/swap-out/client/Client.ts). The start of this file contains a few boilerplate things that must be setup:
 
@@ -58,7 +58,7 @@ const htlcClaimAddress = htlcClaimPubKey.toP2wpkhAddress();
 logger.info("generated claim address", htlcClaimAddress);
 ```
 
-_Note_: Why are we using a P2WPKH address instead of a 33-byte public key directly? We could send a 33-byte compressed pubkey, a 20-byte pubkeyhash, or a Bitcoin address (an encoded pubkeyhash). Since we'll be sharing these values over HTTP JSON addresses provide the least ambiguity as to the meaning of the data.
+_Note_: Why are we using a P2WPKH address instead of a 33-byte public key directly? We could send a 33-byte compressed pubkey, a 20-byte pubkeyhash, or a Bitcoin address (an encoded pubkeyhash). Since we'll be sharing these values over HTTP JSON, an address provides the least ambiguity.
 
 Now we'll create a random preimage and the hash defined as `sha256(preimage)`. The hash will be used in the invoice and the HTLC construction.
 
@@ -121,7 +121,7 @@ await lightning.sendPaymentV2(
 );
 ```
 
-However! Before we make the payment request we want start watching the blockchain for the HTLC. To watch for the HTLC we need to look for a transaction that has a P2WSH output matching our HTLC. Recall that P2WSH outputs use Script that is `0x00+sha256(script)`. Only when the output is spent is the script revealed as part of the witness. So for our purposes we want to construct the HTLC Script but then convert it into a P2WSH ScriptPubKey.
+However! Before we make the payment request we want start watching the blockchain for the HTLC. To watch for the HTLC we need to look for a transaction that has a P2WSH output matching our HTLC. Recall that P2WSH outputs use Script that is `0x00+sha256(script)`. Only when the output is spent the actual script will be revealed as part of the witness data. For our purposes we want to construct the HTLC Script but then convert it into a P2WSH ScriptPubKey so we can watch for an output that contains it.
 
 Constructing the script uses the [`createHtlcDescriptor`](https://github.com/bmancini55/building-lightning-advanced/blob/main/exercises/swap-out/CreateHtlcDescriptor.ts) method which generates a Script that looks like:
 
@@ -309,7 +309,7 @@ protected async checkBlockForSettlements(block: Bitcoind.Block): Promise<void> {
 }
 ```
 
-When we find a transaction that spends the HTLC outpoint, it means that the requestor has spent the output using the preimage path. We need to extract the preimage so we can settle the incoming hold invoice. We do this with the [`processClaimTransaction`](https://github.com/bmancini55/building-lightning-advanced/blob/e6a505c80e3cc719d50361d614f2ea8954916576/exercises/swap-out/service/RequestManager.ts#L158) method of the `RequestManager` which simply extracts the preimage from the witness data that was used to claim the HTLC. If you recall from the previous section when the claim transaction is build the witness data used to spend the HTLC UTXO is `[<claim_sig>, <claim_pubkey>, <preimage>, <htlc_script>]`.
+When we find a transaction that spends the HTLC outpoint, it means that the requestor has spent the output using the preimage path. We need to extract the preimage so we can settle the incoming hold invoice. We do this with the [`processClaimTransaction`](https://github.com/bmancini55/building-lightning-advanced/blob/e6a505c80e3cc719d50361d614f2ea8954916576/exercises/swap-out/service/RequestManager.ts#L158) method of the `RequestManager` which simply extracts the preimage from the witness data that was used to claim the HTLC. If you recall from the previous section that the claim transaction has witness data that spends the HTLC: `[<claim_sig>, <claim_pubkey>, <preimage>, <htlc_script>]`.
 
 ```typescript
 protected async processClaimTransaction(input: Bitcoind.Input, request: Request) {
@@ -341,9 +341,7 @@ Using [Lightning Polar](https://lightningpolar.com/), create a new environment w
 
 Create a channel from Alice to Bob. This will ensure that all the funds are on Alice's side of the channel.
 
-If you haven't already, clone the [code repository](https://github.com/bmancini55/building-lightning-advanced) and run `npm install`.
-
-Copy `.env-sample` to `.env` and configure the follow values from the running Polar environment.
+In `.env` you'll need to configure the follow values from the running Polar environment.
 
 ```
 # SWAP OUT - ALICE
@@ -365,13 +363,13 @@ BITCOIND_RPC_PASSWORD=
 You should now be able to start the server with (which will be run by Bob):
 
 ```
-npm start exercises/swap-out/service/Service.ts
+npm start "exercises/swap-out/service/Service.ts"
 ```
 
 In a separate command line instance start the client from Alice's perspective with:
 
 ```
-npm start exercices/swap-out/service/Client.ts
+npm start "exercises/swap-out/client/Client.ts"
 ```
 
 The client should output something like the following:
