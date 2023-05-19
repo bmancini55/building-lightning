@@ -8,7 +8,7 @@ From a software engineering perspective, it's a good practice to isolate our app
 
 To achieve this decoupling, instead of pinning our application to the structure of invoices in LND's database, we'll create our own `Invoice` type that is used throughout our application. This also allows us to add some methods to our `Invoice` type that are domain specific to our application.
 
-You can take a look at the `server/domain/Invoice` class. This class only has properties that the application uses: memo, preimage, hash, value in satoshis, and settlement information.
+You can take a look at the `server/src/domain/Invoice` class. This class only has properties that the application uses: memo, preimage, hash, value in satoshis, and settlement information.
 
 ```typescript
 export class Invoice {
@@ -37,7 +37,7 @@ The `linkId` is going to be a 32-byte value (64 hex encoded characters). As we d
 
 The `buyerId` is the 33-byte public key (66 hex encoded characters) of the node that we are generating the invoice for. In this case, if Bob requested an invoice to pay, this value would be the public key of Bob's Lightning Network node.
 
-Go ahead and implement the `createMemo` method in `server/domain/Invoice` class according to the rule specified.
+Go ahead and implement the `createMemo` method in `server/src/domain/Invoice` class according to the rule specified.
 
 ```typescript
 public static createMemo(linkId: string, buyer: string) {
@@ -97,7 +97,7 @@ sha256(alice_sig(seed) || bob_sig(seed) || satoshis)
 
 where `||` denotes concatenation.
 
-Based on that information, go ahead and implement the `createPreimage` method in the `server/domain/Invoice` class.
+Based on that information, go ahead and implement the `createPreimage` method in the `server/src/domain/Invoice` class.
 
 Dev Tip: A `sha256` function is available for you to use, you may need to case `sats` to a string using `toString()` and you may need to convert the concatenated value into a Buffer using `Buffer.from` in order to use the `sha256` function.
 

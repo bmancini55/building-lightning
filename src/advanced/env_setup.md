@@ -26,7 +26,7 @@ We'll also need a Lightning Network environment to test. You can create a new Po
 
 We'll again use the `dotenv` package to simplify environment variables.
 
-You'll need to add some values to the `.env` inside the repository root. Specifically we'll set values for the following:
+First rename `.evn-sample` to `.env`. You'll then need to set the first group of variables.
 
 - `LND_RPC_HOST` is the host for LND RPC
 - `LND_ADMIN_MACAROON_PATH` is the file path to the admin Macaroon

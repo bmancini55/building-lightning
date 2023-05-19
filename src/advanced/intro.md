@@ -5,3 +5,4 @@ This section discusses advanced topics of the Lightning Network and currently in
 - [Hold Invoice](./hold_invoices.md)
 - [Spontaneous payments with Keysend](./spontanenous_keysend.md)
 - [Circular rebalancing](./circular_rebalancing.md)
+- [Swap out](./swap_out.md)

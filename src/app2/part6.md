@@ -26,7 +26,7 @@ export interface IMessageSigner {
 }
 ```
 
-Under the covers, we have already implemented a `LndMessageSigner` class that uses LND to perform signature creation and verification. This will be wired up later but feel free to explore this code in the `server/data/lnd` folder.
+Under the covers, we have already implemented a `LndMessageSigner` class that uses LND to perform signature creation and verification. This will be wired up later but feel free to explore this code in the `server/src/data/lnd` folder.
 
 ## Exercise: Implement `createFromSeed`
 
