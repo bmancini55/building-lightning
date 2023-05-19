@@ -12,7 +12,7 @@ You can control this balance by performing circular rebalancing.
 
 Circular Rebalancing is a technique for when you have multiple channels open and want to change the inbound/outbound ratio for your channels. The general idea is that you pay yourself (only losing some fees along the way) using a channel that has excess outbound capacity and you accept payment through the channel that has excess inbound capacity. In this regard, the payment generates a circle and the net result is that your channel balances are more evenly distributed for both sending and receiving.
 
-Create a Polar environment with three nodes: Alice, Bob, and Carol where:
+Create a new Polar environment with three nodes: Alice, Bob, and Carol where:
 
 - Alice opens a channel to Bob
 - Bob opens a channel to Carol
@@ -20,9 +20,11 @@ Create a Polar environment with three nodes: Alice, Bob, and Carol where:
 
 ![Circular Rebalancing Environment](../images/ch3_circular_rebalancing_env.png)
 
-In this environment, Alice has full outbound capacity one channel, and full inbound capacity on a second channel.
+In this environment, Alice has full outbound capacity on one channel, and full inbound capacity on a second channel.
 
 With this environment setup, lets see if we can perform a circular rebalance.
+
+Dev Tip: Remember to update your `.env` file to use the new values for Alice's LND instance.
 
 ## Exercise: Rebalance Capacity Script
 
@@ -50,7 +52,7 @@ const hop_pubkeys = process.argv[3].split(",").map(v => Buffer.from(v, "hex"));
 
 What we want is a list of node identifiers such that we start with the node we are sending to and end with our node. For example if we had outbound capacity from `Alice -> Bob` and inbound capacity from `Carol -> Alice` we want to send the payment using the `Alice -> Bob` channel, through the `Bob -> Carol` channel, then finally back to ourselves with the `Carol -> Alice` channel.
 
-Our list of node identifiers would then correspond to those hops in the route: `pubkey(Bob),pubkey(Carol),pubkey(Alice)` or more concretely:
+Our list of node identifiers would then correspond to those hops in the route: `pubkey(Bob),pubkey(Carol),pubkey(Alice)` or more concretely an example may look like this:
 
 ```
 Alice=02a3cc61dd74a22f575b22f4ece6400f5754db9fab8a72a53b2a789ceca34a9d7e
@@ -296,12 +298,12 @@ async function run(): Promise<void> {
 To run the script:
 
 1. Gather the node_ids for Bob,Carol,Alice
-1. Use `npm start exercises/reblancing/Run.ts <satashis> <comma_separated_list_of_nodes>`
+1. Use `npm start "exercises/reblancing/Run.ts" -- <satashis> <comma_separated_list_of_nodes>`
 
 For example:
 
 ```
-npm start exercises/rebalancing/Run.ts 10000 \
+npm start "exercises/rebalancing/Run.ts" -- 10000 \
 0227bfa020ce5765ef852555c5fbb58bdb3edbeb44f51b2eeb5e7167e678a2771e,0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791,02a3cc61dd74a22f575b22f4ece6400f5754db9fab8a72a53b2a789ceca34a9d7e
 ```
 

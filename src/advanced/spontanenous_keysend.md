@@ -48,10 +48,13 @@ Restart your node.
 
 You can then open a terminal and send payments using the `sendpayment` CLI command by providing a destination `--dest=<node_id>`, amount in satoshis `--amt=<value>` and the flag `--keysend`
 
-For example to send 10,000 satoshi's to Carol's node that has the node identifier 0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791:
+For example, sending a 10,000 satoshi payment to Carol's node, that understands keysend, and has the node identifier 0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791 would look like:
 
 ```
-lncli sendpayment --dest=0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791 --amt=10000 --keysend
+lncli sendpayment \
+  --dest=0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791 \
+  --amt=10000 \
+  --keysend
 ```
 
 ![LND Keysend](../images/ch3_keysend_lnd.png)
@@ -61,8 +64,10 @@ lncli sendpayment --dest=0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd
 Now we can try performing a keysend from code. Using your LND node that has keysend enabled you can run the script and supply the destination node identifier and the amount in satoshis. This script relies on the [`SendPaymentV2`](https://api.lightning.community/#sendpaymentv2) API of LND and supplies the custom onion record with the payment preimage.
 
 ```
-npm run start exercises/spontaneous-keysend/Run.ts <dest_node_id> <amt>
+npm run start "exercises/sponteneous-keysend/Run.ts" -- <dest_node_id> <amt>
 ```
+
+Dev Tip: Replace <dest_node_id> with the pubkey of a node that understanding Keysend. You also need to ensure all routes have enough outbound capacity to make a payment.
 
 The script will run the following code located in `exercises/spontaneous-keysend/Run.ts`.
 

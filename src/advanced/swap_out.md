@@ -2,7 +2,7 @@
 
 In this section we'll discuss reverse submarine swaps in a Lightning Network channel using [hold invoices](./hold_invoices.md). When performing an reverse submarine swap aka swap-out, it is the ability to move funds from an off-chain Lightning Network channel to an on-chain address in a trustless way.
 
-An obvious use case for this is a merchant that a receives a large inflow of payments via Lightning. At a certain point the merchant Lightning channel inbound capacity will be exhausted and the merchant. A swap-out allows the merchant to simultaneously change the balance of their channel so that they once again have inbound capacity and move the funds to an on-chain address for safe keeping!
+An obvious use case for this is a merchant that a receives a large inflow of payments via Lightning. At a certain point the merchant's Lightning channel inbound capacity will be exhausted and the merchant will no longer be able to receive payments. A swap-out allows the merchant to simultaneously change the balance of their channel so that they once again have inbound capacity and move the funds to an on-chain address for safe keeping!
 
 This article is going to show how to build a simple reverse submarine swap service. There are a lot of moving pieces and we need to have on-chain wallet capabilities. In order to keep this article somewhat brief we'll forgo building a fully complete and secure swap service and instead work through the mechanics. The full working code can be found [here](https://github.com/bmancini55/building-lightning-advanced/tree/main/exercises/swap-out).
 
@@ -15,7 +15,7 @@ So here are the steps for a swap-out between Alice and Bob. Bob runs a swap-out 
 1. Alice generates a hash preimage that only she knows and provides the hash, a payment address, and the amount to Bob
 1. Bob generates a hold invoice and provides the payment request and his refund address to Alice
 1. Alice pays the invoice using her Lightning Network node
-1. Bob gets receipt of the payment,
+1. Bob gets receipt of the payment but can't settle it yet
 1. Bob broadcasts an on-chain HTLC that pays Alice if she provides the preimage or it pays him after some timeout period
 1. Alice settles the on-chain HTLC by spending it using the preimage (Alice now has her funds on-chain)
 1. Bob extracts the preimage from the Alice's settlement transaction on-chain
@@ -28,7 +28,7 @@ Astute readers will recognize that the on-chain HTLC aspect is remarkably simila
 1. the offerer of an HTLC has access to reclaim the funds after some timeout period
 1. the recipient of an HTLC can claim the funds using the preimage
 
-With swaping it's much simpler than inside a channel. In our example, Alice can claim the on-chain HTLC using the preimage that she knows. If she does this, then Bob can extract the preimage and settle the off-chain HTLC so that he doesn't lose funds.
+With swaping it's much simpler than inside a channel which requires support for revocation. In our example, Alice can claim the on-chain HTLC using the preimage that she knows. If she does this, then Bob can extract the preimage and settle the off-chain HTLC so that he doesn't lose funds.
 
 One final note is that just like off-chain payments, to ensure there are no funds lost, the timeouts must be larger for incoming HTLCs than the corresponding outgoing HTLC. This ensures that an outgoing HTLC is always fully resolve before the incoming HTLC can be timed out.
 
