@@ -1,6 +1,6 @@
 # Creating the `AppController` Class
 
-Now that we have all the components built, we'll turn our attention to the primary logic controller for our application! This logic resides in the `AppController` class located in `server/domain`. This class is responsible for constructing and maintaining the chain of ownership based on paid invoices.
+Now that we have all the components built, we'll turn our attention to the primary logic controller for our application! This logic resides in the `AppController` class located in `server/src/domain`. This class is responsible for constructing and maintaining the chain of ownership based on paid invoices.
 
 The constructor of this class takes a few things we've previously worked on such as:
 
@@ -54,7 +54,7 @@ Back when we discussed the `IInvoiceDataMapper` we had a `sync` method. If you r
 export type InvoiceHandler = (invoice: Invoice) => Promise<void>;
 ```
 
-If you take a look at the `AppController`. You'll see that `handleInvoice` matches this signature! This is not a coincidence. We'll we use the `handleInvoice` method to process all invoices that our Lightning Network node knows about.
+If you take a look at the `AppController`. You'll see that `handleInvoice` matches this signature! This is not a coincidence. We'll use the `handleInvoice` method to process all invoices that our Lightning Network node knows about.
 
 Now that we understand that, let's do an exercise and implement our `start` method.
 
