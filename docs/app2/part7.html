@@ -143,7 +143,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="creating-the-appcontroller-class"><a class="header" href="#creating-the-appcontroller-class">Creating the <code>AppController</code> Class</a></h1>
-<p>Now that we have all the components built, we'll turn our attention to the primary logic controller for our application! This logic resides in the <code>AppController</code> class located in <code>server/domain</code>. This class is responsible for constructing and maintaining the chain of ownership based on paid invoices.</p>
+<p>Now that we have all the components built, we'll turn our attention to the primary logic controller for our application! This logic resides in the <code>AppController</code> class located in <code>server/src/domain</code>. This class is responsible for constructing and maintaining the chain of ownership based on paid invoices.</p>
 <p>The constructor of this class takes a few things we've previously worked on such as:</p>
 <ul>
 <li><code>IInvoiceDataMapper</code> - we'll use this to create and fetch invoices from our Lightning Network node</li>
@@ -182,7 +182,7 @@
 <p>Back when we discussed the <code>IInvoiceDataMapper</code> we had a <code>sync</code> method. If you recall, this method accepted an <code>InvoiceHandler</code> that defined a simple function that has one argument, an <code>Invoice</code>.</p>
 <pre><code class="language-typescript">export type InvoiceHandler = (invoice: Invoice) =&gt; Promise&lt;void&gt;;
 </code></pre>
-<p>If you take a look at the <code>AppController</code>. You'll see that <code>handleInvoice</code> matches this signature! This is not a coincidence. We'll we use the <code>handleInvoice</code> method to process all invoices that our Lightning Network node knows about.</p>
+<p>If you take a look at the <code>AppController</code>. You'll see that <code>handleInvoice</code> matches this signature! This is not a coincidence. We'll use the <code>handleInvoice</code> method to process all invoices that our Lightning Network node knows about.</p>
 <p>Now that we understand that, let's do an exercise and implement our <code>start</code> method.</p>
 <h2 id="exercise-implement-start"><a class="header" href="#exercise-implement-start">Exercise: Implement <code>start</code></a></h2>
 <p>To implement the <code>start</code> method requires us to perform two tasks:</p>

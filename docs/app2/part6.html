@@ -166,7 +166,7 @@
   verify(msg: Buffer, signature: string): Promise&lt;VerifySignatureResult&gt;;
 }
 </code></pre>
-<p>Under the covers, we have already implemented a <code>LndMessageSigner</code> class that uses LND to perform signature creation and verification. This will be wired up later but feel free to explore this code in the <code>server/data/lnd</code> folder.</p>
+<p>Under the covers, we have already implemented a <code>LndMessageSigner</code> class that uses LND to perform signature creation and verification. This will be wired up later but feel free to explore this code in the <code>server/src/data/lnd</code> folder.</p>
 <h2 id="exercise-implement-createfromseed"><a class="header" href="#exercise-implement-createfromseed">Exercise: Implement <code>createFromSeed</code></a></h2>
 <p>As we previously discussed, a <code>Link</code> starts out in the <code>unsettled</code> state, which means that no one has taken ownership of it. Logically, the application starts off without any ownership and in an <code>unsettled</code> state. Since we don't have any prior links, we'll simply create a link from some seed value.</p>
 <p>In order to create a link we do two things:</p>

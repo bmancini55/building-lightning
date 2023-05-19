@@ -156,7 +156,7 @@
 <p>We'll also need a Lightning Network environment to test. You can create a new Polar environment or reuse an existing one. Some of these exercises will require specific configurations of nodes and channels, so feel free to destroy and recreate environments as needed.</p>
 <h2 id="exercise-configuring-env-to-connect-to-lnd"><a class="header" href="#exercise-configuring-env-to-connect-to-lnd">Exercise: Configuring <code>.env</code> to Connect to LND</a></h2>
 <p>We'll again use the <code>dotenv</code> package to simplify environment variables.</p>
-<p>You'll need to add some values to the <code>.env</code> inside the repository root. Specifically we'll set values for the following:</p>
+<p>First rename <code>.evn-sample</code> to <code>.env</code>. You'll then need to set the first group of variables.</p>
 <ul>
 <li><code>LND_RPC_HOST</code> is the host for LND RPC</li>
 <li><code>LND_ADMIN_MACAROON_PATH</code> is the file path to the admin Macaroon</li>

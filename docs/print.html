@@ -856,7 +856,7 @@ hash = sha256(sha256(alice_sig(seed) || bob_sig(seed) || satoshis))
 <p>This time around we'll be using the <a href="https://api.lightning.community/#lnd-grpc-api-reference">LND RPC API</a>. This is similar to the REST interface we used in the previous application but uses a binary protocol instead of HTTPS to communicate with the LND node. For the purposes of our application it will be remarkably similar and in reality, the only difference will be how we wire up the application. Which brings us to our next point.</p>
 <p>From a software engineering perspective, it's a good practice to isolate our application logic from the specifics of the underlying data persistence mechanism. This rule is often conveyed when working with relational databases systems where it would be poor form for your database tables to dictate how your application logic functions. This is no different than working with Lightning Network nodes! We break out our code so that we can tightly focus the critical application bits from the logic of how we retrieve that information. A by-product is that we could switch from LND to c-lightning or Eclair without having to change our core application logic!</p>
 <p>To achieve this decoupling, instead of pinning our application to the structure of invoices in LND's database, we'll create our own <code>Invoice</code> type that is used throughout our application. This also allows us to add some methods to our <code>Invoice</code> type that are domain specific to our application.</p>
-<p>You can take a look at the <code>server/domain/Invoice</code> class. This class only has properties that the application uses: memo, preimage, hash, value in satoshis, and settlement information.</p>
+<p>You can take a look at the <code>server/src/domain/Invoice</code> class. This class only has properties that the application uses: memo, preimage, hash, value in satoshis, and settlement information.</p>
 <pre><code class="language-typescript">export class Invoice {
   constructor(
     public memo: string,
@@ -876,7 +876,7 @@ hash = sha256(sha256(alice_sig(seed) || bob_sig(seed) || satoshis))
 </code></pre>
 <p>The <code>linkId</code> is going to be a 32-byte value (64 hex encoded characters). As we discussed in the last section, the linkId is the current point of the game. We use the <code>linkId</code> to help us identify which point of the game the invoice was for.</p>
 <p>The <code>buyerId</code> is the 33-byte public key (66 hex encoded characters) of the node that we are generating the invoice for. In this case, if Bob requested an invoice to pay, this value would be the public key of Bob's Lightning Network node.</p>
-<p>Go ahead and implement the <code>createMemo</code> method in <code>server/domain/Invoice</code> class according to the rule specified.</p>
+<p>Go ahead and implement the <code>createMemo</code> method in <code>server/src/domain/Invoice</code> class according to the rule specified.</p>
 <pre><code class="language-typescript">public static createMemo(linkId: string, buyer: string) {
     // Exercise
 }
@@ -917,7 +917,7 @@ public get buyerNodeId(): string {
 <pre><code>sha256(alice_sig(seed) || bob_sig(seed) || satoshis)
 </code></pre>
 <p>where <code>||</code> denotes concatenation.</p>
-<p>Based on that information, go ahead and implement the <code>createPreimage</code> method in the <code>server/domain/Invoice</code> class.</p>
+<p>Based on that information, go ahead and implement the <code>createPreimage</code> method in the <code>server/src/domain/Invoice</code> class.</p>
 <p>Dev Tip: A <code>sha256</code> function is available for you to use, you may need to case <code>sats</code> to a string using <code>toString()</code> and you may need to convert the concatenated value into a Buffer using <code>Buffer.from</code> in order to use the <code>sha256</code> function.</p>
 <pre><code class="language-typescript">public static createPreimage(local: string, remote: string, sats: number) {
     // Exercise
@@ -949,7 +949,7 @@ public get buyerNodeId(): string {
  */
 export type InvoiceHandler = (invoice: Invoice) =&gt; Promise&lt;void&gt;;
 </code></pre>
-<p>With the <code>IInvoiceDataMapper</code> defined, we need to implement a concrete version of it that works with LND. The <code>LndInvoiceDataMapper</code> class does just that. It is located in the <code>server/data/lnd</code> folder. The constructor of this class accepts the interface <code>ILndClient</code>. There are two classes that implement <code>ILndClient</code>: <code>LndRestClient</code> and <code>LndRpcClient</code> that connect to LND over REST and GRPC respectively. We'll be using the latter to connect to LND over the GRPC API. With this code structure, our application could switch to other types of Lightning Network nodes by implementing a new <code>IInvoiceDataMapper</code>. Or if we wanted to switch between the LNDs REST or GRPC client we can supply a different <code>ILndClient</code> to the <code>LndInvoiceDataMapper</code>.</p>
+<p>With the <code>IInvoiceDataMapper</code> defined, we need to implement a concrete version of it that works with LND. The <code>LndInvoiceDataMapper</code> class does just that. It is located in the <code>server/src/data/lnd</code> folder. The constructor of this class accepts the interface <code>ILndClient</code>. There are two classes that implement <code>ILndClient</code>: <code>LndRestClient</code> and <code>LndRpcClient</code> that connect to LND over REST and GRPC respectively. We'll be using the latter to connect to LND over the GRPC API. With this code structure, our application could switch to other types of Lightning Network nodes by implementing a new <code>IInvoiceDataMapper</code>. Or if we wanted to switch between the LNDs REST or GRPC client we can supply a different <code>ILndClient</code> to the <code>LndInvoiceDataMapper</code>.</p>
 <p>We'll now explore the methods on the <code>LndInvoiceDataMapper</code>. For loading invoices we're concerned with the <code>sync</code> method.</p>
 <p>The <code>sync</code> method reaches out to our invoice database and requests all invoices. It will also subscribe to creation of new invoices or the settlement of existing invoices. Because the syncing process and the subscription are long lived, we will use notifications to alert our application code about invoice events instead of returning a list of the <code>Invoice</code> type. You may have noticed the <code>InvoiceHandler</code> type. This type defines any function that receives an <code>Invoice</code> as an argument. Our <code>sync</code> method takes a single argument which must be an <code>InvoiceHandler</code>. This handler function will be called every time an invoice of is found or changes.</p>
 <p>The <code>sync</code> method does two things:</p>
@@ -981,7 +981,7 @@ export type InvoiceHandler = (invoice: Invoice) =&gt; Promise&lt;void&gt;;
 <p>But, before we call the handler we need to convert the invoice from LND's invoice to our application's <code>Invoice</code> type.</p>
 <h2 id="exercise-implement-convertinvoice"><a class="header" href="#exercise-implement-convertinvoice">Exercise: Implement <code>convertInvoice</code></a></h2>
 <p>This function is a mapping function that converts LND's invoice type into our application domain's <code>Invoice</code> class.</p>
-<p>Go ahead and implement the <code>convertInvoice</code> method in the <code>server/data/LndInvoiceDataMapper</code> class.</p>
+<p>Go ahead and implement the <code>convertInvoice</code> method in the <code>server/src/data/LndInvoiceDataMapper</code> class.</p>
 <p>Dev Tip: You need will use the <code>memo</code>, <code>r_preimage</code>, <code>r_hash</code>, <code>value</code>, <code>settled</code>, and <code>settled_date</code> properties of the LND Invoice. Make sure to perform proper type conversions for Buffers (try <code>.toString(&quot;hex&quot;)</code>) and casting the <code>settled_date</code> value into a number (try <code>Number(some_string)</code>).</p>
 <pre><code class="language-typescript">public convertInvoice(invoice: Lnd.Invoice): Invoice {
     // Exercise
@@ -994,7 +994,7 @@ export type InvoiceHandler = (invoice: Invoice) =&gt; Promise&lt;void&gt;;
 <div style="break-before: page; page-break-before: always;"></div><h1 id="creating-the-link-class"><a class="header" href="#creating-the-link-class">Creating the <code>Link</code> Class</a></h1>
 <p>For our application, we can think of the leaders in the game as links in a chain. There is always a link at the end that is &quot;open&quot; for taking over the leadership position. The last closed link in the chain is the current leader of the game.</p>
 <p>The <code>Link</code> class defines a single link in the chain of ownership. A <code>Link</code> can be in one of two states: <code>unsettled</code> or <code>settled</code>.</p>
-<p>When a <code>Link</code> is unsettled, it means that no one has take ownership or closed that link. It is still open to the world and anyone can pay an invoice and take ownership. Only the last link in the chain will ever be <code>unsettled</code>.</p>
+<p>When a <code>Link</code> is unsettled, it means that no one has taken ownership or closed that link. It is still open to the world and anyone can pay an invoice and take ownership. Only the last link in the chain will ever be <code>unsettled</code>.</p>
 <p>When a <code>Link</code> is settled, it means there was an invoice that was paid to close that link. The person that paid the invoice becomes the owner of that link. The last closed link in the chain is considered the current leader of the game.</p>
 <p>Take a look at the diagram of game links again.</p>
 <p><img src="app2/../images/ch2_diagram_01.png" alt="Link" /></p>
@@ -1018,10 +1018,10 @@ export type InvoiceHandler = (invoice: Invoice) =&gt; Promise&lt;void&gt;;
 <li><code>localSignature</code> is our Lightning Network node's signature of the <code>linkId</code>. We'll use this to construct invoices using our <code>createPreimage</code> helper function</li>
 <li><code>minSats</code> is the minimum satoshis payment we're willing to accept payment to settle this <code>Link</code>. This value will be larger than the last link.</li>
 </ul>
-<p>You'll also notice that there is an <code>invoice</code> property. This property will be assigned when a invoice when someone pays the <code>Invoice</code> that corresponds to this link.</p>
+<p>You'll also notice that there is an <code>invoice</code> property. This property will be assigned when someone pays the <code>Invoice</code> that corresponds to this link.</p>
 <h2 id="exercise-implement-issettled"><a class="header" href="#exercise-implement-issettled">Exercise: Implement <code>isSettled</code></a></h2>
 <p>A <code>Link</code> is only considered settled when it has an invoice assigned and that invoice is settled.</p>
-<p>Go ahead and implement the <code>isSettled</code> getter which should check the <code>invoice</code> property to see if it has a value. If it does have a value it should check the invoice to see if it has been settled.</p>
+<p>Go ahead and implement the <code>isSettled</code> getter in <code>server/src/domain/Link.ts</code> which should check the <code>invoice</code> property to see if it has a value. If it does have a value it should check the invoice to see if it has been settled.</p>
 <pre><code class="language-typescript">public get isSettled(): boolean {
     // Exercise
 }
@@ -1065,7 +1065,7 @@ export type InvoiceHandler = (invoice: Invoice) =&gt; Promise&lt;void&gt;;
   verify(msg: Buffer, signature: string): Promise&lt;VerifySignatureResult&gt;;
 }
 </code></pre>
-<p>Under the covers, we have already implemented a <code>LndMessageSigner</code> class that uses LND to perform signature creation and verification. This will be wired up later but feel free to explore this code in the <code>server/data/lnd</code> folder.</p>
+<p>Under the covers, we have already implemented a <code>LndMessageSigner</code> class that uses LND to perform signature creation and verification. This will be wired up later but feel free to explore this code in the <code>server/src/data/lnd</code> folder.</p>
 <h2 id="exercise-implement-createfromseed"><a class="header" href="#exercise-implement-createfromseed">Exercise: Implement <code>createFromSeed</code></a></h2>
 <p>As we previously discussed, a <code>Link</code> starts out in the <code>unsettled</code> state, which means that no one has taken ownership of it. Logically, the application starts off without any ownership and in an <code>unsettled</code> state. Since we don't have any prior links, we'll simply create a link from some seed value.</p>
 <p>In order to create a link we do two things:</p>
@@ -1102,7 +1102,7 @@ export type InvoiceHandler = (invoice: Invoice) =&gt; Promise&lt;void&gt;;
 <pre><code>npm run test:server -- --grep createFromSettled
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="creating-the-appcontroller-class"><a class="header" href="#creating-the-appcontroller-class">Creating the <code>AppController</code> Class</a></h1>
-<p>Now that we have all the components built, we'll turn our attention to the primary logic controller for our application! This logic resides in the <code>AppController</code> class located in <code>server/domain</code>. This class is responsible for constructing and maintaining the chain of ownership based on paid invoices.</p>
+<p>Now that we have all the components built, we'll turn our attention to the primary logic controller for our application! This logic resides in the <code>AppController</code> class located in <code>server/src/domain</code>. This class is responsible for constructing and maintaining the chain of ownership based on paid invoices.</p>
 <p>The constructor of this class takes a few things we've previously worked on such as:</p>
 <ul>
 <li><code>IInvoiceDataMapper</code> - we'll use this to create and fetch invoices from our Lightning Network node</li>
@@ -1141,7 +1141,7 @@ export type InvoiceHandler = (invoice: Invoice) =&gt; Promise&lt;void&gt;;
 <p>Back when we discussed the <code>IInvoiceDataMapper</code> we had a <code>sync</code> method. If you recall, this method accepted an <code>InvoiceHandler</code> that defined a simple function that has one argument, an <code>Invoice</code>.</p>
 <pre><code class="language-typescript">export type InvoiceHandler = (invoice: Invoice) =&gt; Promise&lt;void&gt;;
 </code></pre>
-<p>If you take a look at the <code>AppController</code>. You'll see that <code>handleInvoice</code> matches this signature! This is not a coincidence. We'll we use the <code>handleInvoice</code> method to process all invoices that our Lightning Network node knows about.</p>
+<p>If you take a look at the <code>AppController</code>. You'll see that <code>handleInvoice</code> matches this signature! This is not a coincidence. We'll use the <code>handleInvoice</code> method to process all invoices that our Lightning Network node knows about.</p>
 <p>Now that we understand that, let's do an exercise and implement our <code>start</code> method.</p>
 <h2 id="exercise-implement-start"><a class="header" href="#exercise-implement-start">Exercise: Implement <code>start</code></a></h2>
 <p>To implement the <code>start</code> method requires us to perform two tasks:</p>
@@ -1238,8 +1238,8 @@ export type InvoiceHandler = (invoice: Invoice) =&gt; Promise&lt;void&gt;;
 <pre><code>npm run test:server -- --grep &quot;AppController.*createInvoice&quot;
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="putting-it-all-together"><a class="header" href="#putting-it-all-together">Putting It All Together</a></h1>
-<p>We have now completed all of the application's core logic. The only code that we have not discussed is the glue that holds it all together. As with our previous application, this one is bootstrapped inside of <code>server/Server.ts</code>. We're going to skip going into the heavy details of this class but you should take a look to see how things are wired up.</p>
-<p>If you take take a look at <code>server/Server.ts</code> you can see that we construct an instance of <code>AppController</code> and call the <code>start</code> method.</p>
+<p>We have now completed all of the application's core logic. The only code that we have not discussed is the glue that holds it all together. As with our previous application, this one is bootstrapped inside of <code>server/src/Server.ts</code>. We're going to skip going into the heavy details of this class but you should take a look to see how things are wired up.</p>
+<p>If you take a look at <code>server/src/Server.ts</code> you can see that we construct an instance of <code>AppController</code> and call the <code>start</code> method.</p>
 <pre><code class="language-typescript">// start the application logic
 await appController.start(
   &quot;0000000000000000000000000000000000000000000000000000000000000001&quot;,
@@ -1256,7 +1256,7 @@ appController.listener = (links: Link[]) =&gt;
 <p>Lastly we have two API's that Express mounts: <code>server/api/LinkApi</code> and <code>server/api/InvoiceApi</code>. Both of these APIs parse requests and call methods in our <code>AppController</code> to retrieve the list of <code>Link</code> or create a new invoice for a user.</p>
 <p>With that, your application is ready to fire up and test!</p>
 <h2 id="exercise-run-the-application"><a class="header" href="#exercise-run-the-application">Exercise: Run the Application!</a></h2>
-<p>You should be able to run the <code>npm run watch</code> from the root of the application to start it. You can now browse to http://192.168.0.1:8001 and try out the game!</p>
+<p>You should be able to run the <code>npm run watch</code> from the root of the application to start it. You can now browse to http://127.0.0.1:8001 and try out the game!</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="further-exploration-1"><a class="header" href="#further-exploration-1">Further Exploration</a></h1>
 <p>I hope you have enjoyed building this application and learned a bit more about building Lightning Applications with invoices. This application is ripe for extending in interesting ways. Astute readers may have already recognized a few issues with this approach already. A few thoughts to leave you with:</p>
 <ul>
@@ -1276,6 +1276,7 @@ appController.listener = (links: Link[]) =&gt;
 <li><a href="advanced/./hold_invoices.html">Hold Invoice</a></li>
 <li><a href="advanced/./spontanenous_keysend.html">Spontaneous payments with Keysend</a></li>
 <li><a href="advanced/./circular_rebalancing.html">Circular rebalancing</a></li>
+<li><a href="advanced/./swap_out.html">Swap out</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="environment-setup-2"><a class="header" href="#environment-setup-2">Environment Setup</a></h1>
 <p>The application code is available in the <a href="https://github.com/bmancini55/building-lightning-advanced">Building on Lightning: Advanced</a> on GitHub. To get started, you can clone this repository:</p>
@@ -1291,7 +1292,7 @@ appController.listener = (links: Link[]) =&gt;
 <p>We'll also need a Lightning Network environment to test. You can create a new Polar environment or reuse an existing one. Some of these exercises will require specific configurations of nodes and channels, so feel free to destroy and recreate environments as needed.</p>
 <h2 id="exercise-configuring-env-to-connect-to-lnd-2"><a class="header" href="#exercise-configuring-env-to-connect-to-lnd-2">Exercise: Configuring <code>.env</code> to Connect to LND</a></h2>
 <p>We'll again use the <code>dotenv</code> package to simplify environment variables.</p>
-<p>You'll need to add some values to the <code>.env</code> inside the repository root. Specifically we'll set values for the following:</p>
+<p>First rename <code>.evn-sample</code> to <code>.env</code>. You'll then need to set the first group of variables.</p>
 <ul>
 <li><code>LND_RPC_HOST</code> is the host for LND RPC</li>
 <li><code>LND_ADMIN_MACAROON_PATH</code> is the file path to the admin Macaroon</li>
@@ -1463,14 +1464,18 @@ hash:      33f35509e040e0cc653691caa22f99e4d7fcaf714f2bcdda13ce369ca844f979
 <p><img src="advanced/../images/ch3_keysend_enable_lnd.png" alt="Enable Keysend on LND" /></p>
 <p>Restart your node.</p>
 <p>You can then open a terminal and send payments using the <code>sendpayment</code> CLI command by providing a destination <code>--dest=&lt;node_id&gt;</code>, amount in satoshis <code>--amt=&lt;value&gt;</code> and the flag <code>--keysend</code></p>
-<p>For example to send 10,000 satoshi's to Carol's node that has the node identifier 0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791:</p>
-<pre><code>lncli sendpayment --dest=0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791 --amt=10000 --keysend
+<p>For example, sending a 10,000 satoshi payment to Carol's node, that understands keysend, and has the node identifier 0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791 would look like:</p>
+<pre><code>lncli sendpayment \
+  --dest=0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791 \
+  --amt=10000 \
+  --keysend
 </code></pre>
 <p><img src="advanced/../images/ch3_keysend_lnd.png" alt="LND Keysend" /></p>
 <h2 id="exercise-try-keysend-from-code"><a class="header" href="#exercise-try-keysend-from-code">Exercise: Try Keysend from Code</a></h2>
 <p>Now we can try performing a keysend from code. Using your LND node that has keysend enabled you can run the script and supply the destination node identifier and the amount in satoshis. This script relies on the <a href="https://api.lightning.community/#sendpaymentv2"><code>SendPaymentV2</code></a> API of LND and supplies the custom onion record with the payment preimage.</p>
-<pre><code>npm run start exercises/spontaneous-keysend/Run.ts &lt;dest_node_id&gt; &lt;amt&gt;
+<pre><code>npm run start &quot;exercises/sponteneous-keysend/Run.ts&quot; -- &lt;dest_node_id&gt; &lt;amt&gt;
 </code></pre>
+<p>Dev Tip: Replace &lt;dest_node_id&gt; with the pubkey of a node that understanding Keysend. You also need to ensure all routes have enough outbound capacity to make a payment.</p>
 <p>The script will run the following code located in <code>exercises/spontaneous-keysend/Run.ts</code>.</p>
 <pre><code class="language-typescript">async function run(): Promise&lt;void&gt; {
   // Obtains destination and amount from command line
@@ -1520,15 +1525,16 @@ hash:      33f35509e040e0cc653691caa22f99e4d7fcaf714f2bcdda13ce369ca844f979
 <p>You can control this balance by performing circular rebalancing.</p>
 <h2 id="circular-rebalancing"><a class="header" href="#circular-rebalancing">Circular Rebalancing</a></h2>
 <p>Circular Rebalancing is a technique for when you have multiple channels open and want to change the inbound/outbound ratio for your channels. The general idea is that you pay yourself (only losing some fees along the way) using a channel that has excess outbound capacity and you accept payment through the channel that has excess inbound capacity. In this regard, the payment generates a circle and the net result is that your channel balances are more evenly distributed for both sending and receiving.</p>
-<p>Create a Polar environment with three nodes: Alice, Bob, and Carol where:</p>
+<p>Create a new Polar environment with three nodes: Alice, Bob, and Carol where:</p>
 <ul>
 <li>Alice opens a channel to Bob</li>
 <li>Bob opens a channel to Carol</li>
 <li>Carol opens a channel to Alice</li>
 </ul>
 <p><img src="advanced/../images/ch3_circular_rebalancing_env.png" alt="Circular Rebalancing Environment" /></p>
-<p>In this environment, Alice has full outbound capacity one channel, and full inbound capacity on a second channel.</p>
+<p>In this environment, Alice has full outbound capacity on one channel, and full inbound capacity on a second channel.</p>
 <p>With this environment setup, lets see if we can perform a circular rebalance.</p>
+<p>Dev Tip: Remember to update your <code>.env</code> file to use the new values for Alice's LND instance.</p>
 <h2 id="exercise-rebalance-capacity-script"><a class="header" href="#exercise-rebalance-capacity-script">Exercise: Rebalance Capacity Script</a></h2>
 <p>This script is located in <code>./execises/rebalancing/Run.ts</code>. This script does a few things:</p>
 <ol>
@@ -1548,7 +1554,7 @@ hash:      33f35509e040e0cc653691caa22f99e4d7fcaf714f2bcdda13ce369ca844f979
 const hop_pubkeys = process.argv[3].split(&quot;,&quot;).map(v =&gt; Buffer.from(v, &quot;hex&quot;));
 </code></pre>
 <p>What we want is a list of node identifiers such that we start with the node we are sending to and end with our node. For example if we had outbound capacity from <code>Alice -&gt; Bob</code> and inbound capacity from <code>Carol -&gt; Alice</code> we want to send the payment using the <code>Alice -&gt; Bob</code> channel, through the <code>Bob -&gt; Carol</code> channel, then finally back to ourselves with the <code>Carol -&gt; Alice</code> channel.</p>
-<p>Our list of node identifiers would then correspond to those hops in the route: <code>pubkey(Bob),pubkey(Carol),pubkey(Alice)</code> or more concretely:</p>
+<p>Our list of node identifiers would then correspond to those hops in the route: <code>pubkey(Bob),pubkey(Carol),pubkey(Alice)</code> or more concretely an example may look like this:</p>
 <pre><code>Alice=02a3cc61dd74a22f575b22f4ece6400f5754db9fab8a72a53b2a789ceca34a9d7e
 Bob  =0227bfa020ce5765ef852555c5fbb58bdb3edbeb44f51b2eeb5e7167e678a2771e
 Carol=0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791
@@ -1761,10 +1767,10 @@ const { route } = await client.buildRoute({
 <p>To run the script:</p>
 <ol>
 <li>Gather the node_ids for Bob,Carol,Alice</li>
-<li>Use <code>npm start exercises/reblancing/Run.ts &lt;satashis&gt; &lt;comma_separated_list_of_nodes&gt;</code></li>
+<li>Use <code>npm start &quot;exercises/reblancing/Run.ts&quot; -- &lt;satashis&gt; &lt;comma_separated_list_of_nodes&gt;</code></li>
 </ol>
 <p>For example:</p>
-<pre><code>npm start exercises/rebalancing/Run.ts 10000 \
+<pre><code>npm start &quot;exercises/rebalancing/Run.ts&quot; -- 10000 \
 0227bfa020ce5765ef852555c5fbb58bdb3edbeb44f51b2eeb5e7167e678a2771e,0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791,02a3cc61dd74a22f575b22f4ece6400f5754db9fab8a72a53b2a789ceca34a9d7e
 </code></pre>
 <h2 id="afterthoughts"><a class="header" href="#afterthoughts">Afterthoughts</a></h2>
@@ -1780,7 +1786,7 @@ const { route } = await client.buildRoute({
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="building-a-reverse-submarine-swap-service-for-the-lightning-network"><a class="header" href="#building-a-reverse-submarine-swap-service-for-the-lightning-network">Building a Reverse Submarine Swap Service for the Lightning Network</a></h1>
 <p>In this section we'll discuss reverse submarine swaps in a Lightning Network channel using <a href="advanced/./hold_invoices.html">hold invoices</a>. When performing an reverse submarine swap aka swap-out, it is the ability to move funds from an off-chain Lightning Network channel to an on-chain address in a trustless way.</p>
-<p>An obvious use case for this is a merchant that a receives a large inflow of payments via Lightning. At a certain point the merchant Lightning channel inbound capacity will be exhausted and the merchant. A swap-out allows the merchant to simultaneously change the balance of their channel so that they once again have inbound capacity and move the funds to an on-chain address for safe keeping!</p>
+<p>An obvious use case for this is a merchant that a receives a large inflow of payments via Lightning. At a certain point the merchant's Lightning channel inbound capacity will be exhausted and the merchant will no longer be able to receive payments. A swap-out allows the merchant to simultaneously change the balance of their channel so that they once again have inbound capacity and move the funds to an on-chain address for safe keeping!</p>
 <p>This article is going to show how to build a simple reverse submarine swap service. There are a lot of moving pieces and we need to have on-chain wallet capabilities. In order to keep this article somewhat brief we'll forgo building a fully complete and secure swap service and instead work through the mechanics. The full working code can be found <a href="https://github.com/bmancini55/building-lightning-advanced/tree/main/exercises/swap-out">here</a>.</p>
 <h2 id="mechanics-of-swap-out"><a class="header" href="#mechanics-of-swap-out">Mechanics of Swap-Out</a></h2>
 <p>Each swap-out will generate at least two on-chain transaction: one on-chain HTLC and one claim transaction to resolve the HTLC. Performing a swap-out require a service that bridges off-chain Lightning Network payments to on-chain transaction. Functionally the service will broadcast an on-chain HTLC that can be claimed with the hash preimage by the person requesting the swap-out.</p>
@@ -1789,7 +1795,7 @@ const { route } = await client.buildRoute({
 <li>Alice generates a hash preimage that only she knows and provides the hash, a payment address, and the amount to Bob</li>
 <li>Bob generates a hold invoice and provides the payment request and his refund address to Alice</li>
 <li>Alice pays the invoice using her Lightning Network node</li>
-<li>Bob gets receipt of the payment,</li>
+<li>Bob gets receipt of the payment but can't settle it yet</li>
 <li>Bob broadcasts an on-chain HTLC that pays Alice if she provides the preimage or it pays him after some timeout period</li>
 <li>Alice settles the on-chain HTLC by spending it using the preimage (Alice now has her funds on-chain)</li>
 <li>Bob extracts the preimage from the Alice's settlement transaction on-chain</li>
@@ -1801,15 +1807,15 @@ const { route } = await client.buildRoute({
 <li>the offerer of an HTLC has access to reclaim the funds after some timeout period</li>
 <li>the recipient of an HTLC can claim the funds using the preimage</li>
 </ol>
-<p>With swaping it's much simpler than inside a channel. In our example, Alice can claim the on-chain HTLC using the preimage that she knows. If she does this, then Bob can extract the preimage and settle the off-chain HTLC so that he doesn't lose funds.</p>
+<p>With swaping it's much simpler than inside a channel which requires support for revocation. In our example, Alice can claim the on-chain HTLC using the preimage that she knows. If she does this, then Bob can extract the preimage and settle the off-chain HTLC so that he doesn't lose funds.</p>
 <p>One final note is that just like off-chain payments, to ensure there are no funds lost, the timeouts must be larger for incoming HTLCs than the corresponding outgoing HTLC. This ensures that an outgoing HTLC is always fully resolve before the incoming HTLC can be timed out.</p>
 <h2 id="building-a-swap-out-client"><a class="header" href="#building-a-swap-out-client">Building a Swap-Out Client</a></h2>
 <p>The first step is going to be building a client for Alice. To make our lives easier this client will connect to the service over HTTP to exchange necessary information.</p>
 <p>Once the client has an invoice it will:</p>
 <ol>
-<li>pay the invoice</li>
-<li>watch the blockchain for the HTLC</li>
-<li>spend the HTLC using the preimage that it knows</li>
+<li>Pay the invoice</li>
+<li>Watch the blockchain for the HTLC</li>
+<li>Spend the HTLC using the preimage that it knows</li>
 </ol>
 <p>The code for our client application can be found in <a href="https://github.com/bmancini55/building-lightning-advanced/blob/main/exercises/swap-out/client/Client.ts"><code>exercises/swap-out/client/Client.ts</code></a>. The start of this file contains a few boilerplate things that must be setup:</p>
 <ol>
@@ -1824,7 +1830,7 @@ const htlcClaimPubKey = htlcClaimPrivKey.toPubKey(true);
 const htlcClaimAddress = htlcClaimPubKey.toP2wpkhAddress();
 logger.info(&quot;generated claim address&quot;, htlcClaimAddress);
 </code></pre>
-<p><em>Note</em>: Why are we using a P2WPKH address instead of a 33-byte public key directly? We could send a 33-byte compressed pubkey, a 20-byte pubkeyhash, or a Bitcoin address (an encoded pubkeyhash). Since we'll be sharing these values over HTTP JSON addresses provide the least ambiguity as to the meaning of the data.</p>
+<p><em>Note</em>: Why are we using a P2WPKH address instead of a 33-byte public key directly? We could send a 33-byte compressed pubkey, a 20-byte pubkeyhash, or a Bitcoin address (an encoded pubkeyhash). Since we'll be sharing these values over HTTP JSON, an address provides the least ambiguity.</p>
 <p>Now we'll create a random preimage and the hash defined as <code>sha256(preimage)</code>. The hash will be used in the invoice and the HTLC construction.</p>
 <pre><code class="language-typescript">const preimage = crypto.randomBytes(32);
 logger.info(&quot;generated preimage&quot;, preimage.toString(&quot;hex&quot;));
@@ -1867,7 +1873,7 @@ logger.info(&quot;generated hash&quot;, hash.toString(&quot;hex&quot;));
   }
 );
 </code></pre>
-<p>However! Before we make the payment request we want start watching the blockchain for the HTLC. To watch for the HTLC we need to look for a transaction that has a P2WSH output matching our HTLC. Recall that P2WSH outputs use Script that is <code>0x00+sha256(script)</code>. Only when the output is spent is the script revealed as part of the witness. So for our purposes we want to construct the HTLC Script but then convert it into a P2WSH ScriptPubKey.</p>
+<p>However! Before we make the payment request we want start watching the blockchain for the HTLC. To watch for the HTLC we need to look for a transaction that has a P2WSH output matching our HTLC. Recall that P2WSH outputs use Script that is <code>0x00+sha256(script)</code>. Only when the output is spent the actual script will be revealed as part of the witness data. For our purposes we want to construct the HTLC Script but then convert it into a P2WSH ScriptPubKey so we can watch for an output that contains it.</p>
 <p>Constructing the script uses the <a href="https://github.com/bmancini55/building-lightning-advanced/blob/main/exercises/swap-out/CreateHtlcDescriptor.ts"><code>createHtlcDescriptor</code></a> method which generates a Script that looks like:</p>
 <pre><code>OP_SHA256
 &lt;32-byte hash&gt;
@@ -2031,7 +2037,7 @@ OP_CHECKSIG
     }
 }
 </code></pre>
-<p>When we find a transaction that spends the HTLC outpoint, it means that the requestor has spent the output using the preimage path. We need to extract the preimage so we can settle the incoming hold invoice. We do this with the <a href="https://github.com/bmancini55/building-lightning-advanced/blob/e6a505c80e3cc719d50361d614f2ea8954916576/exercises/swap-out/service/RequestManager.ts#L158"><code>processClaimTransaction</code></a> method of the <code>RequestManager</code> which simply extracts the preimage from the witness data that was used to claim the HTLC. If you recall from the previous section when the claim transaction is build the witness data used to spend the HTLC UTXO is <code>[&lt;claim_sig&gt;, &lt;claim_pubkey&gt;, &lt;preimage&gt;, &lt;htlc_script&gt;]</code>.</p>
+<p>When we find a transaction that spends the HTLC outpoint, it means that the requestor has spent the output using the preimage path. We need to extract the preimage so we can settle the incoming hold invoice. We do this with the <a href="https://github.com/bmancini55/building-lightning-advanced/blob/e6a505c80e3cc719d50361d614f2ea8954916576/exercises/swap-out/service/RequestManager.ts#L158"><code>processClaimTransaction</code></a> method of the <code>RequestManager</code> which simply extracts the preimage from the witness data that was used to claim the HTLC. If you recall from the previous section that the claim transaction has witness data that spends the HTLC: <code>[&lt;claim_sig&gt;, &lt;claim_pubkey&gt;, &lt;preimage&gt;, &lt;htlc_script&gt;]</code>.</p>
 <pre><code class="language-typescript">protected async processClaimTransaction(input: Bitcoind.Input, request: Request) {
     request.logger.info(&quot;event: block_connected[htlc_spend]&quot;);
 
@@ -2054,8 +2060,7 @@ OP_CHECKSIG
 <p>Using <a href="https://lightningpolar.com/">Lightning Polar</a>, create a new environment with two LND nodes (one for Alice and one for Bob) and a single bitcoind back end node.</p>
 <p><img src="advanced/../images/ch3_swapout_polar.png" alt="Environment" /></p>
 <p>Create a channel from Alice to Bob. This will ensure that all the funds are on Alice's side of the channel.</p>
-<p>If you haven't already, clone the <a href="https://github.com/bmancini55/building-lightning-advanced">code repository</a> and run <code>npm install</code>.</p>
-<p>Copy <code>.env-sample</code> to <code>.env</code> and configure the follow values from the running Polar environment.</p>
+<p>In <code>.env</code> you'll need to configure the follow values from the running Polar environment.</p>
 <pre><code># SWAP OUT - ALICE
 ALICE_LND_RPC_HOST=
 ALICE_LND_CERT_PATH=
@@ -2072,10 +2077,10 @@ BITCOIND_RPC_USER=
 BITCOIND_RPC_PASSWORD=
 </code></pre>
 <p>You should now be able to start the server with (which will be run by Bob):</p>
-<pre><code>npm start exercises/swap-out/service/Service.ts
+<pre><code>npm start &quot;exercises/swap-out/service/Service.ts&quot;
 </code></pre>
 <p>In a separate command line instance start the client from Alice's perspective with:</p>
-<pre><code>npm start exercices/swap-out/service/Client.ts
+<pre><code>npm start &quot;exercises/swap-out/client/Client.ts&quot;
 </code></pre>
 <p>The client should output something like the following:</p>
 <pre><code>&gt; npm start exercises/swap-out/client/Client.ts

@@ -143,8 +143,8 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="putting-it-all-together"><a class="header" href="#putting-it-all-together">Putting It All Together</a></h1>
-<p>We have now completed all of the application's core logic. The only code that we have not discussed is the glue that holds it all together. As with our previous application, this one is bootstrapped inside of <code>server/Server.ts</code>. We're going to skip going into the heavy details of this class but you should take a look to see how things are wired up.</p>
-<p>If you take take a look at <code>server/Server.ts</code> you can see that we construct an instance of <code>AppController</code> and call the <code>start</code> method.</p>
+<p>We have now completed all of the application's core logic. The only code that we have not discussed is the glue that holds it all together. As with our previous application, this one is bootstrapped inside of <code>server/src/Server.ts</code>. We're going to skip going into the heavy details of this class but you should take a look to see how things are wired up.</p>
+<p>If you take a look at <code>server/src/Server.ts</code> you can see that we construct an instance of <code>AppController</code> and call the <code>start</code> method.</p>
 <pre><code class="language-typescript">// start the application logic
 await appController.start(
   &quot;0000000000000000000000000000000000000000000000000000000000000001&quot;,
@@ -161,7 +161,7 @@ appController.listener = (links: Link[]) =&gt;
 <p>Lastly we have two API's that Express mounts: <code>server/api/LinkApi</code> and <code>server/api/InvoiceApi</code>. Both of these APIs parse requests and call methods in our <code>AppController</code> to retrieve the list of <code>Link</code> or create a new invoice for a user.</p>
 <p>With that, your application is ready to fire up and test!</p>
 <h2 id="exercise-run-the-application"><a class="header" href="#exercise-run-the-application">Exercise: Run the Application!</a></h2>
-<p>You should be able to run the <code>npm run watch</code> from the root of the application to start it. You can now browse to http://192.168.0.1:8001 and try out the game!</p>
+<p>You should be able to run the <code>npm run watch</code> from the root of the application to start it. You can now browse to http://127.0.0.1:8001 and try out the game!</p>
 
                     </main>
 

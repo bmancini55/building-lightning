@@ -149,15 +149,16 @@
 <p>You can control this balance by performing circular rebalancing.</p>
 <h2 id="circular-rebalancing"><a class="header" href="#circular-rebalancing">Circular Rebalancing</a></h2>
 <p>Circular Rebalancing is a technique for when you have multiple channels open and want to change the inbound/outbound ratio for your channels. The general idea is that you pay yourself (only losing some fees along the way) using a channel that has excess outbound capacity and you accept payment through the channel that has excess inbound capacity. In this regard, the payment generates a circle and the net result is that your channel balances are more evenly distributed for both sending and receiving.</p>
-<p>Create a Polar environment with three nodes: Alice, Bob, and Carol where:</p>
+<p>Create a new Polar environment with three nodes: Alice, Bob, and Carol where:</p>
 <ul>
 <li>Alice opens a channel to Bob</li>
 <li>Bob opens a channel to Carol</li>
 <li>Carol opens a channel to Alice</li>
 </ul>
 <p><img src="../images/ch3_circular_rebalancing_env.png" alt="Circular Rebalancing Environment" /></p>
-<p>In this environment, Alice has full outbound capacity one channel, and full inbound capacity on a second channel.</p>
+<p>In this environment, Alice has full outbound capacity on one channel, and full inbound capacity on a second channel.</p>
 <p>With this environment setup, lets see if we can perform a circular rebalance.</p>
+<p>Dev Tip: Remember to update your <code>.env</code> file to use the new values for Alice's LND instance.</p>
 <h2 id="exercise-rebalance-capacity-script"><a class="header" href="#exercise-rebalance-capacity-script">Exercise: Rebalance Capacity Script</a></h2>
 <p>This script is located in <code>./execises/rebalancing/Run.ts</code>. This script does a few things:</p>
 <ol>
@@ -177,7 +178,7 @@
 const hop_pubkeys = process.argv[3].split(&quot;,&quot;).map(v =&gt; Buffer.from(v, &quot;hex&quot;));
 </code></pre>
 <p>What we want is a list of node identifiers such that we start with the node we are sending to and end with our node. For example if we had outbound capacity from <code>Alice -&gt; Bob</code> and inbound capacity from <code>Carol -&gt; Alice</code> we want to send the payment using the <code>Alice -&gt; Bob</code> channel, through the <code>Bob -&gt; Carol</code> channel, then finally back to ourselves with the <code>Carol -&gt; Alice</code> channel.</p>
-<p>Our list of node identifiers would then correspond to those hops in the route: <code>pubkey(Bob),pubkey(Carol),pubkey(Alice)</code> or more concretely:</p>
+<p>Our list of node identifiers would then correspond to those hops in the route: <code>pubkey(Bob),pubkey(Carol),pubkey(Alice)</code> or more concretely an example may look like this:</p>
 <pre><code>Alice=02a3cc61dd74a22f575b22f4ece6400f5754db9fab8a72a53b2a789ceca34a9d7e
 Bob  =0227bfa020ce5765ef852555c5fbb58bdb3edbeb44f51b2eeb5e7167e678a2771e
 Carol=0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791
@@ -390,10 +391,10 @@ const { route } = await client.buildRoute({
 <p>To run the script:</p>
 <ol>
 <li>Gather the node_ids for Bob,Carol,Alice</li>
-<li>Use <code>npm start exercises/reblancing/Run.ts &lt;satashis&gt; &lt;comma_separated_list_of_nodes&gt;</code></li>
+<li>Use <code>npm start &quot;exercises/reblancing/Run.ts&quot; -- &lt;satashis&gt; &lt;comma_separated_list_of_nodes&gt;</code></li>
 </ol>
 <p>For example:</p>
-<pre><code>npm start exercises/rebalancing/Run.ts 10000 \
+<pre><code>npm start &quot;exercises/rebalancing/Run.ts&quot; -- 10000 \
 0227bfa020ce5765ef852555c5fbb58bdb3edbeb44f51b2eeb5e7167e678a2771e,0396e97fb9a10aaf7f1ccbe1fd71683863b9d279b3190f7561ceacd44d3e7a0791,02a3cc61dd74a22f575b22f4ece6400f5754db9fab8a72a53b2a789ceca34a9d7e
 </code></pre>
 <h2 id="afterthoughts"><a class="header" href="#afterthoughts">Afterthoughts</a></h2>

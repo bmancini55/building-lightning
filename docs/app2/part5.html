@@ -145,7 +145,7 @@
                         <h1 id="creating-the-link-class"><a class="header" href="#creating-the-link-class">Creating the <code>Link</code> Class</a></h1>
 <p>For our application, we can think of the leaders in the game as links in a chain. There is always a link at the end that is &quot;open&quot; for taking over the leadership position. The last closed link in the chain is the current leader of the game.</p>
 <p>The <code>Link</code> class defines a single link in the chain of ownership. A <code>Link</code> can be in one of two states: <code>unsettled</code> or <code>settled</code>.</p>
-<p>When a <code>Link</code> is unsettled, it means that no one has take ownership or closed that link. It is still open to the world and anyone can pay an invoice and take ownership. Only the last link in the chain will ever be <code>unsettled</code>.</p>
+<p>When a <code>Link</code> is unsettled, it means that no one has taken ownership or closed that link. It is still open to the world and anyone can pay an invoice and take ownership. Only the last link in the chain will ever be <code>unsettled</code>.</p>
 <p>When a <code>Link</code> is settled, it means there was an invoice that was paid to close that link. The person that paid the invoice becomes the owner of that link. The last closed link in the chain is considered the current leader of the game.</p>
 <p>Take a look at the diagram of game links again.</p>
 <p><img src="../images/ch2_diagram_01.png" alt="Link" /></p>
@@ -169,10 +169,10 @@
 <li><code>localSignature</code> is our Lightning Network node's signature of the <code>linkId</code>. We'll use this to construct invoices using our <code>createPreimage</code> helper function</li>
 <li><code>minSats</code> is the minimum satoshis payment we're willing to accept payment to settle this <code>Link</code>. This value will be larger than the last link.</li>
 </ul>
-<p>You'll also notice that there is an <code>invoice</code> property. This property will be assigned when a invoice when someone pays the <code>Invoice</code> that corresponds to this link.</p>
+<p>You'll also notice that there is an <code>invoice</code> property. This property will be assigned when someone pays the <code>Invoice</code> that corresponds to this link.</p>
 <h2 id="exercise-implement-issettled"><a class="header" href="#exercise-implement-issettled">Exercise: Implement <code>isSettled</code></a></h2>
 <p>A <code>Link</code> is only considered settled when it has an invoice assigned and that invoice is settled.</p>
-<p>Go ahead and implement the <code>isSettled</code> getter which should check the <code>invoice</code> property to see if it has a value. If it does have a value it should check the invoice to see if it has been settled.</p>
+<p>Go ahead and implement the <code>isSettled</code> getter in <code>server/src/domain/Link.ts</code> which should check the <code>invoice</code> property to see if it has a value. If it does have a value it should check the invoice to see if it has been settled.</p>
 <pre><code class="language-typescript">public get isSettled(): boolean {
     // Exercise
 }

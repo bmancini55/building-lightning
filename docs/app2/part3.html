@@ -147,7 +147,7 @@
 <p>This time around we'll be using the <a href="https://api.lightning.community/#lnd-grpc-api-reference">LND RPC API</a>. This is similar to the REST interface we used in the previous application but uses a binary protocol instead of HTTPS to communicate with the LND node. For the purposes of our application it will be remarkably similar and in reality, the only difference will be how we wire up the application. Which brings us to our next point.</p>
 <p>From a software engineering perspective, it's a good practice to isolate our application logic from the specifics of the underlying data persistence mechanism. This rule is often conveyed when working with relational databases systems where it would be poor form for your database tables to dictate how your application logic functions. This is no different than working with Lightning Network nodes! We break out our code so that we can tightly focus the critical application bits from the logic of how we retrieve that information. A by-product is that we could switch from LND to c-lightning or Eclair without having to change our core application logic!</p>
 <p>To achieve this decoupling, instead of pinning our application to the structure of invoices in LND's database, we'll create our own <code>Invoice</code> type that is used throughout our application. This also allows us to add some methods to our <code>Invoice</code> type that are domain specific to our application.</p>
-<p>You can take a look at the <code>server/domain/Invoice</code> class. This class only has properties that the application uses: memo, preimage, hash, value in satoshis, and settlement information.</p>
+<p>You can take a look at the <code>server/src/domain/Invoice</code> class. This class only has properties that the application uses: memo, preimage, hash, value in satoshis, and settlement information.</p>
 <pre><code class="language-typescript">export class Invoice {
   constructor(
     public memo: string,
@@ -167,7 +167,7 @@
 </code></pre>
 <p>The <code>linkId</code> is going to be a 32-byte value (64 hex encoded characters). As we discussed in the last section, the linkId is the current point of the game. We use the <code>linkId</code> to help us identify which point of the game the invoice was for.</p>
 <p>The <code>buyerId</code> is the 33-byte public key (66 hex encoded characters) of the node that we are generating the invoice for. In this case, if Bob requested an invoice to pay, this value would be the public key of Bob's Lightning Network node.</p>
-<p>Go ahead and implement the <code>createMemo</code> method in <code>server/domain/Invoice</code> class according to the rule specified.</p>
+<p>Go ahead and implement the <code>createMemo</code> method in <code>server/src/domain/Invoice</code> class according to the rule specified.</p>
 <pre><code class="language-typescript">public static createMemo(linkId: string, buyer: string) {
     // Exercise
 }
@@ -208,7 +208,7 @@ public get buyerNodeId(): string {
 <pre><code>sha256(alice_sig(seed) || bob_sig(seed) || satoshis)
 </code></pre>
 <p>where <code>||</code> denotes concatenation.</p>
-<p>Based on that information, go ahead and implement the <code>createPreimage</code> method in the <code>server/domain/Invoice</code> class.</p>
+<p>Based on that information, go ahead and implement the <code>createPreimage</code> method in the <code>server/src/domain/Invoice</code> class.</p>
 <p>Dev Tip: A <code>sha256</code> function is available for you to use, you may need to case <code>sats</code> to a string using <code>toString()</code> and you may need to convert the concatenated value into a Buffer using <code>Buffer.from</code> in order to use the <code>sha256</code> function.</p>
 <pre><code class="language-typescript">public static createPreimage(local: string, remote: string, sats: number) {
     // Exercise

@@ -144,7 +144,7 @@
                     <main>
                         <h1 id="building-a-reverse-submarine-swap-service-for-the-lightning-network"><a class="header" href="#building-a-reverse-submarine-swap-service-for-the-lightning-network">Building a Reverse Submarine Swap Service for the Lightning Network</a></h1>
 <p>In this section we'll discuss reverse submarine swaps in a Lightning Network channel using <a href="./hold_invoices.html">hold invoices</a>. When performing an reverse submarine swap aka swap-out, it is the ability to move funds from an off-chain Lightning Network channel to an on-chain address in a trustless way.</p>
-<p>An obvious use case for this is a merchant that a receives a large inflow of payments via Lightning. At a certain point the merchant Lightning channel inbound capacity will be exhausted and the merchant. A swap-out allows the merchant to simultaneously change the balance of their channel so that they once again have inbound capacity and move the funds to an on-chain address for safe keeping!</p>
+<p>An obvious use case for this is a merchant that a receives a large inflow of payments via Lightning. At a certain point the merchant's Lightning channel inbound capacity will be exhausted and the merchant will no longer be able to receive payments. A swap-out allows the merchant to simultaneously change the balance of their channel so that they once again have inbound capacity and move the funds to an on-chain address for safe keeping!</p>
 <p>This article is going to show how to build a simple reverse submarine swap service. There are a lot of moving pieces and we need to have on-chain wallet capabilities. In order to keep this article somewhat brief we'll forgo building a fully complete and secure swap service and instead work through the mechanics. The full working code can be found <a href="https://github.com/bmancini55/building-lightning-advanced/tree/main/exercises/swap-out">here</a>.</p>
 <h2 id="mechanics-of-swap-out"><a class="header" href="#mechanics-of-swap-out">Mechanics of Swap-Out</a></h2>
 <p>Each swap-out will generate at least two on-chain transaction: one on-chain HTLC and one claim transaction to resolve the HTLC. Performing a swap-out require a service that bridges off-chain Lightning Network payments to on-chain transaction. Functionally the service will broadcast an on-chain HTLC that can be claimed with the hash preimage by the person requesting the swap-out.</p>
@@ -153,7 +153,7 @@
 <li>Alice generates a hash preimage that only she knows and provides the hash, a payment address, and the amount to Bob</li>
 <li>Bob generates a hold invoice and provides the payment request and his refund address to Alice</li>
 <li>Alice pays the invoice using her Lightning Network node</li>
-<li>Bob gets receipt of the payment,</li>
+<li>Bob gets receipt of the payment but can't settle it yet</li>
 <li>Bob broadcasts an on-chain HTLC that pays Alice if she provides the preimage or it pays him after some timeout period</li>
 <li>Alice settles the on-chain HTLC by spending it using the preimage (Alice now has her funds on-chain)</li>
 <li>Bob extracts the preimage from the Alice's settlement transaction on-chain</li>
@@ -165,15 +165,15 @@
 <li>the offerer of an HTLC has access to reclaim the funds after some timeout period</li>
 <li>the recipient of an HTLC can claim the funds using the preimage</li>
 </ol>
-<p>With swaping it's much simpler than inside a channel. In our example, Alice can claim the on-chain HTLC using the preimage that she knows. If she does this, then Bob can extract the preimage and settle the off-chain HTLC so that he doesn't lose funds.</p>
+<p>With swaping it's much simpler than inside a channel which requires support for revocation. In our example, Alice can claim the on-chain HTLC using the preimage that she knows. If she does this, then Bob can extract the preimage and settle the off-chain HTLC so that he doesn't lose funds.</p>
 <p>One final note is that just like off-chain payments, to ensure there are no funds lost, the timeouts must be larger for incoming HTLCs than the corresponding outgoing HTLC. This ensures that an outgoing HTLC is always fully resolve before the incoming HTLC can be timed out.</p>
 <h2 id="building-a-swap-out-client"><a class="header" href="#building-a-swap-out-client">Building a Swap-Out Client</a></h2>
 <p>The first step is going to be building a client for Alice. To make our lives easier this client will connect to the service over HTTP to exchange necessary information.</p>
 <p>Once the client has an invoice it will:</p>
 <ol>
-<li>pay the invoice</li>
-<li>watch the blockchain for the HTLC</li>
-<li>spend the HTLC using the preimage that it knows</li>
+<li>Pay the invoice</li>
+<li>Watch the blockchain for the HTLC</li>
+<li>Spend the HTLC using the preimage that it knows</li>
 </ol>
 <p>The code for our client application can be found in <a href="https://github.com/bmancini55/building-lightning-advanced/blob/main/exercises/swap-out/client/Client.ts"><code>exercises/swap-out/client/Client.ts</code></a>. The start of this file contains a few boilerplate things that must be setup:</p>
 <ol>
@@ -188,7 +188,7 @@ const htlcClaimPubKey = htlcClaimPrivKey.toPubKey(true);
 const htlcClaimAddress = htlcClaimPubKey.toP2wpkhAddress();
 logger.info(&quot;generated claim address&quot;, htlcClaimAddress);
 </code></pre>
-<p><em>Note</em>: Why are we using a P2WPKH address instead of a 33-byte public key directly? We could send a 33-byte compressed pubkey, a 20-byte pubkeyhash, or a Bitcoin address (an encoded pubkeyhash). Since we'll be sharing these values over HTTP JSON addresses provide the least ambiguity as to the meaning of the data.</p>
+<p><em>Note</em>: Why are we using a P2WPKH address instead of a 33-byte public key directly? We could send a 33-byte compressed pubkey, a 20-byte pubkeyhash, or a Bitcoin address (an encoded pubkeyhash). Since we'll be sharing these values over HTTP JSON, an address provides the least ambiguity.</p>
 <p>Now we'll create a random preimage and the hash defined as <code>sha256(preimage)</code>. The hash will be used in the invoice and the HTLC construction.</p>
 <pre><code class="language-typescript">const preimage = crypto.randomBytes(32);
 logger.info(&quot;generated preimage&quot;, preimage.toString(&quot;hex&quot;));
@@ -231,7 +231,7 @@ logger.info(&quot;generated hash&quot;, hash.toString(&quot;hex&quot;));
   }
 );
 </code></pre>
-<p>However! Before we make the payment request we want start watching the blockchain for the HTLC. To watch for the HTLC we need to look for a transaction that has a P2WSH output matching our HTLC. Recall that P2WSH outputs use Script that is <code>0x00+sha256(script)</code>. Only when the output is spent is the script revealed as part of the witness. So for our purposes we want to construct the HTLC Script but then convert it into a P2WSH ScriptPubKey.</p>
+<p>However! Before we make the payment request we want start watching the blockchain for the HTLC. To watch for the HTLC we need to look for a transaction that has a P2WSH output matching our HTLC. Recall that P2WSH outputs use Script that is <code>0x00+sha256(script)</code>. Only when the output is spent the actual script will be revealed as part of the witness data. For our purposes we want to construct the HTLC Script but then convert it into a P2WSH ScriptPubKey so we can watch for an output that contains it.</p>
 <p>Constructing the script uses the <a href="https://github.com/bmancini55/building-lightning-advanced/blob/main/exercises/swap-out/CreateHtlcDescriptor.ts"><code>createHtlcDescriptor</code></a> method which generates a Script that looks like:</p>
 <pre><code>OP_SHA256
 &lt;32-byte hash&gt;
@@ -395,7 +395,7 @@ OP_CHECKSIG
     }
 }
 </code></pre>
-<p>When we find a transaction that spends the HTLC outpoint, it means that the requestor has spent the output using the preimage path. We need to extract the preimage so we can settle the incoming hold invoice. We do this with the <a href="https://github.com/bmancini55/building-lightning-advanced/blob/e6a505c80e3cc719d50361d614f2ea8954916576/exercises/swap-out/service/RequestManager.ts#L158"><code>processClaimTransaction</code></a> method of the <code>RequestManager</code> which simply extracts the preimage from the witness data that was used to claim the HTLC. If you recall from the previous section when the claim transaction is build the witness data used to spend the HTLC UTXO is <code>[&lt;claim_sig&gt;, &lt;claim_pubkey&gt;, &lt;preimage&gt;, &lt;htlc_script&gt;]</code>.</p>
+<p>When we find a transaction that spends the HTLC outpoint, it means that the requestor has spent the output using the preimage path. We need to extract the preimage so we can settle the incoming hold invoice. We do this with the <a href="https://github.com/bmancini55/building-lightning-advanced/blob/e6a505c80e3cc719d50361d614f2ea8954916576/exercises/swap-out/service/RequestManager.ts#L158"><code>processClaimTransaction</code></a> method of the <code>RequestManager</code> which simply extracts the preimage from the witness data that was used to claim the HTLC. If you recall from the previous section that the claim transaction has witness data that spends the HTLC: <code>[&lt;claim_sig&gt;, &lt;claim_pubkey&gt;, &lt;preimage&gt;, &lt;htlc_script&gt;]</code>.</p>
 <pre><code class="language-typescript">protected async processClaimTransaction(input: Bitcoind.Input, request: Request) {
     request.logger.info(&quot;event: block_connected[htlc_spend]&quot;);
 
@@ -418,8 +418,7 @@ OP_CHECKSIG
 <p>Using <a href="https://lightningpolar.com/">Lightning Polar</a>, create a new environment with two LND nodes (one for Alice and one for Bob) and a single bitcoind back end node.</p>
 <p><img src="../images/ch3_swapout_polar.png" alt="Environment" /></p>
 <p>Create a channel from Alice to Bob. This will ensure that all the funds are on Alice's side of the channel.</p>
-<p>If you haven't already, clone the <a href="https://github.com/bmancini55/building-lightning-advanced">code repository</a> and run <code>npm install</code>.</p>
-<p>Copy <code>.env-sample</code> to <code>.env</code> and configure the follow values from the running Polar environment.</p>
+<p>In <code>.env</code> you'll need to configure the follow values from the running Polar environment.</p>
 <pre><code># SWAP OUT - ALICE
 ALICE_LND_RPC_HOST=
 ALICE_LND_CERT_PATH=
@@ -436,10 +435,10 @@ BITCOIND_RPC_USER=
 BITCOIND_RPC_PASSWORD=
 </code></pre>
 <p>You should now be able to start the server with (which will be run by Bob):</p>
-<pre><code>npm start exercises/swap-out/service/Service.ts
+<pre><code>npm start &quot;exercises/swap-out/service/Service.ts&quot;
 </code></pre>
 <p>In a separate command line instance start the client from Alice's perspective with:</p>
-<pre><code>npm start exercices/swap-out/service/Client.ts
+<pre><code>npm start &quot;exercises/swap-out/client/Client.ts&quot;
 </code></pre>
 <p>The client should output something like the following:</p>
 <pre><code>&gt; npm start exercises/swap-out/client/Client.ts
